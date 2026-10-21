@@ -18,12 +18,15 @@ python ml/src/export_browser_model.py --metadata ml/models/url-multidataset-tune
 python ml/src/fetch_feeds.py --openphish --phishtank --output ml/data/recent_phishing_feeds.csv
 python ml/src/fetch_feeds.py --umbrella --output ml/data/recent_legitimate_feed.csv
 python ml/src/train_model.py --include-edgephish --additional-dataset ml/data/recent_phishing_feeds.csv --additional-dataset ml/data/phishtank_recent.csv --balanced --limit 100000 --model-version url-multidataset-feeds-tuned-v0.5.0 --output ml/models/url-multidataset-feeds-tuned-v0.5.0.json
+python ml/src/train_model.py --include-edgephish --additional-dataset ml/data/recent_phishing_feeds.csv --additional-dataset ml/data/phishtank_recent.csv --additional-dataset ml/data/legitimate_login_hard_negatives.csv --balanced --limit 100000 --model-version url-multidataset-feeds-tuned-v0.6.0 --output ml/models/url-multidataset-feeds-tuned-v0.6.0.json
 python ml/src/train_char_model.py --include-edgephish --additional-dataset ml/data/recent_phishing_feeds.csv --additional-dataset ml/data/phishtank_recent.csv --balanced --limit 100000 --model-version char-url-tfidf-feeds-v0.2.0 --output ml/models/char-url-tfidf-feeds-v0.2.0.json
 python ml/src/export_browser_model.py --metadata ml/models/url-tuned-ensemble-v0.3.0.json --model ml/models/url-tuned-ensemble-v0.3.0.joblib --output extension/src/shared/trained-model-data.js
 python ml/src/export_browser_char_model.py --metadata ml/models/char-url-tfidf-feeds-v0.2.0.json --model ml/models/char-url-tfidf-feeds-v0.2.0.joblib --output extension/src/shared/trained-char-model-data.js
 ```
 
 The `--balanced` option samples the same number of legitimate and malicious URLs. `--include-edgephish` adds the MIT-licensed EdgePhish-5G URL corpus. URLs are normalized, deduplicated, and conflicting labels are removed before sampling. The trainer compares logistic regression with multiple random forest and extra trees configurations, tunes hyperparameters and the F1 threshold on a validation split, and evaluates the winner once on an untouched test split.
+
+`ml/data/legitimate_login_hard_negatives.csv` is a curated set of official login endpoints used as hard negatives. It prevents URL-only learners from treating every login-shaped URL as phishing.
 
 ## Current selected model
 
@@ -75,7 +78,7 @@ The validator rejects missing HTML, invalid labels, oversized snapshots, and cro
 
 ## Browser integration
 
-The generated model data is loaded by the service worker. The worker combines the trained URL score with the existing rule score and keeps the higher score. A high trained probability is only applied when at least two strong phishing signals agree, which prevents a generic login page from being escalated by the URL-only model alone.
+The generated model data is loaded by the service worker. The worker combines the trained URL score with the existing rule score and keeps the higher score. A high trained probability is only applied when strong evidence is present (page-level high-confidence indicators or multiple independent URL anomalies), which prevents generic same-origin login pages from being escalated by URL terms alone.
 
 The browser also contains the exported character n-gram model. It is used only at a high-confidence probability of 0.99, because the future-feed evaluation shows that lower thresholds create unacceptable legitimate-page false positives. It is a high-recall secondary signal, not a standalone verdict.
 

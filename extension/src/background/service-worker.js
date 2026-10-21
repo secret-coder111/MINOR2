@@ -3,6 +3,7 @@ importScripts(
   '../shared/constants.js',
   '../shared/browser-api.js',
   '../shared/risk-score.js',
+  '../shared/model-policy.js',
   '../shared/trained-model-data.js',
   '../shared/trained-char-model-data.js',
   '../shared/trained-model.js',
@@ -76,21 +77,6 @@ self.PhishGuard = self.PhishGuard || {};
     return reasons.slice(0, 5);
   }
 
-  function hasStrongModelEvidence(features) {
-    const evidence = [
-      Number(features.suspicious_keyword_count) >= 2,
-      Number(features.suspicious_char_count) >= 2,
-      Number(features.has_ip_address) === 1,
-      Number(features.uses_http) === 1,
-      Number(features.has_punycode) === 1,
-      Number(features.brand_domain_mismatch) === 1,
-      Number(features.cross_domain_form_action) === 1,
-      Number(features.has_unusual_port) === 1,
-      Number(features.subdomain_count) >= 2
-    ];
-    return evidence.filter(Boolean).length >= 2;
-  }
-
   function applyExplicitRules(score, features) {
     let adjustedScore = score;
     if (Number(features.has_ip_address) === 1) adjustedScore += 12;
@@ -100,23 +86,14 @@ self.PhishGuard = self.PhishGuard || {};
     if (Number(features.frontpage_suspicious_signal_count) >= 3) adjustedScore += 12;
     if (
       Number(features.is_official_brand_domain) === 1
-      && !hasHighConfidencePageEvidence(features)
+      && !self.PhishGuard.hasHighConfidencePageEvidence(features)
     ) {
       adjustedScore = Math.min(adjustedScore, 34);
     }
+    if (self.PhishGuard.isOrdinarySecureLoginPage(features)) {
+      adjustedScore = Math.min(adjustedScore, 34);
+    }
     return Math.min(100, adjustedScore);
-  }
-
-  function hasHighConfidencePageEvidence(features) {
-    return Number(features.has_ip_address) === 1
-      || Number(features.has_punycode) === 1
-      || Number(features.has_unusual_port) === 1
-      || Number(features.cross_domain_form_action) === 1
-      || Number(features.hidden_iframe_count) >= 1
-      || Number(features.obfuscated_script_score) >= 0.75
-      || Number(features.credential_submission_script) === 1
-      || Number(features.suspicious_hosting) === 1
-      || Number(features.frontpage_suspicious_signal_count) >= 3;
   }
 
   function getOptions() {
@@ -198,18 +175,19 @@ self.PhishGuard = self.PhishGuard || {};
     const trainedModelApplied = Boolean(
       trainedPrediction
       && trainedPrediction.probability >= trainedPrediction.threshold
-      && hasStrongModelEvidence(features)
+      && self.PhishGuard.hasStrongModelEvidence(features)
       && (
         Number(features.is_official_brand_domain) !== 1
-        || hasHighConfidencePageEvidence(features)
+        || self.PhishGuard.hasHighConfidencePageEvidence(features)
       )
     );
     const characterHighConfidence = Boolean(
       characterPrediction
       && characterPrediction.probability >= characterPrediction.highConfidenceThreshold
+      && self.PhishGuard.hasStrongModelEvidence(features)
       && (
         Number(features.is_official_brand_domain) !== 1
-        || hasHighConfidencePageEvidence(features)
+        || self.PhishGuard.hasHighConfidencePageEvidence(features)
       )
     );
     const trainedScore = trainedModelApplied ? trainedPrediction.score : 0;

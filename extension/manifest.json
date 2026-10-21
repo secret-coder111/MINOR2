@@ -24,6 +24,7 @@
         "src/shared/constants.js",
         "src/shared/browser-api.js",
         "src/shared/risk-score.js",
+        "src/shared/model-policy.js",
         "src/content/url-features.js",
         "src/content/dom-features.js",
         "src/content/form-features.js",
