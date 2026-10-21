@@ -1,0 +1,48 @@
+{
+  "manifest_version": 3,
+  "name": "PhishGuard",
+  "version": "0.1.0",
+  "description": "Privacy-first phishing detector for browser pages.",
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "src/background/service-worker.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "src/shared/feature-schema.js",
+        "src/shared/constants.js",
+        "src/shared/browser-api.js",
+        "src/shared/risk-score.js",
+        "src/content/url-features.js",
+        "src/content/dom-features.js",
+        "src/content/form-features.js",
+        "src/content/explanation-mapping.js",
+        "src/content/content-script.js"
+      ],
+      "run_at": "document_idle",
+      "all_frames": false
+    }
+  ],
+  "action": {
+    "default_title": "PhishGuard",
+    "default_popup": "src/popup/popup.html"
+  },
+  "options_ui": {
+    "page": "src/options/options.html",
+    "open_in_tab": true
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  }
+}

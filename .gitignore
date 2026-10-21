@@ -1,0 +1,11 @@
+.venv/
+node_modules/
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Older/generated model artifacts excluded from the public repository.
+ml/models/url-ensemble-selection-v0.2.0.joblib
+ml/models/url-multidataset-tuned-v0.4.0.joblib
+ml/models/url-tuned-ensemble-v0.3.0.joblib
+

@@ -1,0 +1,55 @@
+{
+  "model_version": "char-url-tfidf-feeds-v0.2.0",
+  "algorithm": "character_tfidf_logistic_regression",
+  "ngram_range": [
+    3,
+    5
+  ],
+  "max_features": 60000,
+  "best_c": 4.0,
+  "vocabulary_size": 60000,
+  "samples": 100000,
+  "test_samples": 20000,
+  "validation_models": {
+    "0.5": {
+      "accuracy": 0.9429,
+      "precision": 0.9356,
+      "recall": 0.9513,
+      "f1": 0.9433,
+      "roc_auc": 0.9863,
+      "threshold": 0.42
+    },
+    "1.0": {
+      "accuracy": 0.9483,
+      "precision": 0.9441,
+      "recall": 0.953,
+      "f1": 0.9486,
+      "roc_auc": 0.9885,
+      "threshold": 0.43
+    },
+    "2.0": {
+      "accuracy": 0.9518,
+      "precision": 0.9478,
+      "recall": 0.9563,
+      "f1": 0.952,
+      "roc_auc": 0.9901,
+      "threshold": 0.43
+    },
+    "4.0": {
+      "accuracy": 0.9546,
+      "precision": 0.9507,
+      "recall": 0.959,
+      "f1": 0.9548,
+      "roc_auc": 0.991,
+      "threshold": 0.43
+    }
+  },
+  "test": {
+    "accuracy": 0.9544,
+    "precision": 0.9502,
+    "recall": 0.959,
+    "f1": 0.9546,
+    "roc_auc": 0.9905,
+    "threshold": 0.43
+  }
+}

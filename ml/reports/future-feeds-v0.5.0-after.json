@@ -1,0 +1,138 @@
+{
+  "protocol": "future_source_separated_v1",
+  "model": "ml\\models\\url-multidataset-feeds-tuned-v0.5.0.joblib",
+  "metadata": "ml\\models\\url-multidataset-feeds-tuned-v0.5.0.json",
+  "artifact_type": "feature_estimator",
+  "model_version": "url-multidataset-feeds-tuned-v0.5.0",
+  "python": "3.10.11",
+  "scikit_learn": "1.7.2",
+  "samples": 169968,
+  "class_counts": {
+    "legitimate": 91924,
+    "phishing": 78044
+  },
+  "sources": {
+    "openphish": 295,
+    "phishtank": 77749,
+    "umbrella-top-1m": 91924
+  },
+  "dataset_sha256": {
+    "ml\\data\\recent_phishing_feeds.csv": "52c7b8967ae3ddbfbfb22a937054602e09ac5dddbcf4569868b6edf627f02038",
+    "ml\\data\\phishtank_recent.csv": "7cb3a824e632673650739be46115f4a7840a58f7cbc528c6c8128b859c4dd146",
+    "ml\\data\\recent_legitimate_feed.csv": "ef0c1d305d1f36c56a7a45663fb8212766f445405f398b54fa1e4c02b5e6eae4"
+  },
+  "leakage_check": {
+    "cross_class_registrable_domain_overlap": 0,
+    "passed": true
+  },
+  "dom_coverage": {
+    "page_title_mismatch": {
+      "nonzero": 0,
+      "rate": 0.0,
+      "phishing_rate": 0.0,
+      "legitimate_rate": 0.0
+    },
+    "form_count": {
+      "nonzero": 0,
+      "rate": 0.0,
+      "phishing_rate": 0.0,
+      "legitimate_rate": 0.0
+    },
+    "has_password_input": {
+      "nonzero": 0,
+      "rate": 0.0,
+      "phishing_rate": 0.0,
+      "legitimate_rate": 0.0
+    },
+    "credential_field_count": {
+      "nonzero": 0,
+      "rate": 0.0,
+      "phishing_rate": 0.0,
+      "legitimate_rate": 0.0
+    },
+    "cross_domain_form_action": {
+      "nonzero": 0,
+      "rate": 0.0,
+      "phishing_rate": 0.0,
+      "legitimate_rate": 0.0
+    },
+    "hidden_field_count": {
+      "nonzero": 0,
+      "rate": 0.0,
+      "phishing_rate": 0.0,
+      "legitimate_rate": 0.0
+    },
+    "form_action_is_empty": {
+      "nonzero": 0,
+      "rate": 0.0,
+      "phishing_rate": 0.0,
+      "legitimate_rate": 0.0
+    },
+    "obfuscated_script_score": {
+      "nonzero": 0,
+      "rate": 0.0,
+      "phishing_rate": 0.0,
+      "legitimate_rate": 0.0
+    },
+    "hidden_iframe_count": {
+      "nonzero": 0,
+      "rate": 0.0,
+      "phishing_rate": 0.0,
+      "legitimate_rate": 0.0
+    },
+    "external_script_count": {
+      "nonzero": 0,
+      "rate": 0.0,
+      "phishing_rate": 0.0,
+      "legitimate_rate": 0.0
+    },
+    "meta_refresh_count": {
+      "nonzero": 0,
+      "rate": 0.0,
+      "phishing_rate": 0.0,
+      "legitimate_rate": 0.0
+    },
+    "brand_name_in_title": {
+      "nonzero": 0,
+      "rate": 0.0,
+      "phishing_rate": 0.0,
+      "legitimate_rate": 0.0
+    },
+    "brand_name_in_visible_text": {
+      "nonzero": 0,
+      "rate": 0.0,
+      "phishing_rate": 0.0,
+      "legitimate_rate": 0.0
+    }
+  },
+  "metrics": {
+    "accuracy": 0.504477,
+    "precision": 0.4788,
+    "recall": 0.89406,
+    "false_negative_rate": 0.10594,
+    "false_positive_rate": 0.82628,
+    "f1": 0.623626,
+    "mcc": 0.096598,
+    "roc_auc": 0.72346,
+    "pr_auc": 0.735327,
+    "threshold": 0.44,
+    "confusion_matrix": {
+      "tn": 15969,
+      "fp": 75955,
+      "fn": 8268,
+      "tp": 69776
+    }
+  },
+  "input_counts": {
+    "phishing_records": 78044,
+    "legitimate_records": 91924,
+    "phishing_domains": 15327,
+    "legitimate_domains": 39449,
+    "legitimate_removed_for_domain_overlap": 8076
+  },
+  "observed_at_values": [
+    "2026-09-29T18:53:33.405999+00:00",
+    "2026-09-29T18:53:38.444084+00:00",
+    "2026-09-29T18:58:05.672398+00:00"
+  ]
+}
