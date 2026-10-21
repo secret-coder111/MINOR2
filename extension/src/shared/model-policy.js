@@ -27,14 +27,28 @@
 
   function isOrdinarySecureLoginPage(features) {
     return Number(features.uses_http) !== 1
-      && Number(features.has_password_input) === 1
+      && (
+        Number(features.has_password_input) === 1
+        || Number(features.credential_field_count) > 0
+        || Number(features.form_count) > 0
+      )
       && Number(features.cross_domain_form_action) !== 1
       && Number(features.brand_domain_mismatch) !== 1
       && !hasHighConfidencePageEvidence(features);
+  }
+
+  function shouldApplyModel(features) {
+    return !isOrdinarySecureLoginPage(features)
+      && hasStrongModelEvidence(features)
+      && (
+        Number(features.is_official_brand_domain) !== 1
+        || hasHighConfidencePageEvidence(features)
+      );
   }
 
   global.PhishGuard = global.PhishGuard || {};
   global.PhishGuard.hasHighConfidencePageEvidence = hasHighConfidencePageEvidence;
   global.PhishGuard.hasStrongModelEvidence = hasStrongModelEvidence;
   global.PhishGuard.isOrdinarySecureLoginPage = isOrdinarySecureLoginPage;
+  global.PhishGuard.shouldApplyModel = shouldApplyModel;
 })(typeof self !== 'undefined' ? self : globalThis);

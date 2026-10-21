@@ -57,4 +57,19 @@ assert.strictEqual(
   'HTTP login pages must not receive the legitimate-login safeguard'
 );
 
+assert.strictEqual(
+  global.PhishGuard.shouldApplyModel(normalLoginPage),
+  false,
+  'URL-model probabilities must not override an ordinary secure login page'
+);
+
+assert.strictEqual(
+  global.PhishGuard.shouldApplyModel({
+    ...normalLoginPage,
+    cross_domain_form_action: 1
+  }),
+  true,
+  'strong cross-domain evidence may activate the model'
+);
+
 console.log('Model evidence policy validation passed.');

@@ -175,20 +175,12 @@ self.PhishGuard = self.PhishGuard || {};
     const trainedModelApplied = Boolean(
       trainedPrediction
       && trainedPrediction.probability >= trainedPrediction.threshold
-      && self.PhishGuard.hasStrongModelEvidence(features)
-      && (
-        Number(features.is_official_brand_domain) !== 1
-        || self.PhishGuard.hasHighConfidencePageEvidence(features)
-      )
+      && self.PhishGuard.shouldApplyModel(features)
     );
     const characterHighConfidence = Boolean(
       characterPrediction
       && characterPrediction.probability >= characterPrediction.highConfidenceThreshold
-      && self.PhishGuard.hasStrongModelEvidence(features)
-      && (
-        Number(features.is_official_brand_domain) !== 1
-        || self.PhishGuard.hasHighConfidencePageEvidence(features)
-      )
+      && self.PhishGuard.shouldApplyModel(features)
     );
     const trainedScore = trainedModelApplied ? trainedPrediction.score : 0;
     const characterScore = characterHighConfidence ? characterPrediction.score : 0;
