@@ -1,0 +1,131 @@
+{
+  "date": "2026-10-27",
+  "versions": {
+    "extension": "0.4.0",
+    "numeric_feature_schema": "0.2.0",
+    "extractor_sha256": "47c2098b656925d8fe5bf6401d7230da99d1c888f640ca8b6eac4c688fe0bb09"
+  },
+  "checks": {
+    "javascript_tests": {
+      "passed": 23,
+      "files": 15
+    },
+    "python_tests": {
+      "passed": 37
+    },
+    "targeted_popup_runtime_tests": {
+      "passed": 10
+    },
+    "demo": "passed",
+    "real_edge_browser": "passed",
+    "manifest_assets": "passed",
+    "version_alignment": "passed",
+    "model_copy_hashes": "passed"
+  },
+  "models": {
+    "research-url-0.4.0": {
+      "model_sha256": "939425902b2233e32a1ce623ffb2ec7df2416e0e10779a6ef9a9aeb9e2ed5424",
+      "deployment_eligible": false,
+      "extractor_matches_current": false
+    },
+    "research-hybrid-url-0.4.0": {
+      "model_sha256": "c1e2dc92511fbf547f0832efe1b9857fa0e8eb72ddd0ebdc21a380191e2f2162",
+      "deployment_eligible": false,
+      "extractor_matches_current": true
+    }
+  },
+  "browser": {
+    "passed": true,
+    "browser": "Edg/156.0.4314.42",
+    "workerContext": {
+      "url": "chrome-extension://hhpgjcdcfahiilchnimhfnjclldkdgpd/src/background/service-worker.js",
+      "chrome": "object",
+      "self": "object",
+      "document": "undefined",
+      "phishguard": "object"
+    },
+    "extensionId": "hhpgjcdcfahiilchnimhfnjclldkdgpd",
+    "localHttpLogin": {
+      "score": 8,
+      "outcome": "SAFE",
+      "note": "Local HTTP/IP fixtures can produce transport/address caution; no high-risk banner."
+    },
+    "spaMutation": {
+      "score": 88,
+      "outcome": "HIGH_RISK"
+    },
+    "attributeCorrection": "warning removed",
+    "embeddedFrame": {
+      "score": 88,
+      "outcome": "HIGH_RISK",
+      "frameId": 9
+    },
+    "frameRemoval": "warning removed",
+    "sameOriginLookalike": {
+      "score": 80,
+      "outcome": "HIGH_RISK",
+      "externalDestination": false
+    },
+    "popup": "real origin, high-risk next step, manual rescan completion, screenshot and width verified",
+    "lookalikeProviderControl": "provider phrase alone remains low risk; no submission made",
+    "interactiveDemo": [
+      {
+        "scenario": "external",
+        "score": 43,
+        "outcome": "CAUTION"
+      },
+      {
+        "scenario": "phishing",
+        "score": 88,
+        "outcome": "HIGH_RISK"
+      },
+      {
+        "scenario": "normal",
+        "score": 8,
+        "outcome": "SAFE"
+      }
+    ],
+    "demoSubmission": "JavaScript cancellation and browser CSP verified; zero POST requests",
+    "metadataMutation": "placeholder-only password prompt rescanned to high risk; correction cleared warning",
+    "openShadow": "late root discovered, credentials detected, warning interference repaired, correction cleared risk",
+    "cssomReveal": {
+      "outcome": "HIGH_RISK",
+      "score": 88
+    },
+    "collapsedControls": "closed SAFE; open HIGH_RISK; closed SAFE",
+    "hashNavigation": "current document rescanned",
+    "inheritedDocument": {
+      "score": 88,
+      "outcome": "HIGH_RISK",
+      "origin": "http://127.0.0.1:62487"
+    },
+    "coverage": {
+      "complete": false,
+      "inventoryAvailable": true,
+      "limitations": [],
+      "pendingFrames": 1,
+      "recovering": true,
+      "uninspectedFrames": 1
+    },
+    "workerRestart": "actual worker stopped; top-only mutation restarted it and risky static iframe recovered",
+    "publicComparisonControls": "observation selection, summary and reset passed",
+    "previews": [
+      {
+        "name": "desktop",
+        "captured": true
+      },
+      {
+        "name": "mobile",
+        "captured": true
+      }
+    ],
+    "captureWorldIsolation": "real collector expression resisted page MAIN-world DOM/title prototype poisoning",
+    "captureDocumentBinding": {
+      "passed": true,
+      "original_status": 200,
+      "captured_document_status": 404,
+      "binding": "real Edge Network events and loader identity through actual DocumentResponses"
+    },
+    "optionsAndFeedback": "unusable endpoint rejected; settings saved; synthetic correction reviewed; export enabled; correction deletion confirmed"
+  }
+}

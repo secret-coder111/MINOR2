@@ -1,12 +1,13 @@
 {
   "manifest_version": 3,
   "name": "PhishGuard",
-  "version": "0.1.0",
+  "version": "0.5.0",
   "description": "Privacy-first phishing detector for browser pages.",
   "permissions": [
     "storage",
     "activeTab",
-    "scripting"
+    "scripting",
+    "webNavigation"
   ],
   "host_permissions": [
     "<all_urls>"
@@ -23,6 +24,9 @@
         "src/shared/feature-schema.js",
         "src/shared/constants.js",
         "src/shared/browser-api.js",
+        "src/shared/public-suffix.js",
+        "src/shared/domain-utils.js",
+        "src/shared/document-context.js",
         "src/shared/risk-score.js",
         "src/shared/model-policy.js",
         "src/content/url-features.js",
@@ -31,8 +35,9 @@
         "src/content/explanation-mapping.js",
         "src/content/content-script.js"
       ],
-      "run_at": "document_idle",
-      "all_frames": false
+      "run_at": "document_start",
+      "all_frames": true,
+      "match_origin_as_fallback": true
     }
   ],
   "action": {

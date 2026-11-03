@@ -1,0 +1,29 @@
+{
+  "workerRestart": {
+    "before": "HIGH_RISK",
+    "afterTopOnlyRescan": "SAFE",
+    "inspectedFrames": 1,
+    "coverage": {
+      "uninspectedFrames": 1,
+      "inventoryAvailable": true
+    },
+    "recoveryRequested": false,
+    "method": "actual worker; fake browser/scorer; session retained, worker memory recreated"
+  },
+  "reputationReset": {
+    "priorReport": "HIGH_RISK",
+    "sameHostRescan": "SAFE",
+    "afterUnknownResponse": "SAFE",
+    "requests": 2,
+    "method": "actual worker, fake browser/scorer and controlled remote responses"
+  },
+  "cssomVisibility": {
+    "initialOutcome": "SAFE",
+    "freshOutcomeIfRescanned": "HIGH_RISK",
+    "initialCredentialContext": 0,
+    "freshCredentialContext": 1,
+    "actualAnalysisMessagesAfterCssomAndRootPoll": 1,
+    "pendingAnalysisTimers": 0,
+    "method": "actual extractors/policy/content observer in jsdom; CSSStyleSheet.insertRule"
+  }
+}

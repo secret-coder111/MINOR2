@@ -4,13 +4,20 @@ from __future__ import annotations
 
 import argparse
 import json
+import hashlib
 from pathlib import Path
 
 import joblib
 
 
-def export_model(metadata_path: Path, model_path: Path, output_path: Path) -> None:
+def export_model(metadata_path: Path, model_path: Path, output_path: Path, diagnostic_only: bool = False) -> None:
     metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+    if not diagnostic_only:
+        raise ValueError('Character export is research-only until Unicode/tokenization browser parity and an untouched login evaluation are validated; pass --diagnostic-only')
+    if metadata.get('model_file_sha256') != hashlib.sha256(model_path.read_bytes()).hexdigest():
+        raise ValueError('Character estimator hash mismatch; retrain legacy artifacts')
+    if metadata.get('calibration',{}).get('method') != 'independent_fpr_budget':
+        raise ValueError('Independent FPR calibration required')
     artifact = joblib.load(model_path)
     if not isinstance(artifact, dict) or "model" not in artifact or "vectorizer" not in artifact:
         raise ValueError("Expected a joblib bundle containing model and vectorizer")
@@ -36,7 +43,8 @@ def export_model(metadata_path: Path, model_path: Path, output_path: Path) -> No
         "coefficients": coefficients,
         "intercept": float(model.intercept_[0]),
         "threshold": float(metadata.get("threshold", 0.5)),
-        "high_confidence_threshold": 0.99,
+        'deployment_eligible': False,
+        'deployment_status': 'diagnostic_only',
     }
     javascript = (
         "self.PHISH_GUARD_CHAR_MODEL = "
@@ -56,8 +64,9 @@ def main() -> None:
     parser.add_argument("--metadata", type=Path, required=True)
     parser.add_argument("--model", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument('--diagnostic-only', action='store_true')
     args = parser.parse_args()
-    export_model(args.metadata, args.model, args.output)
+    export_model(args.metadata, args.model, args.output, args.diagnostic_only)
 
 
 if __name__ == "__main__":

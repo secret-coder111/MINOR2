@@ -1,38 +1,70 @@
-<!DOCTYPE html>
-<html>
+﻿<!DOCTYPE html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>PhishGuard</title>
     <link rel="stylesheet" href="popup.css" />
   </head>
   <body>
     <main class="popup">
       <header>
-        <h1>PhishGuard</h1>
-        <span id="riskBadge" class="badge neutral">Checking…</span>
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M12 3 4.5 6v5.2c0 4.2 2.6 7.8 7.5 9.8 4.9-2 7.5-5.6 7.5-9.8V6L12 3Z" fill="none" stroke="currentColor" stroke-width="1.7" /><path d="m8.5 11.8 2.4 2.4 4.6-4.8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg></span>
+          <div><h1>PhishGuard</h1><span class="brand-caption">Browser protection</span></div>
+        </div>
+        <span id="riskBadge" class="badge neutral">Checking...</span>
       </header>
-
-      <section class="summary">
-        <div id="scoreText">0/100 risk</div>
+      <section class="site-card" aria-label="Current website">
+        <span class="eyebrow">Current browser tab</span>
+        <p id="siteOrigin" class="site-origin">Reading the site address…</p>
+      <p class="tab-scope">This score belongs to the tab above. To check a pasted address, choose Check another URL.</p>
+      </section>
+      <div class="overview-grid"><section class="summary" aria-live="polite" aria-atomic="true">
+        <span class="eyebrow">This tab's page score</span>
+        <h2 id="verdictTitle" class="verdict-title">Checking this page</h2>
+        <div id="scoreText">Checking page</div>
+        <div class="risk-track" aria-hidden="true"><span id="riskFill"></span></div>
         <p id="statusText">Analyzing this page locally.</p>
-        <small id="modelText">Model: checking</small>
+        <p id="evidenceOrigin" class="evidence-origin" hidden></p>
       </section>
-
-      <section class="reasons">
-        <h2>Strong indicators</h2>
-        <ul id="reasonList"></ul>
+      <section class="guidance" aria-labelledby="guidanceHeading">
+        <h2 id="guidanceHeading">What to do</h2>
+        <p id="nextStep" class="next-step">Wait for the page check before sharing sensitive information.</p>
       </section>
-
-      <section class="actions">
-        <button id="continueBtn" class="secondary">Continue anyway</button>
-        <button id="reportBtn" class="primary">Report incorrect result</button>
-      </section>
-
-      <footer>
-        <small>Analysis runs on your device.</small>
-      </footer>
+      </div>
+      <button id="leaveBtn" class="danger-action" type="button" hidden>Leave this page</button>
+      <div class="scan-actions">
+        <button id="rescanBtn" class="secondary" type="button">Check again</button>
+          <button id="urlCheckerBtn" class="secondary" type="button">Check another URL</button>
+        <button id="settingsBtn" class="secondary" type="button">Settings</button>
+      </div>
+      <small id="scanStatus" role="status"></small>
+      <section class="reasons"><h2>Observed indicators</h2><ul id="reasonList"></ul></section>
+      <details class="inspection-details">
+        <summary>Inspection details</summary>
+        <small id="coverageText">Waiting for a result.</small>
+        <p id="reputationText"></p>
+        <p class="privacy-note">Passwords and typed field values are never read.</p>
+      </details>
+      <details class="correction-details">
+        <summary>Report an incorrect result</summary>
+        <section class="actions">
+        <label for="expectedVerdict">If this result is incorrect, what should it be?</label>
+        <select id="expectedVerdict">
+          <option value="">Choose a correction</option>
+          <option value="SAFE">Low risk</option>
+          <option value="CAUTION">Caution</option>
+          <option value="HIGH_RISK">High risk</option>
+        </select>
+        <button id="reportBtn" class="primary" type="button" disabled>Save correction locally</button>
+        <small id="feedbackStatus" role="status"></small>
+        </section>
+      </details>
+      <footer><small>Local page analysis · A low score does not verify a website.</small><button id="closeBtn" class="secondary close-button" type="button">Close</button></footer>
     </main>
-
+    <script src="../shared/browser-api.js"></script>
+    <script src="../shared/feedback.js"></script>
     <script src="popup.js"></script>
   </body>
 </html>

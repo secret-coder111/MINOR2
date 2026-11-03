@@ -1,0 +1,33 @@
+{
+  "passed": true,
+  "browser": "Edg/156.0.4314.42",
+  "workerContext": {
+    "url": "chrome-extension://hhpgjcdcfahiilchnimhfnjclldkdgpd/src/background/service-worker.js",
+    "chrome": "object",
+    "self": "object",
+    "document": "undefined",
+    "phishguard": "object"
+  },
+  "extensionId": "hhpgjcdcfahiilchnimhfnjclldkdgpd",
+  "localHttpLogin": {
+    "score": 8,
+    "outcome": "SAFE",
+    "note": "Local HTTP/IP fixtures can produce transport/address caution; no high-risk banner."
+  },
+  "cssomVisibility": {
+    "hiddenScore": 28,
+    "staleScore": 28,
+    "staleOutcome": "SAFE",
+    "unchangedScanId": true,
+    "afterExplicitRescan": "HIGH_RISK",
+    "freshScore": 88,
+    "waitMs": 4500
+  },
+  "closedDetails": {
+    "open": false,
+    "passwordRects": 1,
+    "passwordVisible": false,
+    "score": 78,
+    "outcome": "HIGH_RISK"
+  }
+}

@@ -1,0 +1,80 @@
+{
+  "date": "2026-10-25",
+  "release_version": "0.3.0",
+  "policy_version": "0.3.0",
+  "numeric_schema_version": "0.2.0",
+  "extractor_sha256": "6699fcfac21e32a7240b2af5401363ac3596521f1719f82962ac8c32481c1ce6",
+  "policy_sha256": "c5891a2b041d46b33e89779b05362254935e652ec84810f61b19a71d96df7204",
+  "javascript": {
+    "command": "npm.cmd test",
+    "passed": true,
+    "tap_tests": 21,
+    "test_files": 14
+  },
+  "python": {
+    "command": ".\\.venv\\Scripts\\python.exe -m unittest discover -s ml/tests -v",
+    "passed": true,
+    "tests": 26
+  },
+  "browser_python_parity_fixtures": 46,
+  "demo_validator_passed": true,
+  "git_diff_check_passed": true,
+  "syntax_compile_manifest_version_checks_passed": true,
+  "edge": {
+    "version": "Edg/156.0.4314.42",
+    "passed": true,
+    "report": "browser-smoke-results.json",
+    "report_sha256": "7d7609f5f4a17069a9051cf39c4ddb6e0abe6f6e052a3b1189600ee4abda8c86",
+    "worker_restart": "actual worker stopped; top-only mutation restarted it and risky static iframe recovered",
+    "cssom_reveal": {
+      "outcome": "HIGH_RISK",
+      "score": 88
+    },
+    "collapsed_controls": "closed SAFE; open HIGH_RISK; closed SAFE",
+    "inherited_document": {
+      "score": 88,
+      "outcome": "HIGH_RISK",
+      "origin": "http://127.0.0.1:54611"
+    },
+    "capture_document_binding": {
+      "passed": true,
+      "original_status": 200,
+      "captured_document_status": 404,
+      "binding": "real Edge Network events and loader identity through actual DocumentResponses"
+    },
+    "options_feedback": "unusable endpoint rejected; settings saved; synthetic correction reviewed; export enabled; correction deletion confirmed"
+  },
+  "options_screenshot_visually_inspected": true,
+  "original_bug_ids_addressed": [
+    "B01",
+    "B02",
+    "B03",
+    "B04",
+    "B05",
+    "B06",
+    "B07",
+    "B08",
+    "B09",
+    "B10",
+    "B11",
+    "B12",
+    "B13",
+    "B14"
+  ],
+  "limitation_items_reviewed": [
+    "L1",
+    "L2",
+    "L3",
+    "L4",
+    "L5",
+    "L6",
+    "L7",
+    "L8",
+    "L9",
+    "L10"
+  ],
+  "production_accuracy_measured": false,
+  "learned_model_activated": false,
+  "full_playwright_collection_cli_exercised": false,
+  "scope": "Controlled regression/integration evidence. See tester-repairs-2026-10-25.md for residual limits."
+}

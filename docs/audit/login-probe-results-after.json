@@ -1,0 +1,375 @@
+﻿{
+  "fixtureOnly": true,
+  "featureSchemaVersion": "0.2.0",
+  "policyVersion": "0.2.0",
+  "modelInfluence": "none_pending_compatible_calibration",
+  "results": [
+    {
+      "name": "ordinary college login",
+      "beforeScore": 12,
+      "score": 0,
+      "outcome": "SAFE",
+      "warning": false,
+      "categories": {
+        "identity": 0,
+        "destination": 0,
+        "transport": 0,
+        "address": 0,
+        "page": 0
+      },
+      "reasons": [
+        "No strong phishing indicators found. The website's identity has not been independently verified."
+      ],
+      "contextsChecked": 1,
+      "extracted": {
+        "brand_domain_mismatch": 0,
+        "is_official_brand_domain": 0,
+        "credential_submission_script": 0,
+        "cross_domain_form_action": 0,
+        "hidden_iframe_count": 0,
+        "frontpage_suspicious_signal_count": 0
+      }
+    },
+    {
+      "name": "ordinary login with input validation",
+      "beforeScore": 50,
+      "score": 0,
+      "outcome": "SAFE",
+      "warning": false,
+      "categories": {
+        "identity": 0,
+        "destination": 0,
+        "transport": 0,
+        "address": 0,
+        "page": 0
+      },
+      "reasons": [
+        "No strong phishing indicators found. The website's identity has not been independently verified."
+      ],
+      "contextsChecked": 1,
+      "extracted": {
+        "brand_domain_mismatch": 0,
+        "is_official_brand_domain": 0,
+        "credential_submission_script": 0,
+        "cross_domain_form_action": 0,
+        "hidden_iframe_count": 0,
+        "frontpage_suspicious_signal_count": 0
+      }
+    },
+    {
+      "name": "official Google plain login at root path",
+      "beforeScore": 42,
+      "score": 0,
+      "outcome": "SAFE",
+      "warning": false,
+      "categories": {
+        "identity": 0,
+        "destination": 0,
+        "transport": 0,
+        "address": 0,
+        "page": 0
+      },
+      "reasons": [
+        "No strong phishing indicators found. The website's identity has not been independently verified."
+      ],
+      "contextsChecked": 1,
+      "extracted": {
+        "brand_domain_mismatch": 0,
+        "is_official_brand_domain": 1,
+        "credential_submission_script": 0,
+        "cross_domain_form_action": 0,
+        "hidden_iframe_count": 0,
+        "frontpage_suspicious_signal_count": 0
+      }
+    },
+    {
+      "name": "same official Google login at login path",
+      "beforeScore": 20,
+      "score": 0,
+      "outcome": "SAFE",
+      "warning": false,
+      "categories": {
+        "identity": 0,
+        "destination": 0,
+        "transport": 0,
+        "address": 0,
+        "page": 0
+      },
+      "reasons": [
+        "No strong phishing indicators found. The website's identity has not been independently verified."
+      ],
+      "contextsChecked": 1,
+      "extracted": {
+        "brand_domain_mismatch": 0,
+        "is_official_brand_domain": 1,
+        "credential_submission_script": 0,
+        "cross_domain_form_action": 0,
+        "hidden_iframe_count": 0,
+        "frontpage_suspicious_signal_count": 0
+      }
+    },
+    {
+      "name": "Apple substring in Pineapple Club",
+      "beforeScore": 100,
+      "score": 0,
+      "outcome": "SAFE",
+      "warning": false,
+      "categories": {
+        "identity": 0,
+        "destination": 0,
+        "transport": 0,
+        "address": 0,
+        "page": 0
+      },
+      "reasons": [
+        "No strong phishing indicators found. The website's identity has not been independently verified."
+      ],
+      "contextsChecked": 1,
+      "extracted": {
+        "brand_domain_mismatch": 0,
+        "is_official_brand_domain": 0,
+        "credential_submission_script": 0,
+        "cross_domain_form_action": 0,
+        "hidden_iframe_count": 0,
+        "frontpage_suspicious_signal_count": 0
+      }
+    },
+    {
+      "name": "brand mentioned only in return URL",
+      "beforeScore": 100,
+      "score": 0,
+      "outcome": "SAFE",
+      "warning": false,
+      "categories": {
+        "identity": 0,
+        "destination": 0,
+        "transport": 0,
+        "address": 0,
+        "page": 0
+      },
+      "reasons": [
+        "No strong phishing indicators found. The website's identity has not been independently verified."
+      ],
+      "contextsChecked": 1,
+      "extracted": {
+        "brand_domain_mismatch": 0,
+        "is_official_brand_domain": 0,
+        "credential_submission_script": 0,
+        "cross_domain_form_action": 0,
+        "hidden_iframe_count": 0,
+        "frontpage_suspicious_signal_count": 0
+      }
+    },
+    {
+      "name": "two brands in official Microsoft title",
+      "beforeScore": 100,
+      "score": 0,
+      "outcome": "SAFE",
+      "warning": false,
+      "categories": {
+        "identity": 0,
+        "destination": 0,
+        "transport": 0,
+        "address": 0,
+        "page": 0
+      },
+      "reasons": [
+        "No strong phishing indicators found. The website's identity has not been independently verified."
+      ],
+      "contextsChecked": 1,
+      "extracted": {
+        "brand_domain_mismatch": 0,
+        "is_official_brand_domain": 1,
+        "credential_submission_script": 0,
+        "cross_domain_form_action": 0,
+        "hidden_iframe_count": 0,
+        "frontpage_suspicious_signal_count": 0
+      }
+    },
+    {
+      "name": "official Google homepage with validation and visible iframe",
+      "beforeScore": 93,
+      "score": 0,
+      "outcome": "SAFE",
+      "warning": false,
+      "categories": {
+        "identity": 0,
+        "destination": 0,
+        "transport": 0,
+        "address": 0,
+        "page": 0
+      },
+      "reasons": [
+        "No strong phishing indicators found. The website's identity has not been independently verified."
+      ],
+      "contextsChecked": 1,
+      "extracted": {
+        "brand_domain_mismatch": 0,
+        "is_official_brand_domain": 1,
+        "credential_submission_script": 0,
+        "cross_domain_form_action": 0,
+        "hidden_iframe_count": 0,
+        "frontpage_suspicious_signal_count": 0
+      }
+    },
+    {
+      "name": "official Google homepage with iframe and three CSRF fields",
+      "beforeScore": 68,
+      "score": 0,
+      "outcome": "SAFE",
+      "warning": false,
+      "categories": {
+        "identity": 0,
+        "destination": 0,
+        "transport": 0,
+        "address": 0,
+        "page": 0
+      },
+      "reasons": [
+        "No strong phishing indicators found. The website's identity has not been independently verified."
+      ],
+      "contextsChecked": 1,
+      "extracted": {
+        "brand_domain_mismatch": 0,
+        "is_official_brand_domain": 1,
+        "credential_submission_script": 0,
+        "cross_domain_form_action": 0,
+        "hidden_iframe_count": 0,
+        "frontpage_suspicious_signal_count": 0
+      }
+    },
+    {
+      "name": "cross-domain target trusted through page text",
+      "beforeScore": 12,
+      "score": 35,
+      "outcome": "CAUTION",
+      "warning": false,
+      "categories": {
+        "identity": 0,
+        "destination": 35,
+        "transport": 0,
+        "address": 0,
+        "page": 0
+      },
+      "reasons": [
+        "A credential form sends information to another site. Verify the destination; some sign-in providers use this legitimately."
+      ],
+      "contextsChecked": 1,
+      "extracted": {
+        "brand_domain_mismatch": 0,
+        "is_official_brand_domain": 0,
+        "credential_submission_script": 0,
+        "cross_domain_form_action": 1,
+        "hidden_iframe_count": 0,
+        "frontpage_suspicious_signal_count": 0
+      }
+    },
+    {
+      "name": "different github.io tenants treated as same site",
+      "beforeScore": 12,
+      "score": 35,
+      "outcome": "CAUTION",
+      "warning": false,
+      "categories": {
+        "identity": 0,
+        "destination": 35,
+        "transport": 0,
+        "address": 0,
+        "page": 0
+      },
+      "reasons": [
+        "A credential form sends information to another site. Verify the destination; some sign-in providers use this legitimately."
+      ],
+      "contextsChecked": 1,
+      "extracted": {
+        "brand_domain_mismatch": 0,
+        "is_official_brand_domain": 0,
+        "credential_submission_script": 0,
+        "cross_domain_form_action": 1,
+        "hidden_iframe_count": 0,
+        "frontpage_suspicious_signal_count": 0
+      }
+    },
+    {
+      "name": "score label conflicts with category gate",
+      "beforeScore": 90,
+      "score": 53,
+      "outcome": "CAUTION",
+      "warning": false,
+      "categories": {
+        "identity": 0,
+        "destination": 45,
+        "transport": 0,
+        "address": 8,
+        "page": 0
+      },
+      "reasons": [
+        "A credential form targets an IP address rather than an identified website.",
+        "The address has unusual structural characteristics; this alone does not establish phishing."
+      ],
+      "contextsChecked": 1,
+      "extracted": {
+        "brand_domain_mismatch": 0,
+        "is_official_brand_domain": 0,
+        "credential_submission_script": 0,
+        "cross_domain_form_action": 0,
+        "hidden_iframe_count": 0,
+        "frontpage_suspicious_signal_count": 0
+      }
+    },
+    {
+      "name": "controlled brand impersonation and external destination",
+      "beforeScore": null,
+      "score": 80,
+      "outcome": "HIGH_RISK",
+      "warning": true,
+      "categories": {
+        "identity": 45,
+        "destination": 35,
+        "transport": 0,
+        "address": 0,
+        "page": 0
+      },
+      "reasons": [
+        "This page asks for credentials while claiming a brand whose recognized domain does not match.",
+        "A credential form sends information to another site. Verify the destination; some sign-in providers use this legitimately."
+      ],
+      "contextsChecked": 1,
+      "extracted": {
+        "brand_domain_mismatch": 1,
+        "is_official_brand_domain": 0,
+        "credential_submission_script": 0,
+        "cross_domain_form_action": 1,
+        "hidden_iframe_count": 0,
+        "frontpage_suspicious_signal_count": 0
+      }
+    },
+    {
+      "name": "controlled external credential transport downgrade",
+      "beforeScore": null,
+      "score": 80,
+      "outcome": "HIGH_RISK",
+      "warning": true,
+      "categories": {
+        "identity": 0,
+        "destination": 35,
+        "transport": 45,
+        "address": 0,
+        "page": 0
+      },
+      "reasons": [
+        "This HTTPS page sends credentials to an unencrypted HTTP destination.",
+        "A credential form sends information to another site. Verify the destination; some sign-in providers use this legitimately."
+      ],
+      "contextsChecked": 1,
+      "extracted": {
+        "brand_domain_mismatch": 0,
+        "is_official_brand_domain": 0,
+        "credential_submission_script": 0,
+        "cross_domain_form_action": 1,
+        "hidden_iframe_count": 0,
+        "frontpage_suspicious_signal_count": 0
+      }
+    }
+  ]
+}

@@ -1,11 +1,24 @@
 {
   "name": "phishguard",
-  "version": "0.1.0",
+  "version": "0.5.0",
   "private": true,
   "scripts": {
-    "test": "node extension/tests/unit/feature-schema.test.js && node extension/tests/unit/risk-score.test.js && node extension/tests/unit/char-model.test.js && node extension/tests/unit/dom-features.test.js && node extension/tests/unit/form-features.test.js && node extension/tests/unit/model-policy.test.js"
+    "test": "node --test extension/tests/unit/*.test.js",
+    "demo": "node scripts/demo-server.cjs",
+    "train:url-checker": ".venv\\Scripts\\python.exe scripts/train-url-checker.py",
+    "build:url-checker": "node scripts/prepare-url-checker.cjs",
+    "build:classroom": "node scripts/prepare-classroom-site.cjs",
+    "test:demo": "node validate-demo.js",
+    "test:browser": "node extension/tests/browser-smoke.cjs",
+    "audit:login": "node docs/audit/diagnose-login.cjs",
+    "audit:public-demos": "node extension/tests/browser-smoke.cjs --public-demos",
+    "vendor:psl": "node scripts/vendor-public-suffix.cjs"
   },
   "devDependencies": {
-    "jsdom": "^29.1.1"
+    "jsdom": "^29.1.1",
+    "tldts": "7.4.16"
+  },
+  "engines": {
+    "node": ">=22"
   }
 }

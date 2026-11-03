@@ -1,0 +1,155 @@
+{
+  "model_version": "url-checker-research-2026-11-03-expanded",
+  "winner": "none_c_4",
+  "candidate_search": {
+    "predeclared_candidates": {
+      "none_c_1": {
+        "text_transform": "none",
+        "character_c": 1.0
+      },
+      "none_c_2": {
+        "text_transform": "none",
+        "character_c": 2.0
+      },
+      "none_c_4": {
+        "text_transform": "none",
+        "character_c": 4.0
+      }
+    },
+    "candidate_count": 3
+  },
+  "selection": {
+    "method": "tuning_recall_at_empirical_fpr_budget",
+    "partition": "tuning",
+    "fpr_budget": 0.01,
+    "tie_breakers": [
+      "lower_false_positive_rate",
+      "higher_average_precision",
+      "higher_roc_auc"
+    ],
+    "threshold_is_final": false,
+    "uncertainty": "Reported intervals are descriptive; tuning selection is not release validation"
+  },
+  "threshold": 0.7668868035783822,
+  "test": {
+    "accuracy": 0.9256641917881743,
+    "precision": 0.9820710637835488,
+    "recall": 0.8579022306597057,
+    "f1": 0.9157969399128585,
+    "roc_auc": 0.9860944822864028,
+    "average_precision": 0.9861207362038964,
+    "positive_prevalence": 0.4711959924859111,
+    "threshold": 0.7668868035783822,
+    "false_positive_rate": 0.01395584876934788,
+    "false_positive_rate_95ci": [
+      0.011993663374143084,
+      0.016233776723289566
+    ],
+    "recall_95ci": [
+      0.8511045143938575,
+      0.8644390327280521
+    ],
+    "confusion_matrix": {
+      "tn": 11658,
+      "fp": 165,
+      "fn": 1497,
+      "tp": 9038
+    }
+  },
+  "paired_comparison": {
+    "baseline": {
+      "accuracy": 0.9011986760890957,
+      "precision": 0.9830587143188675,
+      "recall": 0.8041765543426673,
+      "f1": 0.8846655876364016,
+      "roc_auc": 0.9844853095578706,
+      "average_precision": 0.9832099493693026,
+      "positive_prevalence": 0.4711959924859111,
+      "threshold": 0.7662075550880134,
+      "false_positive_rate": 0.012348811638332064,
+      "false_positive_rate_95ci": [
+        0.010510568592898952,
+        0.014503841201192748
+      ],
+      "recall_95ci": [
+        0.7964885249738157,
+        0.8116428360531461
+      ],
+      "confusion_matrix": {
+        "tn": 11677,
+        "fp": 146,
+        "fn": 2063,
+        "tp": 8472
+      }
+    },
+    "candidate": {
+      "accuracy": 0.9256641917881743,
+      "precision": 0.9820710637835488,
+      "recall": 0.8579022306597057,
+      "f1": 0.9157969399128585,
+      "roc_auc": 0.9860944822864028,
+      "average_precision": 0.9861207362038964,
+      "positive_prevalence": 0.4711959924859111,
+      "threshold": 0.7668868035783822,
+      "false_positive_rate": 0.01395584876934788,
+      "false_positive_rate_95ci": [
+        0.011993663374143084,
+        0.016233776723289566
+      ],
+      "recall_95ci": [
+        0.8511045143938575,
+        0.8644390327280521
+      ],
+      "confusion_matrix": {
+        "tn": 11658,
+        "fp": 165,
+        "fn": 1497,
+        "tp": 9038
+      }
+    },
+    "delta": {
+      "accuracy": 0.02446551569907862,
+      "precision": -0.0009876505353186849,
+      "recall": 0.053725676317038396,
+      "f1": 0.031131352276456914,
+      "false_positive_rate": 0.0016070371310158166
+    },
+    "both_wrong": 1532,
+    "previous_errors_fixed": 677,
+    "new_errors": 130
+  },
+  "controls": [
+    {
+      "url": "https://github.com/login",
+      "model_estimate": 0.9683560607092137,
+      "above_threshold": true
+    },
+    {
+      "url": "https://www.google.com/",
+      "model_estimate": 0.031103029717990244,
+      "above_threshold": false
+    },
+    {
+      "url": "https://paypal.com/",
+      "model_estimate": 0.9993500769316621,
+      "above_threshold": true
+    },
+    {
+      "url": "http://banamxr.com/1/mexico/",
+      "model_estimate": 0.9301585470987584,
+      "above_threshold": true
+    },
+    {
+      "url": "https://www.amtso.org/check-desktop-phishing-page/",
+      "model_estimate": 0.04466796485020002,
+      "above_threshold": false
+    }
+  ],
+  "deployment_eligible": false,
+  "evaluation_scope": "Paired exploratory ablation on previously used internal corpora and test partitions",
+  "limitations": [
+    "Reused internal test is not an untouched release benchmark.",
+    "No live-page ground truth or production accuracy guarantee.",
+    "Character patterns can misclassify legitimate addresses; no primary phishing verdict."
+  ]
+}

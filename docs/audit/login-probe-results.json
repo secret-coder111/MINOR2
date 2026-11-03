@@ -1,0 +1,308 @@
+﻿{
+  "fixtureOnly": true,
+  "modelVersion": "url-multidataset-hard-negatives-v0.6.0",
+  "results": [
+    {
+      "name": "ordinary college login",
+      "score": 12,
+      "outcome": "SAFE",
+      "warning": false,
+      "ruleScore": 12,
+      "modelProbability": 0.7913650952176166,
+      "modelApplied": false,
+      "categories": {
+        "url": 0,
+        "form": 12,
+        "brand": 0
+      },
+      "reasons": [
+        "Normal first-party login form; no phishing warning."
+      ],
+      "extracted": {
+        "brand_domain_mismatch": 0,
+        "is_official_brand_domain": 0,
+        "credential_submission_script": 0,
+        "cross_domain_form_action": 0,
+        "hidden_iframe_count": 0,
+        "frontpage_suspicious_signal_count": 0
+      }
+    },
+    {
+      "name": "ordinary login with input validation",
+      "score": 50,
+      "outcome": "CAUTION",
+      "warning": false,
+      "ruleScore": 50,
+      "modelProbability": 0.7913650952176166,
+      "modelApplied": true,
+      "categories": {
+        "url": 0,
+        "form": 42,
+        "brand": 0
+      },
+      "reasons": [
+        "Credential-like fields coexist with scripts that may observe or submit input events."
+      ],
+      "extracted": {
+        "brand_domain_mismatch": 0,
+        "is_official_brand_domain": 0,
+        "credential_submission_script": 1,
+        "cross_domain_form_action": 0,
+        "hidden_iframe_count": 0,
+        "frontpage_suspicious_signal_count": 0
+      }
+    },
+    {
+      "name": "official Google plain login at root path",
+      "score": 42,
+      "outcome": "CAUTION",
+      "warning": false,
+      "ruleScore": 42,
+      "modelProbability": 0.5946733641505999,
+      "modelApplied": true,
+      "categories": {
+        "url": 0,
+        "form": 12,
+        "brand": 30
+      },
+      "reasons": [
+        "Normal first-party login form; no phishing warning."
+      ],
+      "extracted": {
+        "brand_domain_mismatch": 0,
+        "is_official_brand_domain": 1,
+        "credential_submission_script": 0,
+        "cross_domain_form_action": 0,
+        "hidden_iframe_count": 0,
+        "frontpage_suspicious_signal_count": 3
+      }
+    },
+    {
+      "name": "same official Google login at login path",
+      "score": 20,
+      "outcome": "SAFE",
+      "warning": false,
+      "ruleScore": 20,
+      "modelProbability": 0.7057674561146023,
+      "modelApplied": false,
+      "categories": {
+        "url": 8,
+        "form": 12,
+        "brand": 0
+      },
+      "reasons": [
+        "Normal first-party login form; no phishing warning."
+      ],
+      "extracted": {
+        "brand_domain_mismatch": 0,
+        "is_official_brand_domain": 1,
+        "credential_submission_script": 0,
+        "cross_domain_form_action": 0,
+        "hidden_iframe_count": 0,
+        "frontpage_suspicious_signal_count": 0
+      }
+    },
+    {
+      "name": "Apple substring in Pineapple Club",
+      "score": 100,
+      "outcome": "HIGH_RISK",
+      "warning": true,
+      "ruleScore": 100,
+      "modelProbability": 0.8244016575328029,
+      "modelApplied": true,
+      "categories": {
+        "url": 50,
+        "form": 12,
+        "brand": 50
+      },
+      "reasons": [
+        "The domain resembles a known brand but does not belong to it.",
+        "The page title is inconsistent with the hostname or brand being claimed."
+      ],
+      "extracted": {
+        "brand_domain_mismatch": 1,
+        "is_official_brand_domain": 0,
+        "credential_submission_script": 0,
+        "cross_domain_form_action": 0,
+        "hidden_iframe_count": 0,
+        "frontpage_suspicious_signal_count": 0
+      }
+    },
+    {
+      "name": "brand mentioned only in return URL",
+      "score": 100,
+      "outcome": "HIGH_RISK",
+      "warning": true,
+      "ruleScore": 100,
+      "modelProbability": 0.7876294315868104,
+      "modelApplied": true,
+      "categories": {
+        "url": 65,
+        "form": 12,
+        "brand": 35
+      },
+      "reasons": [
+        "The domain resembles a known brand but does not belong to it."
+      ],
+      "extracted": {
+        "brand_domain_mismatch": 1,
+        "is_official_brand_domain": 0,
+        "credential_submission_script": 0,
+        "cross_domain_form_action": 0,
+        "hidden_iframe_count": 0,
+        "frontpage_suspicious_signal_count": 0
+      }
+    },
+    {
+      "name": "two brands in official Microsoft title",
+      "score": 100,
+      "outcome": "HIGH_RISK",
+      "warning": true,
+      "ruleScore": 100,
+      "modelProbability": 0.9206628364878334,
+      "modelApplied": true,
+      "categories": {
+        "url": 50,
+        "form": 12,
+        "brand": 35
+      },
+      "reasons": [
+        "The domain resembles a known brand but does not belong to it."
+      ],
+      "extracted": {
+        "brand_domain_mismatch": 1,
+        "is_official_brand_domain": 0,
+        "credential_submission_script": 0,
+        "cross_domain_form_action": 0,
+        "hidden_iframe_count": 0,
+        "frontpage_suspicious_signal_count": 2
+      }
+    },
+    {
+      "name": "official Google homepage with validation and visible iframe",
+      "score": 93,
+      "outcome": "HIGH_RISK",
+      "warning": true,
+      "ruleScore": 93,
+      "modelProbability": 0.5946733641505999,
+      "modelApplied": true,
+      "categories": {
+        "url": 0,
+        "form": 55,
+        "brand": 30
+      },
+      "reasons": [
+        "The page title is inconsistent with the hostname or brand being claimed.",
+        "Credential-like fields coexist with scripts that may observe or submit input events."
+      ],
+      "extracted": {
+        "brand_domain_mismatch": 0,
+        "is_official_brand_domain": 1,
+        "credential_submission_script": 1,
+        "cross_domain_form_action": 0,
+        "hidden_iframe_count": 1,
+        "frontpage_suspicious_signal_count": 4
+      }
+    },
+    {
+      "name": "official Google homepage with iframe and three CSRF fields",
+      "score": 68,
+      "outcome": "HIGH_RISK",
+      "warning": true,
+      "ruleScore": 68,
+      "modelProbability": 0.5946733641505999,
+      "modelApplied": true,
+      "categories": {
+        "url": 0,
+        "form": 38,
+        "brand": 30
+      },
+      "reasons": [
+        "Normal first-party login form; no phishing warning."
+      ],
+      "extracted": {
+        "brand_domain_mismatch": 0,
+        "is_official_brand_domain": 1,
+        "credential_submission_script": 0,
+        "cross_domain_form_action": 0,
+        "hidden_iframe_count": 1,
+        "frontpage_suspicious_signal_count": 4
+      }
+    },
+    {
+      "name": "cross-domain target trusted through page text",
+      "score": 12,
+      "outcome": "SAFE",
+      "warning": false,
+      "ruleScore": 12,
+      "modelProbability": 0.6845172892655539,
+      "modelApplied": false,
+      "categories": {
+        "url": 0,
+        "form": 12,
+        "brand": 0
+      },
+      "reasons": [
+        "Normal first-party login form; no phishing warning."
+      ],
+      "extracted": {
+        "brand_domain_mismatch": 0,
+        "is_official_brand_domain": 0,
+        "credential_submission_script": 0,
+        "cross_domain_form_action": 0,
+        "hidden_iframe_count": 0,
+        "frontpage_suspicious_signal_count": 0
+      }
+    },
+    {
+      "name": "different github.io tenants treated as same site",
+      "score": 12,
+      "outcome": "SAFE",
+      "warning": false,
+      "ruleScore": 12,
+      "modelProbability": 0.41645157671188177,
+      "modelApplied": false,
+      "categories": {
+        "url": 0,
+        "form": 12,
+        "brand": 0
+      },
+      "reasons": [
+        "Normal first-party login form; no phishing warning."
+      ],
+      "extracted": {
+        "brand_domain_mismatch": 0,
+        "is_official_brand_domain": 0,
+        "credential_submission_script": 0,
+        "cross_domain_form_action": 0,
+        "hidden_iframe_count": 0,
+        "frontpage_suspicious_signal_count": 0
+      }
+    },
+    {
+      "name": "score label conflicts with category gate",
+      "score": 90,
+      "outcome": "CAUTION",
+      "warning": false,
+      "ruleScore": 90,
+      "modelProbability": 0.980387284233465,
+      "modelApplied": true,
+      "categories": {
+        "url": 70,
+        "form": 12,
+        "brand": 0
+      },
+      "reasons": [
+        "The page title is inconsistent with the hostname or brand being claimed."
+      ],
+      "extracted": {
+        "brand_domain_mismatch": 0,
+        "is_official_brand_domain": 0,
+        "credential_submission_script": 0,
+        "cross_domain_form_action": 0,
+        "hidden_iframe_count": 0,
+        "frontpage_suspicious_signal_count": 0
+      }
+    }
+  ]
+}

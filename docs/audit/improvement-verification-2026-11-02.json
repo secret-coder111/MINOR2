@@ -1,0 +1,37 @@
+{
+  "release": "0.5.0",
+  "reviewDate": "2026-11-02",
+  "javascript": {
+    "passed": true,
+    "tests": 31,
+    "runtime": "Node 24.22.1"
+  },
+  "python": {
+    "passed": true,
+    "tests": 37,
+    "goldenFeatureFixtures": 49
+  },
+  "demo": {
+    "passed": true,
+    "submittedFixturePosts": 0
+  },
+  "browser": {
+    "passed": true,
+    "version": "Edg/156.0.4314.58",
+    "report": "browser-smoke-results.json"
+  },
+  "accuracyClaim": null,
+  "mlDeployment": "research_only",
+  "sha256": {
+    "extension/src/content/form-features.js": "e5e3006c5252d357239b35c542efadba71b37dc1565844297b97efa5f56067cd",
+    "extension/src/shared/model-policy.js": "1d780e58cc06c3fcf9c86903b69c7f3a9662844b0fb93088cde8ba1f20868f05",
+    "extension/src/content/content-script.js": "1e7edbcb1280c370ff7d251e18ac1005ed2ccd2638321d74a6fd87baf7b9b3fb",
+    "extension/src/popup/popup.js": "58aaadad6b1123a8d402534a3f62c0c67312c1fb2ddc54b5f83a9b6f59941b79",
+    "extension/src/popup/popup.html": "8b40b3f06d7903260bbec6df1a9b8a18cd6e5a74a8a4be9b72b0b8b2e8c1b272",
+    "extension/src/popup/popup.css": "e238da37f517dce66f8ee01f281c945062f8d3c4fb9bfda95a30cedada1c9406",
+    "extension/src/options/options.html": "25983b391f62a39a726b1d2b8aa73ff0281ea481bd2be567c17befeaef56c987",
+    "extension/src/options/options.js": "4ad80ac75bb1f7c82993ed6d9aaaf4ab76ac7c22b46bcefa35698c5b72e90a71",
+    "extension/src/options/options.css": "c89dbc29182cb1fe066d83dde3f74adc371f2f8ec9bb550cfd4e2153dd264941",
+    "ml/src/feature_engineering.py": "d81b5831e4bcaff06690c37446d7a0e13032e950e121e3d9bdff4d48c4982683"
+  }
+}

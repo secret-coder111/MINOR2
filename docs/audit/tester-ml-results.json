@@ -1,0 +1,60 @@
+{
+  "provenance_roundtrip": {
+    "confirmed": true,
+    "changes": [
+      {
+        "dataset": "training",
+        "before": "filename_fallback",
+        "after": "explicit"
+      },
+      {
+        "dataset": "future",
+        "before": "filename_fallback",
+        "after": "explicit"
+      }
+    ],
+    "original_rejection": "Future evaluation requires explicit provenance for every sample; filename fallback is not an independent source",
+    "roundtrip_separation_result": {
+      "passed": true,
+      "overlaps": {
+        "url_sha256": 0,
+        "domain_sha256": 0,
+        "content_sha256": 0
+      },
+      "source_time_separated": true
+    }
+  },
+  "all_negative_release": {
+    "confirmed": true,
+    "synthetic_only": true,
+    "representative_login_review_assertion_supplied_for_probe": true,
+    "training_samples": 120,
+    "future_samples": 800,
+    "threshold": 1.0,
+    "recall": 0.0,
+    "confusion_matrix": {
+      "tn": 400,
+      "fp": 0,
+      "fn": 400,
+      "tp": 0
+    },
+    "false_positive_rate_95ci": [
+      8.673617379884035e-19,
+      0.009512294334296508
+    ],
+    "fpr_budget": 0.01,
+    "deployment_eligible": true,
+    "deployment_status": "validated"
+  },
+  "completed_navigation_status_mock": {
+    "confirmed_in_mock": true,
+    "real_browser_test_performed": false,
+    "mock_scenario": "Completed JavaScript redirect from original 200 to final 404 before extraction",
+    "stored_final_url": "https://capture-final.test/missing",
+    "stored_title": "404 Not Found",
+    "stored_status": 200,
+    "actual_final_document_status_in_scenario": 404,
+    "stored_capture_quality": "ok",
+    "accepted_by_snapshot_validator": true
+  }
+}

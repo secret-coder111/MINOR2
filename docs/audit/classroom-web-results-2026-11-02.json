@@ -1,0 +1,78 @@
+{
+  "browser": "Edg/156.0.4314.58",
+  "scope": "Harmless public security fixtures or owner-hosted educational scenarios; no credentials entered or forms submitted; no browser warning bypass. Hosted scenarios remain controlled tests, not an independent accuracy benchmark.",
+  "checks": [
+    {
+      "requestedUrl": "https://phishguard-classroom-visual-lab.www-vikramsahu001.chatgpt.site/legitimate-demo.html",
+      "checkedAt": "2026-11-02T16:54:03.712Z",
+      "effectiveUrl": "https://phishguard-classroom-visual-lab.www-vikramsahu001.chatgpt.site/legitimate-demo",
+      "title": "Contoso Bank",
+      "phishguard": {
+        "score": 0,
+        "outcome": "SAFE",
+        "reasons": [
+          "No strong phishing indicators found. The website's identity has not been independently verified."
+        ],
+        "inspectedFrames": 1,
+        "securityTest": null,
+        "warningVisible": false
+      }
+    },
+    {
+      "requestedUrl": "https://phishguard-classroom-visual-lab.www-vikramsahu001.chatgpt.site/caution-demo.html",
+      "checkedAt": "2026-11-02T16:54:05.522Z",
+      "effectiveUrl": "https://phishguard-classroom-visual-lab.www-vikramsahu001.chatgpt.site/caution-demo",
+      "title": "College Portal",
+      "phishguard": {
+        "score": 35,
+        "outcome": "CAUTION",
+        "reasons": [
+          "A credential form sends information to another site. Verify the destination; some sign-in providers use this legitimately."
+        ],
+        "inspectedFrames": 1,
+        "securityTest": null,
+        "warningVisible": false
+      }
+    },
+    {
+      "requestedUrl": "https://phishguard-classroom-visual-lab.www-vikramsahu001.chatgpt.site/phishing-demo.html",
+      "checkedAt": "2026-11-02T16:54:06.565Z",
+      "effectiveUrl": "https://phishguard-classroom-visual-lab.www-vikramsahu001.chatgpt.site/phishing-demo",
+      "title": "PayPal Security Update",
+      "phishguard": {
+        "score": 80,
+        "outcome": "HIGH_RISK",
+        "reasons": [
+          "This page asks for credentials while claiming a brand whose recognized domain does not match.",
+          "A credential form sends information to another site. Verify the destination; some sign-in providers use this legitimately."
+        ],
+        "inspectedFrames": 1,
+        "securityTest": null,
+        "warningVisible": true
+      }
+    },
+    {
+      "requestedUrl": "https://phishguard-classroom-visual-lab.www-vikramsahu001.chatgpt.site/url-checker.html",
+      "checkedAt": "2026-11-02T16:54:07.037Z",
+      "effectiveUrl": "https://phishguard-classroom-visual-lab.www-vikramsahu001.chatgpt.site/url-checker",
+      "title": "Check a URL | PhishGuard",
+      "urlChecker": {
+        "host": "github.com",
+        "score": "0",
+        "band": "low",
+        "hidden": false,
+        "metrics": 4
+      },
+      "phishguard": {
+        "score": 0,
+        "outcome": "SAFE",
+        "reasons": [
+          "No strong phishing indicators found. The website's identity has not been independently verified."
+        ],
+        "inspectedFrames": 1,
+        "securityTest": null,
+        "warningVisible": false
+      }
+    }
+  ]
+}

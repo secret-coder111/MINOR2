@@ -1,0 +1,76 @@
+{
+  "browser": "Edg/156.0.4314.58",
+  "scope": "Selected benign public test pages; no credentials entered or forms submitted; no browser warning bypass.",
+  "checks": [
+    {
+      "requestedUrl": "https://example.com/",
+      "checkedAt": "2026-11-02T05:56:56.367Z",
+      "effectiveUrl": "https://example.com/",
+      "title": "Example Domain",
+      "phishguard": {
+        "score": 0,
+        "outcome": "SAFE",
+        "reasons": [
+          "No strong phishing indicators found. The website's identity has not been independently verified."
+        ],
+        "inspectedFrames": 1
+      }
+    },
+    {
+      "requestedUrl": "http://http-password.badssl.com/",
+      "checkedAt": "2026-11-02T05:56:56.840Z",
+      "effectiveUrl": "http://http-password.badssl.com/",
+      "title": "http-password.badssl.com",
+      "phishguard": {
+        "score": 35,
+        "outcome": "CAUTION",
+        "reasons": [
+          "The page or credential submission uses unencrypted HTTP, which can expose sign-in information."
+        ],
+        "inspectedFrames": 1
+      }
+    },
+    {
+      "requestedUrl": "https://mixed-form.badssl.com/",
+      "checkedAt": "2026-11-02T05:56:59.100Z",
+      "effectiveUrl": "https://mixed-form.badssl.com/",
+      "title": "mixed-form.badssl.com",
+      "phishguard": {
+        "score": 0,
+        "outcome": "SAFE",
+        "reasons": [
+          "No strong phishing indicators found. The website's identity has not been independently verified."
+        ],
+        "inspectedFrames": 1
+      }
+    },
+    {
+      "requestedUrl": "https://www.amtso.org/check-desktop-phishing-page/",
+      "checkedAt": "2026-11-02T05:57:02.133Z",
+      "effectiveUrl": "https://www.amtso.org/check-desktop-phishing-page/",
+      "title": "Phishing Test Page for Desktop Security Software | AMTSO",
+      "phishguard": {
+        "score": 0,
+        "outcome": "SAFE",
+        "reasons": [
+          "No strong phishing indicators found. The website's identity has not been independently verified."
+        ],
+        "inspectedFrames": 1
+      }
+    },
+    {
+      "requestedUrl": "https://testsafebrowsing.appspot.com/s/phishing.html",
+      "checkedAt": "2026-11-02T05:57:04.032Z",
+      "effectiveUrl": "https://testsafebrowsing.appspot.com/s/phishing.html",
+      "title": "",
+      "phishguard": {
+        "score": 0,
+        "outcome": "SAFE",
+        "reasons": [
+          "No strong phishing indicators found. The website's identity has not been independently verified."
+        ],
+        "inspectedFrames": 1
+      }
+    }
+  ]
+}

@@ -1,2 +1,5 @@
-scikit-learn>=1.7,<2
-joblib>=1.4,<2
+# Reproducible environment used by the offline regression suite. Recalibrate and
+# regenerate artifact hashes after changing estimator/library versions.
+scikit-learn==1.9.1
+joblib==1.6.0
+numpy==2.5.4

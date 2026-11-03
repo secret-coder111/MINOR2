@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; form-action 'none'; connect-src 'none'; base-uri 'none'" />
+  <title>College Portal</title>
+  <link rel="stylesheet" href="demo.css" />
+  <link rel="stylesheet" href="journey.css" />
+</head>
+<body data-journey-scenario="normal">
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header"><div class="header-inner"><a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">PG</span><span>PhishGuard<small>TEST LAB</small></span></a><nav aria-label="Test lab"><a href="index.html">Overview</a><a href="dynamic-demo.html" aria-current="page">Interactive test</a><a href="#credentialJourney">Visual explanation</a><a href="public-examples.html">Public comparisons</a><a href="professor-guide.html">Presenter guide</a><a href="url-checker.html">Check a URL</a></nav></div></header>
+<div class="shell"><main id="main">
+
+<div class="page-heading"><p class="eyebrow">Interactive local test</p><h1>One page. Three decisions.</h1><p class="lead">Change the title and credential destination, then open PhishGuard to see how the observed evidence changes its verdict.</p></div>
+<div class="scenario-controls" role="group" aria-label="Test scenarios">
+<button type="button" data-demo-scenario="normal" aria-pressed="true"><span>01 / BASELINE</span>Ordinary login / reset</button>
+<button type="button" data-demo-scenario="external" aria-pressed="false"><span>02 / DESTINATION</span>External destination</button>
+<button type="button" data-demo-scenario="phishing" aria-pressed="false"><span>03 / COMBINED EVIDENCE</span>Brand + external destination</button>
+</div>
+<div class="lab-layout">
+<section class="card form-card" aria-label="Read-only test form"><div class="fixture-bar"><span>EDUCATIONAL SIMULATION</span><span>READ-ONLY FIELDS</span></div><div class="form-content"><div class="fixture-icon" aria-hidden="true">C</div><h2 id="scenarioHeading">College Portal</h2><p>Local test fixture with no affiliation to any brand used in the test.</p><form id="scenarioForm" action="/demo-signin" method="post"><label>Example email<input type="email" name="email" placeholder="Read-only email example" readonly /></label><label>Example password<input type="password" name="password" placeholder="Read-only password example" readonly /></label><button type="submit">Test blocked submission</button></form><div class="destination"><span>Illustrative form destination</span><code id="destination">/demo-signin</code></div><p id="demoStatus" role="status"></p></div></section>
+<aside><section class="card scenario-result" id="scenarioResult" data-band="normal" aria-live="polite"><p class="eyebrow">Walkthrough expectation · threshold 65</p><strong id="expectedResult">No strong indicators</strong><p id="scenarioDetail">An ordinary first-party login. A password field alone does not establish phishing.</p><p class="expectation-note">This is a walkthrough expectation, not a live extension reading. Open the PhishGuard popup for the actual result.</p></section><section class="card sidebar-card"><h3>What changed?</h3><div class="evidence-item"><small>Page identity</small><p id="identityDetail">An ordinary college portal identity.</p></div><div class="evidence-item"><small>Credential destination</small><p id="destinationDetail">A relative destination on the current site.</p></div><div class="evidence-item"><small>Your next step</small><p>Wait a moment, open the extension popup and read the reasons. Use Check again if needed.</p></div></section></aside>
+</div>
+<div class="notice info"><strong>Try the complete loop:</strong> Ordinary login → External destination → Brand + external destination → Ordinary login / reset. Watch the extension warning appear and clear. No data is submitted.</div>
+
+<section class="journey" id="credentialJourney" aria-labelledby="journeyTitle">
+  <div class="journey-heading"><div><p class="eyebrow">Follow the information</p><h2 id="journeyTitle">Where would the credentials go?</h2><p id="journeyScenario">Training scenario</p></div><div class="journey-safety"><strong>Illustration only</strong>Fixed fictional tokens. No credentials collected. No transfer performed.</div></div>
+  <div class="journey-body">
+    <ol class="journey-stepper" aria-label="Walkthrough stages"><li data-journey-step>01 &middot; Address</li><li data-journey-step>02 &middot; Example</li><li data-journey-step>03 &middot; Destination</li><li data-journey-step>04 &middot; Consequence</li></ol>
+    <div class="journey-stage"><span id="journeyStep">Step 1 of 4</span><h3 id="journeyStageTitle">Read the address</h3></div>
+    <div class="journey-map" aria-label="Illustrated browser-to-recipient route">
+      <section class="journey-node"><span class="node-number" aria-hidden="true">A</span><h3>The visitor's browser</h3><code class="journey-address" id="journeyBrowserAddress"></code><p>The page and button the visitor sees.</p><div id="journeyTokens" hidden><span class="journey-token">Fictional email token</span><span class="journey-token">Fictional secret token</span><p>These are labels, not form contents.</p></div></section>
+      <div class="journey-link" aria-hidden="true"><span>&rarr;</span><i class="journey-packet"></i></div>
+      <section class="journey-node recipient"><span class="node-number" aria-hidden="true">B</span><h3 id="journeyRecipient">Recipient</h3><p id="journeyRecipientDescription"></p><code class="journey-address" id="journeyRecipientAddress"></code><p id="journeyRouteLabel"></p><div class="journey-receipt" id="journeyReceipt" hidden><strong id="journeyReceiptTitle">Recipient view (illustrated)</strong><span class="journey-token">Fictional email token</span><span class="journey-token">Fictional secret token</span>No actual data was sent or stored.</div></section>
+    </div>
+    <p id="journeyNarration" class="journey-narration" role="status" aria-live="polite" aria-atomic="true"></p>
+    <div class="journey-controls"><button id="journeyPlay" type="button" aria-pressed="false">Play walkthrough</button><button class="secondary" id="journeyPrevious" type="button" disabled>Previous step</button><button class="secondary" id="journeyNext" type="button">Next step</button><button class="secondary" id="journeyReset" type="button">Reset animation</button></div>
+    <progress id="journeyProgress" value="1" max="4" aria-label="Walkthrough progress"></progress>
+    <p class="journey-caption">Animation only: it does not submit the form, authenticate a user, block an attack or read PhishGuard's verdict. Open the toolbar popup for the live result.</p>
+    <div class="journey-outcome"><section><h3>What could happen in a real situation?</h3><p id="journeyOutcome"></p></section><section><h3>What should the detector examine?</h3><p id="journeyEvidence"></p></section></div>
+    <details class="journey-facts"><summary>Inspect the real page facts and form destination</summary><p>These facts are read from this document, not from a preset score. After a manual edit, use the extension's Check again button. The narrative remains a schematic teaching example.</p><dl><dt>Browser origin</dt><dd id="journeyActualOrigin"></dd><dt>Actual page title</dt><dd id="journeyActualTitle"></dd><dt>Resolved form action</dt><dd id="journeyActualDestination"></dd></dl><pre><code id="journeyCode"></code></pre><button id="journeyReadFacts" class="secondary" type="button">Read page facts again</button><p id="journeyFactsStatus" role="status"></p></details>
+    <details class="journey-sso"><summary>Why isn't every external destination phishing?</summary><p>A college may use an authorized identity provider. A typical federated flow sends you to the provider's genuine sign-in page and returns an assertion or token to the app. It does not mean every app should send your password to an arbitrary external form.</p><p><strong>App &rarr; genuine identity provider &rarr; authorized return.</strong> Check the actual provider domain and whether the flow is expected. Cross-site movement alone is inconclusive.</p></details>
+  </div>
+</section>
+<nav class="journey-pagination" aria-label="Compare the three pages"><a href="legitimate-demo.html#credentialJourney">01 &middot; Ordinary login</a><a href="caution-demo.html#credentialJourney">02 &middot; External destination</a><a href="phishing-demo.html#credentialJourney">03 &middot; Combined evidence</a></nav>
+</main><footer class="site-footer"><p>Controlled local test. Read-only inputs, JavaScript and browser policy prevent submissions. The illustrative collector uses <code>example.invalid</code>.</p><p>Local analysis. Clear explanations.</p></footer></div>
+<script src="demo.js"></script>
+<script src="journey.js"></script>
+</body>
+</html>

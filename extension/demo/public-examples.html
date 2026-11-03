@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; form-action 'none'; connect-src 'none'; base-uri 'none'" />
+  <title>PhishGuard public website comparison</title>
+  <link rel="stylesheet" href="demo.css" />
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header"><div class="header-inner"><a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">PG</span><span>PhishGuard<small>TEST LAB</small></span></a><nav aria-label="Test lab"><a href="index.html">Overview</a><a href="dynamic-demo.html">Interactive test</a><a href="public-examples.html" aria-current="page">Public comparisons</a><a href="professor-guide.html">Presenter guide</a><a href="url-checker.html">Check a URL</a></nav></div></header>
+<div class="shell"><main id="main">
+<div class="page-heading"><p class="eyebrow">Public website comparisons</p><h1>Inspect. Compare. Record.</h1><p class="lead">Open a public test page, read the extension's actual verdict, then record what you observed. Your notes stay in this page's memory and clear on refresh.</p></div>
+<div class="notice"><strong>Read the kind of result.</strong> Example Domain is a documentation page: if its explanatory text appears, it has loaded. AMTSO is a harmless feature check. Updated PhishGuard recognises its exact test URL and shows <em>Security test recognised</em>, separately from the unchanged local rule score. Reload the extension and refresh the page after updating.</div>
+<section class="card"><p class="eyebrow">When the examiner asks for a web demonstration</p><h2>Let them choose. Record what actually happens.</h2><ol><li>Start with a legitimate login page chosen by the examiner. Enter no credentials; inspect PhishGuard's actual result.</li><li>Use the independent BadSSL page to test an HTTP credential prompt. It is an intentional security fixture, not a criminal phishing incident.</li><li>Use AMTSO or Google's test to demonstrate browser/vendor protection separately. Stop at a browser block; do not bypass it or credit it to PhishGuard.</li><li>Return to the controlled visual pages, change one actual title or destination, and show the extension rescanning. A hosted copy is still a controlled fixture, not an independent accuracy benchmark.</li></ol><p><strong>Present honestly:</strong> “These tests demonstrate observed behavior. Measuring missed phishing and false alarms requires an independent unseen dataset.”</p></section>
+    <div class="example-grid">
+      <article class="card risk-low" data-observation-card>
+        <span class="badge low">1 / Legitimate login comparison</span>
+        <h2>GitHub sign-in</h2>
+        <p class="observed">Independent ordinary login: inspect the current extension result; do not enter sign-in details.</p>
+        <p>The genuine GitHub login provides an independent ordinary sign-in comparison. Check the exact github.com address and inspect the actual PhishGuard popup.</p>
+        <a class="launch" href="https://github.com/login" target="_blank" rel="noopener noreferrer">Open external website</a>
+        <p><code>https://github.com/login</code></p>
+        <p><a href="legitimate-demo.html" target="_blank" rel="noopener noreferrer">Open local low-risk comparison</a></p>
+        <details><summary>What to explain</summary><p>A credential field by itself is ordinary login context. A legitimate service may use SSO or a different authorised identity provider. Let the examiner choose another known service too. The earlier Example Domain link was a documentation page; its explanatory text meant it had loaded correctly.</p></details>
+        <label>Actual PhishGuard result<select data-observation><option value="">Not checked yet</option><option>Low risk</option><option>Caution</option><option>High risk</option><option>Security test recognised</option><option>Browser blocked / no extension result</option><option>Unavailable / different page</option></select></label>
+      </article>
+      <article class="card risk-medium" data-observation-card>
+        <span class="badge medium">2 / Medium-risk comparison</span>
+        <h2>BadSSL HTTP password test</h2>
+        <p class="observed">Observed in isolated Edge 156, 2 November 2026: Caution, 35/100.</p>
+        <p>A purpose-built insecure-password example. Caution is expected if the final document remains HTTP. An HTTPS upgrade or redirect can change the result.</p>
+        <a class="launch" href="http://http-password.badssl.com/" target="_blank" rel="noopener noreferrer">Open external website</a>
+        <p><code>http://http-password.badssl.com/</code></p>
+        <p>Alternative independent form fixture: <a href="http://http-login.badssl.com/" target="_blank" rel="noopener noreferrer">BadSSL HTTP login</a>. Its operator intentionally tests transport security. Enter nothing and inspect the final address.</p>
+        <p><a href="caution-demo.html" target="_blank" rel="noopener noreferrer">Open local caution comparison</a></p>
+        <details><summary>What to explain</summary><p>A password prompt on unencrypted HTTP is a transport concern. It does not establish that this test operator is a phisher. Inspect the final address and enter no data.</p></details>
+        <label>Actual PhishGuard result<select data-observation><option value="">Not checked yet</option><option>Low risk</option><option>Caution</option><option>High risk</option><option>Security test recognised</option><option>Browser blocked / no extension result</option><option>Unavailable / different page</option></select></label>
+      </article>
+      <article class="card risk-medium" data-observation-card>
+        <span class="badge medium">3 / Official security feature check</span>
+        <h2>AMTSO phishing test</h2>
+        <p class="observed">Observed PhishGuard result before test-URL support, 2 November 2026: Low risk, 0/100 in local-rules mode.</p>
+        <p><strong>Verified after update, 2 November 2026:</strong> Security-test warning visible on the official AMTSO page; structural score unchanged at 0/100.</p>
+        <p><strong>Updated behavior:</strong> PhishGuard shows a clearly labelled security-test warning on this exact official URL. Its built-in test entry does not increase the rule score or establish real-world detection accuracy. Other products may block navigation before PhishGuard can inspect the document.</p>
+        <a class="launch" href="https://www.amtso.org/check-desktop-phishing-page/" target="_blank" rel="noopener noreferrer">Open official phishing test</a>
+        <p><code>amtso.org/check-desktop-phishing-page/</code></p>
+        <p><a href="phishing-demo.html" target="_blank" rel="noopener noreferrer">Open local PhishGuard high-risk comparison</a></p>
+        <details><summary>What to explain</summary><p>The public test checks support for a known test entry. The local comparison combines brand mismatch with an external credential destination, which is the behavior PhishGuard scores.</p></details>
+        <label>Actual PhishGuard result<select data-observation><option value="">Not checked yet</option><option>Low risk</option><option>Caution</option><option>High risk</option><option>Security test recognised</option><option>Browser blocked / no extension result</option><option>Unavailable / different page</option></select></label>
+      </article>
+    </div>
+
+<section class="card observation-panel" aria-label="Recorded observations">
+<div><p class="eyebrow">Your testing notes</p><h2>Your observations</h2><p id="observationProgress" role="status">0 of 3 examples recorded.</p><progress id="observationMeter" max="3" value="0" aria-label="Examples recorded"></progress><button id="resetObservations" class="secondary" type="button">Reset observations</button></div>
+<div><ul id="observationSummary"><li>No observations recorded yet.</li></ul><p class="microcopy">Record the actual result even when it differs from a historical observation. External content, redirects and browser protection settings can change.</p></div>
+</section>
+    <p class="source-note">Sources: <a href="https://badssl.com/" target="_blank" rel="noopener noreferrer">BadSSL test directory</a>, <a href="https://www.amtso.org/feature-settings-check-phishing-page/" target="_blank" rel="noopener noreferrer">AMTSO test explanation</a>. Alternative official browser test: <a href="https://testsafebrowsing.appspot.com/s/phishing.html" target="_blank" rel="noopener noreferrer">Google Safe Browsing phishing test</a>. Do not bypass an interstitial for this presentation.</p>
+
+</main><footer class="site-footer"><p>Historical observations are labelled with their date. These examples demonstrate behavior, not measured production accuracy.</p><p><a href="dynamic-demo.html">Try the controlled local test →</a></p></footer></div>
+<script src="public-examples.js"></script>
+</body>
+</html>

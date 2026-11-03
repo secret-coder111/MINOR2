@@ -1,40 +1,29 @@
-"""Train and export a raw-URL phishing baseline for PhishGuard."""
-
+"""Train a compact, explicitly URL-only or captured-DOM research model offline."""
 from __future__ import annotations
 
 import argparse
 import csv
 import json
 import random
+from datetime import datetime, timezone
 from pathlib import Path
 from urllib.request import urlopen
 
 import joblib
 import numpy as np
+from sklearn.base import clone
 from sklearn.ensemble import ExtraTreesClassifier, RandomForestClassifier
-from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score, roc_auc_score
+from sklearn.metrics import (accuracy_score, average_precision_score, confusion_matrix,
+                             f1_score, precision_score, recall_score, roc_auc_score)
 from sklearn.model_selection import GroupShuffleSplit
-from sklearn.preprocessing import StandardScaler
 
-from feature_engineering import FEATURE_SCHEMA, build_feature_row, normalize_url, validate_feature_row
+from dataset_contract import (PHISHING_LABELS, assert_separated, connected_groups, label_value, canonicalize_urls,
+                              manifest, normalize_url, registrable_domain, sha256, label_is_reviewed, source_identity)
+from feature_engineering import FEATURE_SCHEMA, URL_FEATURE_SCHEMA, FEATURE_SCHEMA_VERSION, build_feature_row, validate_feature_row, extractor_source_hash
 
-DATASET_URL = (
-    'https://raw.githubusercontent.com/faizann24/Using-machine-learning-to-detect-'
-    'malicious-URLs/master/data/data.csv'
-)
+DATASET_URL = 'https://raw.githubusercontent.com/faizann24/Using-machine-learning-to-detect-malicious-URLs/master/data/data.csv'
 EDGEPHISH_DATASET_URL = 'https://raw.githubusercontent.com/Hassan-Albattra/URL_Phishing_Detection_Dataset/main/balanced_urls.csv'
-LABELS = {
-    'benign': 0,
-    'legitimate': 0,
-    'good': 0,
-    'safe': 0,
-    'bad': 1,
-    'defacement': 1,
-    'phishing': 1,
-    'malware': 1,
-    'malicious': 1,
-}
+LABELS = PHISHING_LABELS
 
 
 def download_dataset(destination: Path, source_url: str = DATASET_URL) -> None:
@@ -43,250 +32,295 @@ def download_dataset(destination: Path, source_url: str = DATASET_URL) -> None:
         destination.write_bytes(response.read())
 
 
-def read_dataset(
-    paths: list[Path],
-    limit: int | None = None,
-    seed: int = 42,
-    balanced: bool = False,
-) -> list[dict]:
-    rows_by_url: dict[str, dict | None] = {}
+def read_dataset(paths: list[Path], limit: int | None = None, seed: int = 42,
+                 balanced: bool = False, include_other_threats: bool = False) -> list[dict]:
+    rows_by_url: dict[str, dict] = {}
+    quarantined: set[str] = set()
     for path in paths:
         with path.open('r', encoding='utf-8', newline='') as handle:
             reader = csv.DictReader(handle)
             if not reader.fieldnames or 'url' not in reader.fieldnames:
-                raise ValueError(f'Expected a CSV column named url in {path}')
+                raise ValueError(f'Expected a CSV url column in {path}')
             label_column = 'type' if 'type' in reader.fieldnames else 'label'
             if label_column not in reader.fieldnames:
-                raise ValueError(f'Expected a CSV column named type or label in {path}')
-            for row in reader:
-                url = normalize_url(row.get('url') or '')
-                label = LABELS.get((row.get(label_column) or '').strip().lower())
-                if not url or label is None:
+                raise ValueError(f'Expected a CSV type or label column in {path}')
+            source_rows = list(reader)
+            normalized_urls = canonicalize_urls([row.get('url') or '' for row in source_rows])
+            for row, url in zip(source_rows, normalized_urls):
+                label = label_value(row.get(label_column), include_other_threats)
+                if not url or label is None or url in quarantined or not label_is_reviewed(row):
                     continue
-                record = {
-                    'url': url,
-                    'label': label,
-                    'source': (row.get('source') or path.stem).strip(),
-                    'title': (row.get('title') or '').strip(),
-                    'html': row.get('html') or '',
+                if url in rows_by_url and rows_by_url[url]['label'] != label:
+                    quarantined.add(url)
+                    rows_by_url.pop(url)
+                    continue
+                source, provenance = source_identity(row, path.stem)
+                rows_by_url.setdefault(url, {
+                    'url': url, 'label': label,
+                    'source': source,
+                    # File names are useful report labels, not evidence that
+                    # two datasets originated from independent sources.
+                    'source_provenance': provenance,
+                    'label_status': (row.get('label_status') or '').strip(),
+                    'title': (row.get('title') or '').strip(), 'html': row.get('html') or '',
                     'observed_at': (row.get('observed_at') or row.get('date') or '').strip(),
-                }
-                if url in rows_by_url and rows_by_url[url] and rows_by_url[url]['label'] != label:
-                    rows_by_url[url] = None
-                else:
-                    rows_by_url[url] = record
-
-    rows = [row for row in rows_by_url.values() if row is not None]
-
+                    'page_type': (row.get('page_type') or '').strip(),
+                    **{name: (row.get(name) or '').strip() for name in ['reviewed_by', 'reviewed_at', 'label_evidence']},
+                    'label_scope': 'mixed_threat' if include_other_threats else 'phishing',
+                })
+    rows = list(rows_by_url.values())
     if balanced:
-        grouped = {label: [row for row in rows if row['label'] == label] for label in {row['label'] for row in rows}}
-        target = min(len(group) for group in grouped.values())
+        groups = [[r for r in rows if r['label'] == label] for label in [0, 1]]
+        if any(not group for group in groups):
+            raise ValueError('Balanced sampling requires both classes; check label scope')
+        target = min(map(len, groups))
         if limit:
-            target = min(target, limit // len(grouped))
+            target = min(target, limit // 2)
         rng = random.Random(seed)
-        selected = []
-        for group in grouped.values():
-            selected.extend(rng.sample(group, target))
-        rng.shuffle(selected)
-        return selected
-    if limit and len(rows) > limit:
-        selected = random.Random(seed).sample(rows, limit)
-        return selected
+        rows = [record for group in groups for record in rng.sample(group, target)]
+        rng.shuffle(rows)
+    elif limit and len(rows) > limit:
+        rows = random.Random(seed).sample(rows, limit)
     return rows
 
 
-def build_matrix(records: list[dict]) -> list[list[float]]:
+def build_matrix(records: list[dict], schema: list[str] | None = None) -> list[list[float]]:
+    schema = schema or FEATURE_SCHEMA
+    if any(name not in FEATURE_SCHEMA for name in schema):
+        raise ValueError('Unsupported model feature schema')
+    if any(name not in URL_FEATURE_SCHEMA for name in schema):
+        if any(not record.get('html', '').strip() for record in records):
+            raise ValueError('DOM model needs observed HTML; missing DOM must not be encoded as harmless zero values')
     matrix = []
     for record in records:
-        row = build_feature_row(record['url'], record['title'], record['html'])
+        document_url = record.get('final_url') or record['url']
+        row = record.get('feature_row') or build_feature_row(document_url, record.get('title', ''), record.get('html', ''))
+        if record.get('feature_row') is not None and record.get('feature_schema_version') != FEATURE_SCHEMA_VERSION:
+            raise ValueError('Captured browser feature version does not match the training contract')
+        if record.get('feature_row') is not None and record.get('extractor_sha256') != extractor_source_hash():
+            raise ValueError('Captured browser extractor hash does not match current sources; recapture or use the pinned extractor checkout')
         validate_feature_row(row)
-        matrix.append([float(row[name]) for name in FEATURE_SCHEMA])
+        matrix.append([float(row[name]) for name in schema])
     return matrix
 
 
-def registrable_domain(url: str) -> str:
-    """Return a stable grouping key to keep related URLs in one split."""
-    from urllib.parse import urlsplit
-
-    hostname = (urlsplit(normalize_url(url)).hostname or '').lower().strip('.')
-    labels = hostname.split('.')
-    if len(labels) <= 2:
-        return hostname
-    multi_label_suffixes = {
-        'co.uk', 'org.uk', 'ac.uk', 'gov.uk', 'com.au', 'net.au',
-        'org.au', 'co.in', 'com.br', 'com.cn', 'co.jp', 'co.nz',
-    }
-    suffix = '.'.join(labels[-2:])
-    if suffix in multi_label_suffixes and len(labels) >= 3:
-        return '.'.join(labels[-3:])
-    return suffix
-
-
 def grouped_split(records: list[dict], test_size: float, seed: int) -> tuple[list[dict], list[dict]]:
-    """Split by domain and require both classes in each partition."""
-    if len({registrable_domain(record['url']) for record in records}) < 3:
-        raise ValueError('Grouped evaluation needs at least three distinct registrable domains')
-
-    groups = np.asarray([registrable_domain(record['url']) for record in records])
-    labels = np.asarray([record['label'] for record in records])
-    splitter = GroupShuffleSplit(n_splits=100, test_size=test_size, random_state=seed)
+    groups = np.asarray(connected_groups(records))
+    if len(set(groups)) < 3:
+        raise ValueError('Grouped evaluation needs at least three independent site/content groups')
+    labels = np.asarray([r['label'] for r in records])
+    splitter = GroupShuffleSplit(n_splits=200, test_size=test_size, random_state=seed)
     for train_indices, test_indices in splitter.split(records, labels, groups):
-        if len(set(labels[train_indices])) < 2 or len(set(labels[test_indices])) < 2:
-            continue
-        return (
-            [records[index] for index in train_indices],
-            [records[index] for index in test_indices],
-        )
-    raise ValueError('Could not create grouped train/test partitions containing both classes')
+        if len(set(labels[train_indices])) == 2 and len(set(labels[test_indices])) == 2:
+            return [records[i] for i in train_indices], [records[i] for i in test_indices]
+    raise ValueError('Cannot create grouped partitions with both classes; collect more independent sites')
 
 
-def score_model(model, x_test, y_test, threshold: float | None = None) -> tuple[dict, np.ndarray]:
-    probabilities = model.predict_proba(x_test)[:, 1]
-    if threshold is None:
-        thresholds = np.linspace(0.1, 0.9, 81)
-        threshold = max(
-            thresholds,
-            key=lambda value: f1_score(y_test, probabilities >= value, zero_division=0),
-        )
+def partition_records(records: list[dict], seed: int) -> dict[str, list[dict]]:
+    selection, test = grouped_split(records, .2, seed)
+    development, calibration = grouped_split(selection, .25, seed + 1)
+    fit, tuning = grouped_split(development, .25, seed + 2)
+    return {'fit': fit, 'tuning': tuning, 'calibration': calibration, 'test': test}
+
+
+def wilson_interval(positives: int, samples: int) -> list[float]:
+    if not samples:
+        return [0., 1.]
+    z = 1.959963984540054
+    p = positives / samples
+    center = (p + z*z/(2*samples)) / (1+z*z/samples)
+    spread = z * ((p*(1-p)/samples + z*z/(4*samples*samples)) ** .5) / (1+z*z/samples)
+    return [max(0., center-spread), min(1., center+spread)]
+
+
+def probability_metrics(labels, probabilities, threshold: float) -> dict:
+    labels, probabilities = np.asarray(labels), np.asarray(probabilities)
     predictions = probabilities >= threshold
-    metrics = {
-        'accuracy': round(accuracy_score(y_test, predictions), 4),
-        'precision': round(precision_score(y_test, predictions, zero_division=0), 4),
-        'recall': round(recall_score(y_test, predictions, zero_division=0), 4),
-        'f1': round(f1_score(y_test, predictions, zero_division=0), 4),
-        'roc_auc': round(roc_auc_score(y_test, probabilities), 4),
-        'threshold': round(float(threshold), 4),
+    tn, fp, fn, tp = confusion_matrix(labels, predictions, labels=[0, 1]).ravel()
+    return {
+        'accuracy': float(accuracy_score(labels, predictions)),
+        'precision': float(precision_score(labels, predictions, zero_division=0)),
+        'recall': float(recall_score(labels, predictions, zero_division=0)),
+        'f1': float(f1_score(labels, predictions, zero_division=0)),
+        'roc_auc': float(roc_auc_score(labels, probabilities)),
+        'average_precision': float(average_precision_score(labels, probabilities)),
+        'positive_prevalence': float(np.mean(labels == 1)),
+        'threshold': float(threshold),
+        'false_positive_rate': float(fp / (fp + tn)),
+        'false_positive_rate_95ci': wilson_interval(int(fp), int(fp+tn)),
+        'recall_95ci': wilson_interval(int(tp), int(tp+fn)),
+        'confusion_matrix': {k: int(v) for k, v in zip(['tn','fp','fn','tp'], [tn,fp,fn,tp])},
     }
-    return metrics, probabilities
 
 
-def train(
-    records: list[dict],
-    seed: int = 42,
-    model_version: str = 'url-tuned-ensemble-v0.3.0',
-) -> tuple[dict, dict, object]:
-    train_records, test_records = grouped_split(records, test_size=0.2, seed=seed)
-    fit_records, validation_records = grouped_split(train_records, test_size=0.2, seed=seed + 1)
-    x_fit = np.asarray(build_matrix(fit_records), dtype=float)
-    x_validation = np.asarray(build_matrix(validation_records), dtype=float)
-    x_train = np.asarray(build_matrix(train_records), dtype=float)
-    x_test = np.asarray(build_matrix(test_records), dtype=float)
-    y_fit = [record['label'] for record in fit_records]
-    y_validation = [record['label'] for record in validation_records]
-    y_train = [record['label'] for record in train_records]
-    y_test = [record['label'] for record in test_records]
-    scaler = StandardScaler().fit(x_fit)
-    x_fit_scaled = scaler.transform(x_fit)
-    x_validation_scaled = scaler.transform(x_validation)
-    x_train_scaled = scaler.fit_transform(x_train)
-    x_test_scaled = scaler.transform(x_test)
+class NoFeasibleThresholdError(ValueError):
+    """No probability threshold in [0, 1] meets the empirical FPR budget."""
 
+
+def select_fpr_threshold(labels, probabilities, fpr_budget: float) -> tuple[float, dict]:
+    if not 0 <= fpr_budget < 1:
+        raise ValueError('FPR budget must be in [0, 1)')
+    labels, probabilities = np.asarray(labels), np.asarray(probabilities)
+    if (labels.ndim != 1 or probabilities.ndim != 1 or labels.shape != probabilities.shape
+        or set(labels) != {0, 1} or not np.isfinite(probabilities).all()
+        or np.any((probabilities < 0) | (probabilities > 1))):
+        raise ValueError('Calibration needs both classes and matching finite probabilities in [0, 1]')
+    candidates = {1.0}
+    for probability in probabilities:
+        candidates.add(float(probability))
+        above = float(np.nextafter(probability, np.inf))
+        if above <= 1:
+            candidates.add(above)
+    sorted_negative = np.sort(probabilities[labels == 0])
+    sorted_positive = np.sort(probabilities[labels == 1])
+    feasible = []
+    for threshold in sorted(candidates):
+        fpr = 1 - np.searchsorted(sorted_negative, threshold, side='left') / len(sorted_negative)
+        recall = 1 - np.searchsorted(sorted_positive, threshold, side='left') / len(sorted_positive)
+        if fpr <= fpr_budget:
+            feasible.append((float(recall), -float(fpr), threshold))
+    if not feasible:
+        raise NoFeasibleThresholdError('No probability threshold meets the calibration FPR budget; improve the model/data')
+    threshold = max(feasible)[2]
+    return threshold, probability_metrics(labels, probabilities, threshold)
+
+
+def select_tuning_candidate(labels, candidate_probabilities: dict, fpr_budget: float) -> tuple[object, dict]:
+    """Compare candidates at the product's operating point on tuning data only.
+
+    Global AUC can prefer a model whose highest-scoring legitimate pages prevent
+    any phishing recall at a low false-positive budget. Thresholds found here
+    rank candidates only: final-fit predictions must be calibrated separately.
+    Wilson intervals describe sampling uncertainty, not selection-adjusted bounds.
+    """
+    if not candidate_probabilities:
+        raise ValueError('At least one tuning candidate is required')
+    results = {}
+    feasible = []
+    for name, probabilities in candidate_probabilities.items():
+        try:
+            _, operating = select_fpr_threshold(labels, probabilities, fpr_budget)
+        except NoFeasibleThresholdError:
+            results[name] = {
+                'operating_point_feasible': False,
+                'fpr_budget': fpr_budget,
+                'default_threshold_metrics': probability_metrics(labels, probabilities, .5),
+                'reason': 'No threshold in [0, 1] meets the empirical tuning FPR budget',
+            }
+            continue
+        results[name] = {
+            **operating,
+            'operating_point_feasible': True,
+            'fpr_budget': fpr_budget,
+            'default_threshold_metrics': probability_metrics(labels, probabilities, .5),
+        }
+        feasible.append(name)
+    if not feasible:
+        raise ValueError('No candidate meets the tuning FPR budget; improve the model/data')
+    winner = max(feasible, key=lambda name: (
+        results[name]['recall'], -results[name]['false_positive_rate'],
+        results[name]['average_precision'], results[name]['roc_auc']))
+    return winner, results
+
+
+def tuning_selection_contract(fpr_budget: float) -> dict:
+    return {
+        'method': 'tuning_recall_at_empirical_fpr_budget',
+        'partition': 'tuning',
+        'fpr_budget': fpr_budget,
+        'tie_breakers': ['lower_false_positive_rate', 'higher_average_precision', 'higher_roc_auc'],
+        'threshold_is_final': False,
+        'uncertainty': 'Reported intervals are descriptive; tuning selection is not release validation',
+    }
+
+
+def score_model(model, x_test, y_test, threshold: float = .5) -> tuple[dict, np.ndarray]:
+    probabilities = model.predict_proba(x_test)[:, 1]
+    return probability_metrics(y_test, probabilities, threshold), probabilities
+
+
+def train(records: list[dict], seed: int = 42, model_version: str = 'url-compact-v1',
+          fpr_budget: float = .01, dom: bool = False, reserved_test: dict | None = None) -> tuple[dict, dict, object]:
+    started_at = datetime.now(timezone.utc).isoformat()
+    from release_contract import release_requirements
+    all_manifest = manifest(records, 'all_development_data')
+    if reserved_test is not None:
+        assert_separated(all_manifest, reserved_test, source_time=True)
+    schema = FEATURE_SCHEMA if dom else URL_FEATURE_SCHEMA
+    partitions = partition_records(records, seed)
+    matrices = {name: np.asarray(build_matrix(rows, schema), dtype=float) for name, rows in partitions.items()}
+    labels = {name: np.asarray([r['label'] for r in rows]) for name, rows in partitions.items()}
     candidates = [
-        ('logistic_regression', LogisticRegression(max_iter=1000, class_weight='balanced', C=1.0, random_state=seed), True),
+        ('random_forest_32', RandomForestClassifier(n_estimators=32, max_depth=16, min_samples_leaf=2,
+          class_weight='balanced_subsample', n_jobs=-1, random_state=seed)),
+        ('extra_trees_32', ExtraTreesClassifier(n_estimators=32, max_depth=16, min_samples_leaf=2,
+          class_weight='balanced', n_jobs=-1, random_state=seed)),
     ]
-    rng = random.Random(seed)
-    for index in range(6):
-        candidates.append((
-            f'random_forest_tuned_{index + 1}',
-            RandomForestClassifier(
-                n_estimators=rng.choice([150, 250]),
-                max_depth=rng.choice([None, 18, 28]),
-                min_samples_leaf=rng.choice([1, 2, 4]),
-                max_features=rng.choice(['sqrt', 0.7]),
-                class_weight='balanced_subsample',
-                n_jobs=-1,
-                random_state=seed + index,
-            ),
-            False,
-        ))
-        candidates.append((
-            f'extra_trees_tuned_{index + 1}',
-            ExtraTreesClassifier(
-                n_estimators=rng.choice([150, 250]),
-                max_depth=rng.choice([None, 18, 28]),
-                min_samples_leaf=rng.choice([1, 2, 4]),
-                max_features=rng.choice(['sqrt', 0.7]),
-                class_weight='balanced',
-                n_jobs=-1,
-                random_state=seed + index,
-            ),
-            False,
-        ))
-
-    validation_results = {}
-    for name, candidate, uses_scaling in candidates:
-        fit_features = x_fit_scaled if uses_scaling else x_fit
-        validation_features = x_validation_scaled if uses_scaling else x_validation
-        candidate.fit(fit_features, y_fit)
-        validation_results[name], _ = score_model(candidate, validation_features, y_validation)
-
-    winner_name = max(
-        validation_results,
-        key=lambda name: (validation_results[name]['roc_auc'], validation_results[name]['f1']),
-    )
-    winner_index = next(index for index, item in enumerate(candidates) if item[0] == winner_name)
-    _, winner, uses_scaling = candidates[winner_index]
-    winner.fit(x_train_scaled if uses_scaling else x_train, y_train)
-    test_metrics, _ = score_model(
-        winner,
-        x_test_scaled if uses_scaling else x_test,
-        y_test,
-        validation_results[winner_name]['threshold'],
-    )
-    test_metrics['validation_threshold'] = validation_results[winner_name]['threshold']
-    metrics = {
-        'samples': len(records),
-        'test_samples': len(y_test),
-        'split_strategy': 'registrable_domain_grouped',
-        'winner': winner_name,
-        'validation_models': validation_results,
-        'test': test_metrics,
-    }
+    tuning_probabilities = {}
+    for name, candidate in candidates:
+        candidate.fit(matrices['fit'], labels['fit'])
+        tuning_probabilities[name] = candidate.predict_proba(matrices['tuning'])[:, 1]
+    winner_name, validation_results = select_tuning_candidate(labels['tuning'], tuning_probabilities, fpr_budget)
+    winner = clone(dict(candidates)[winner_name])
+    winner.fit(np.concatenate([matrices['fit'], matrices['tuning']]), np.concatenate([labels['fit'], labels['tuning']]))
+    # Calibration happens after final fitting and is never used for refitting.
+    calibration_probabilities = winner.predict_proba(matrices['calibration'])[:, 1]
+    threshold, calibration_metrics = select_fpr_threshold(labels['calibration'], calibration_probabilities, fpr_budget)
+    test_metrics, _ = score_model(winner, matrices['test'], labels['test'], threshold)
+    manifests = {name: manifest(rows, name) for name, rows in partitions.items()}
+    metrics = {'samples': len(records), 'split_strategy': 'connected_original_final_psl_site_and_exact_content_grouped',
+               'source_time_separated': False, 'winner': winner_name, 'tuning_models': validation_results,
+               'selection': tuning_selection_contract(fpr_budget),
+               'calibration': calibration_metrics, 'test': test_metrics}
     artifact = {
-        'model_version': model_version,
-        'feature_schema': FEATURE_SCHEMA,
-        'algorithm': winner_name,
-        'threshold': validation_results[winner_name]['threshold'],
-        'means': [float(value) for value in scaler.mean_],
-        'scales': [float(value) for value in scaler.scale_],
-        'metrics': metrics,
+        'model_version': model_version, 'feature_schema': schema,
+        'feature_schema_version': FEATURE_SCHEMA_VERSION, 'extractor_version': FEATURE_SCHEMA_VERSION,
+        'extractor_sha256': extractor_source_hash(),
+        'feature_schema_sha256': sha256(json.dumps(schema, separators=(',', ':'))),
+        'feature_scope': 'observed_dom' if dom else 'url_only',
+        'label_scope': 'mixed_threat' if any(r.get('label_scope') == 'mixed_threat' for r in records) else 'phishing',
+        'algorithm': winner_name, 'threshold': threshold, 'tree_count': len(winner.estimators_),
+        'selection': tuning_selection_contract(fpr_budget),
+        'calibration': {'method': 'independent_fpr_budget', 'fpr_budget': fpr_budget, **calibration_metrics},
+        'manifests': manifests, 'development_manifest': all_manifest,
+        'reserved_test_manifest': reserved_test, 'training_started_at': started_at,
+        'release_requirements': release_requirements(),
+        'training_completed_at': datetime.now(timezone.utc).isoformat(),
+        'deployment_eligible': False, 'deployment_status': 'research_only', 'metrics': metrics,
     }
     return artifact, metrics, winner
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--dataset', type=Path, default=Path('ml/data/malicious_urls.csv'))
+    parser.add_argument('--dataset', type=Path, required=True)
     parser.add_argument('--additional-dataset', type=Path, action='append', default=[])
     parser.add_argument('--include-edgephish', action='store_true')
-    parser.add_argument('--output', type=Path, default=Path('ml/models/url-ensemble-selection-v0.2.0.json'))
-    parser.add_argument('--model-version', default='url-tuned-ensemble-v0.3.0')
-    parser.add_argument('--limit', type=int, default=None)
+    parser.add_argument('--include-other-threats', action='store_true', help='Explicitly include mixed malware/defacement/bad labels')
+    parser.add_argument('--output', type=Path, default=Path('ml/models/url-compact-v1.json'))
+    parser.add_argument('--model-version', default='url-compact-v1')
+    parser.add_argument('--limit', type=int)
     parser.add_argument('--balanced', action='store_true')
-    parser.add_argument('--refresh', action='store_true')
+    parser.add_argument('--refresh', action='store_true', help='Explicitly download the configured dataset')
+    parser.add_argument('--fpr-budget', type=float, default=.01)
+    parser.add_argument('--reserved-test-manifest', type=Path)
     args = parser.parse_args()
-
-    dataset_paths = [args.dataset, *args.additional_dataset]
-    if args.refresh or not args.dataset.exists():
-        print(f'Downloading dataset to {args.dataset} ...')
+    paths = [args.dataset, *args.additional_dataset]
+    if args.refresh:
         download_dataset(args.dataset)
     if args.include_edgephish:
-        edgephish_path = Path('ml/data/edgephish_balanced_urls.csv')
-        if args.refresh or not edgephish_path.exists():
-            print(f'Downloading EdgePhish dataset to {edgephish_path} ...')
-            download_dataset(edgephish_path, EDGEPHISH_DATASET_URL)
-        dataset_paths.append(edgephish_path)
-
-    records = read_dataset(dataset_paths, args.limit, balanced=args.balanced)
-    if len({record['label'] for record in records}) < 2:
-        raise ValueError('Dataset must contain both legitimate and phishing-like labels')
-
-    artifact, metrics, model = train(records, model_version=args.model_version)
+        edge = Path('ml/data/edgephish_balanced_urls.csv')
+        if args.refresh:
+            download_dataset(edge, EDGEPHISH_DATASET_URL)
+        paths.append(edge)
+    records = read_dataset(paths, args.limit, balanced=args.balanced, include_other_threats=args.include_other_threats)
+    reserved = json.loads(args.reserved_test_manifest.read_text(encoding='utf-8')) if args.reserved_test_manifest else None
+    artifact, metrics, model = train(records, model_version=args.model_version, fpr_budget=args.fpr_budget, reserved_test=reserved)
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(json.dumps(artifact, indent=2) + '\n', encoding='utf-8')
     joblib.dump(model, args.output.with_suffix('.joblib'))
+    artifact['model_file_sha256'] = __import__('hashlib').sha256(args.output.with_suffix('.joblib').read_bytes()).hexdigest()
+    args.output.write_text(json.dumps(artifact, indent=2) + '\n', encoding='utf-8')
     print(json.dumps(metrics, indent=2))
-    print(f'Exported model to {args.output}')
 
 
 if __name__ == '__main__':

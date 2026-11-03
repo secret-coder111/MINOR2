@@ -1,0 +1,31 @@
+{
+  "scope": "Controlled causal probes. Before variants restore the previous email-suppression condition or omit the new GET observation in memory; these are not whole-release accuracy benchmarks.",
+  "emailVerificationCode": {
+    "before": {
+      "sensitiveFields": 0,
+      "credentialContext": 0,
+      "score": 0,
+      "outcome": "SAFE"
+    },
+    "after": {
+      "sensitiveFields": 1,
+      "credentialContext": 1,
+      "score": 80,
+      "outcome": "HIGH_RISK"
+    }
+  },
+  "unnamedPasswordGet": {
+    "before": {
+      "sensitiveFields": 1,
+      "credentialContext": 1,
+      "score": 80,
+      "outcome": "HIGH_RISK"
+    },
+    "after": {
+      "sensitiveFields": 1,
+      "credentialContext": 1,
+      "score": 45,
+      "outcome": "CAUTION"
+    }
+  }
+}

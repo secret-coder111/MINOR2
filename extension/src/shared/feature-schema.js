@@ -21,13 +21,13 @@ const PHISH_GUARD_FEATURES = [
     name: 'dot_count',
     type: 'number',
     missing: 0,
-    description: 'Number of dots in the hostname and path.'
+    description: 'Number of dots in the canonical full URL, counted once.'
   },
   {
     name: 'digit_count',
     type: 'number',
     missing: 0,
-    description: 'Number of digits seen in the hostname or path.'
+    description: 'Number of ASCII digits in the canonical full URL, counted once.'
   },
   {
     name: 'suspicious_char_count',
@@ -39,7 +39,7 @@ const PHISH_GUARD_FEATURES = [
     name: 'has_ip_address',
     type: 'number',
     missing: 0,
-    description: 'Whether the hostname resolves to an IP address or numeric-looking host.'
+    description: 'Whether the canonical hostname is an IPv4 or IPv6 literal; no DNS lookup is performed.'
   },
   {
     name: 'uses_http',
@@ -69,13 +69,13 @@ const PHISH_GUARD_FEATURES = [
     name: 'brand_domain_mismatch',
     type: 'number',
     missing: 0,
-    description: 'Whether a brand name is present but the domain does not resemble the brand owner.'
+    description: 'Whether a deliberate title or hostname brand claim mismatches recognized domain ownership; query mentions are excluded.'
   },
   {
     name: 'page_title_mismatch',
     type: 'number',
     missing: 0,
-    description: 'Whether the page title appears inconsistent with the hostname or brand.'
+    description: 'Whether the title makes a recognized brand claim inconsistent with domain ownership.'
   },
   {
     name: 'form_count',
@@ -99,7 +99,7 @@ const PHISH_GUARD_FEATURES = [
     name: 'cross_domain_form_action',
     type: 'number',
     missing: 0,
-    description: 'Whether a form submits to a different domain or an untrusted target.'
+    description: 'Whether an active credential-bearing form targets a different registrable site, including private suffix boundaries.'
   },
   {
     name: 'hidden_field_count',
@@ -171,25 +171,28 @@ const PHISH_GUARD_FEATURES = [
     name: 'credential_submission_script',
     type: 'number',
     missing: 0,
-    description: 'Whether credential-like fields coexist with script patterns that may submit or observe input events.'
+    description: 'Reserved for independently established credential submission behavior; static scans return 0 and do not infer theft from script words.'
   }
 ];
 
-const PHISH_GUARD_MODEL_VERSION = 'v0.1.0';
+const FEATURE_SCHEMA_VERSION = '0.2.0';
+const PHISH_GUARD_MODEL_VERSION = 'rules-0.4.0';
 const PHISH_GUARD_DEFAULT_THRESHOLDS = {
   low: 34,
   medium: 64,
-  high: 80
+  high: 65
 };
 
 if (typeof globalThis !== 'undefined') {
   globalThis.PHISH_GUARD_FEATURES = PHISH_GUARD_FEATURES;
+  globalThis.FEATURE_SCHEMA_VERSION = FEATURE_SCHEMA_VERSION;
   globalThis.PHISH_GUARD_MODEL_VERSION = PHISH_GUARD_MODEL_VERSION;
   globalThis.PHISH_GUARD_DEFAULT_THRESHOLDS = PHISH_GUARD_DEFAULT_THRESHOLDS;
 }
 
 if (typeof window !== 'undefined') {
   window.PHISH_GUARD_FEATURES = PHISH_GUARD_FEATURES;
+  window.FEATURE_SCHEMA_VERSION = FEATURE_SCHEMA_VERSION;
   window.PHISH_GUARD_MODEL_VERSION = PHISH_GUARD_MODEL_VERSION;
   window.PHISH_GUARD_DEFAULT_THRESHOLDS = PHISH_GUARD_DEFAULT_THRESHOLDS;
 }
@@ -197,6 +200,7 @@ if (typeof window !== 'undefined') {
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
     PHISH_GUARD_FEATURES,
+    FEATURE_SCHEMA_VERSION,
     PHISH_GUARD_MODEL_VERSION,
     PHISH_GUARD_DEFAULT_THRESHOLDS
   };

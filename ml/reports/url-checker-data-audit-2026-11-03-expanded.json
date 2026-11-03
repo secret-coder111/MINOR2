@@ -1,0 +1,105 @@
+{
+  "created_at": "2026-11-03T07:21:55.016677+00:00",
+  "seed": 20261102,
+  "files": [
+    {
+      "file": "edgephish_balanced_urls.csv",
+      "sha256": "8a864a7fb867cce6f2a3dfff9c11ad327a95b9fa01d9912ee6c9b918e24c3d4d",
+      "counts": {
+        "rows": 340000,
+        "unique_added": 339582,
+        "invalid_url": 103,
+        "duplicate_url": 315
+      },
+      "labels": {
+        "phishing": 170000,
+        "legitimate": 170000
+      }
+    },
+    {
+      "file": "legitimate_login_hard_negatives.csv",
+      "sha256": "e96f682705e3f8731db4bf1639616e0a02514cc3b2e1e485de616a9dd7b6ac46",
+      "counts": {
+        "rows": 32,
+        "unique_added": 32
+      },
+      "labels": {
+        "legitimate": 32
+      }
+    },
+    {
+      "file": "malicious_urls.csv",
+      "sha256": "3243f054f5205e352f7a9adc2d7b993d516acd4ad17cb032b91c989138e34808",
+      "counts": {
+        "rows": 420464,
+        "excluded_non_phishing_scope_label": 75643,
+        "unique_added": 344799,
+        "duplicate_url": 22
+      },
+      "labels": {
+        "bad": 75643,
+        "good": 344821
+      }
+    },
+    {
+      "file": "phishtank_recent.csv",
+      "sha256": "fe55ae1f27489cd97b66c7f5e6f7de907839413e5a7dfbc4e22be5fdfec82ce4",
+      "counts": {
+        "rows": 77752,
+        "unique_added": 77378,
+        "duplicate_url": 374
+      },
+      "labels": {
+        "phishing": 77752
+      }
+    },
+    {
+      "file": "recent_legitimate_feed.csv",
+      "sha256": "ef0c1d305d1f36c56a7a45663fb8212766f445405f398b54fa1e4c02b5e6eae4",
+      "counts": {
+        "rows": 1000000,
+        "excluded_unreviewed_label": 1000000
+      },
+      "labels": {
+        "legitimate": 1000000
+      }
+    },
+    {
+      "file": "recent_phishing_feeds.csv",
+      "sha256": "52c7b8967ae3ddbfbfb22a937054602e09ac5dddbcf4569868b6edf627f02038",
+      "counts": {
+        "rows": 300,
+        "unique_added": 295,
+        "duplicate_url": 5
+      },
+      "labels": {
+        "phishing": 300
+      }
+    }
+  ],
+  "unique_eligible_urls": 762086,
+  "quarantined_conflicting_urls": 0,
+  "selected_rows": 310947,
+  "sampling": "deterministic round-robin source/class strata, before domain-separated partitions; expanded fitting set round-robin by source/class after excluding every tuning/calibration/test site",
+  "limitations": [
+    "Feed/caller labels are not independently reviewed page captures.",
+    "Internal domain-separated evaluation is exploratory, not source/time-separated production accuracy.",
+    "Generic bad labels and unreviewed popularity seeds are excluded rather than relabelled."
+  ],
+  "additional_fitting_rows": 190947,
+  "base_selected_by_source_class": {
+    "phishtank:1": 29918,
+    "malicious_urls:0": 29918,
+    "edgephish_balanced_urls:0": 29919,
+    "edgephish_balanced_urls:1": 29918,
+    "openphish:1": 295,
+    "curated-official-login:0": 32
+  },
+  "base_sample_limit": 120000,
+  "base_selected_rows": 120000,
+  "expanded_fit_limit": 240000,
+  "selected_class_counts": {
+    "0": 169376,
+    "1": 141571
+  }
+}

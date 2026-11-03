@@ -1,35 +1,46 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <title>PhishGuard Options</title>
-  </head>
+﻿<!DOCTYPE html>
+<html lang="en">
+  <head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><title>PhishGuard settings</title><link rel="stylesheet" href="options.css" /></head>
   <body>
-    <h1>PhishGuard options</h1>
-    <label>
-      <input type="checkbox" id="domainAgeEnabled" />
-      Enable optional domain age enrichment
-    </label>
-    <br /><br />
-    <label>
-      <input type="checkbox" id="reputationEnabled" />
-      Enable optional hostname reputation lookup
-    </label>
-    <br />
-    <label>
-      Reputation endpoint:
-      <input type="url" id="reputationEndpoint" placeholder="https://your-service.example/check" size="42" />
-    </label>
-    <p>Only the hostname is sent. The endpoint should return JSON such as {"verdict":"malicious","source":"provider"}.</p>
-    <br /><br />
-    <label>
-      Warning threshold:
-      <input type="range" id="warningThreshold" min="20" max="90" value="65" />
-      <span id="thresholdValue">65</span>
-    </label>
-    <br /><br />
-    <button id="clearData">Clear local data</button>
-
-    <script src="options.js"></script>
+    <main class="settings-page">
+      <header><a class="wordmark" href="#">PhishGuard<span>Browser protection</span></a><span class="local-badge">Privacy first</span></header>
+      <div class="page-intro"><span class="eyebrow">Make it work for you</span><h1>Protection settings</h1><p>Choose how you are warned and review results you have corrected.</p></div>
+      <div class="settings-grid">
+      <section class="card" aria-labelledby="detectionHeading">
+      <div class="section-number" aria-hidden="true">01</div><h2 id="detectionHeading">Warning sensitivity</h2>
+      <p>High-risk alerts require corroborating evidence. Keep the recommended setting unless you have evaluated a different threshold.</p>
+      <div class="threshold-heading"><label for="warningThreshold">High-risk warning threshold</label><output id="thresholdValue" for="warningThreshold">65</output></div>
+      <input type="range" id="warningThreshold" min="35" max="90" value="65" aria-describedby="thresholdHelp" />
+      <div class="range-labels"><span>Earlier warnings · 35</span><span>Fewer warnings · 90</span></div>
+      <p id="thresholdHelp">A lower threshold warns earlier when independent evidence is present. Caution starts at 35. A configured reputation service's malicious verdict always warns.</p>
+      <button id="resetThreshold" class="subtle" type="button">Use recommended: 65</button>
+      </section>
+      <aside class="card privacy-card"><div class="section-number" aria-hidden="true">Local by default</div><h2>Your privacy boundary</h2><ul><li>Passwords and typed field values are never read.</li><li>Page structure is analysed on your device.</li><li>Saved corrections contain origins and coarse context.</li><li>Reputation lookup is optional and off by default.</li></ul><p>PhishGuard explains indicators. It does not verify a website's owner or guarantee safety.</p></aside>
+      <section class="card network-card" aria-labelledby="networkHeading">
+      <div class="section-number" aria-hidden="true">02</div><h2 id="networkHeading">Optional reputation service</h2>
+      <label class="toggle"><input type="checkbox" id="reputationEnabled" /> Enable hostname reputation lookup</label>
+      <p id="reputationMode" class="mode-label">Local analysis only</p>
+      <label class="field-label" for="reputationEndpoint">Service endpoint</label><input type="url" id="reputationEndpoint" placeholder="https://your-service.example/check" aria-describedby="endpointHelp" spellcheck="false" />
+      <p id="endpointHelp">When enabled, the hostname of each inspected page or embedded frame is sent to your configured service. Passwords, field values, page content, URL paths and queries are not sent.</p>
+      <details><summary>Endpoint format and privacy</summary><p>Use HTTPS (HTTP is allowed for localhost development). The endpoint must return JSON such as <code>{"verdict":"malicious"}</code>. A remote service can observe your IP address and requested hostnames.</p></details>
+      </section>
+      </div>
+      <div class="save-bar"><button id="saveOptions" class="primary" type="button" disabled>Save settings</button><p id="status" role="status"></p></div>
+      <section class="card corrections-card" aria-labelledby="correctionsHeading">
+      <div class="section-number" aria-hidden="true">03</div><h2 id="correctionsHeading">Review saved corrections</h2>
+      <p>Corrections help you investigate wrong results. They do not automatically change predictions or become verified training labels.</p>
+      <details><summary>What stays on this device?</summary>
+      <p>Page results last only for this browser session and are removed when tabs close. Up to 100 corrections stay on this device. They retain the top-page and evidence origins, expected and observed outcomes, time, policy version, and coarse inspection context. No full URL, page text or field values are retained.</p>
+      <p>Check the actual page and its legitimate ownership before marking a correction reviewed. Reviewed labels remain candidates for an independently verified benchmark; they are not automatic training data or site allowlists.</p></details>
+      <p id="feedbackCount" class="mode-label">Loading corrections…</p>
+      <p id="feedbackEmpty" class="empty-state" hidden>No corrections saved yet. You can report an incorrect result from the extension popup.</p>
+      <ul id="feedbackList"></ul>
+      <div class="feedback-actions"><button id="exportFeedback" type="button" disabled>Export reviewed corrections</button><button id="clearData" class="danger-outline" type="button">Clear saved corrections</button></div>
+      <p class="fine-print">Export downloads a JSON file with reviewed site origins. Check its contents before sharing it. Nothing is uploaded.</p>
+      <p id="feedbackStatus" role="status"></p>
+      </section>
+      <footer>PhishGuard · Explainable local analysis · A risk index is not a probability</footer>
+    </main>
+    <script src="../shared/browser-api.js"></script><script src="../shared/feedback.js"></script><script src="options.js"></script>
   </body>
 </html>

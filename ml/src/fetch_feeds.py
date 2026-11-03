@@ -1,4 +1,4 @@
-"""Download verified phishing feeds into a normalized local CSV."""
+"""Import phishing feeds or unreviewed popularity seeds into a local CSV."""
 
 from __future__ import annotations
 
@@ -54,7 +54,11 @@ def collect_umbrella() -> list[dict[str, str]]:
         filename = archive.namelist()[0]
         lines = archive.read(filename).decode('utf-8', errors='replace').splitlines()
     return [
-        {'url': f'https://{line.split(",", 1)[1].strip()}', 'label': 'legitimate', 'source': 'umbrella-top-1m', 'observed_at': observed_at}
+        # Popularity is a sampling source, not proof that a site/page is safe.
+        # A reviewer must inspect and label these seeds before training/capture.
+        {'url': f'https://{line.split(",", 1)[1].strip()}', 'label': '',
+         'label_status': 'unreviewed_popularity_seed',
+         'source': 'umbrella-top-1m', 'observed_at': observed_at}
         for line in lines
         if ',' in line and line.split(',', 1)[1].strip()
     ]
@@ -63,7 +67,11 @@ def collect_umbrella() -> list[dict[str, str]]:
 def write_records(records: list[dict[str, str]], destination: Path) -> None:
     destination.parent.mkdir(parents=True, exist_ok=True)
     with destination.open('w', encoding='utf-8', newline='') as handle:
-        writer = csv.DictWriter(handle, fieldnames=['url', 'label', 'source', 'observed_at'])
+        # Preserve provenance/review columns when exporting reviewed records.
+        # Dropping filename_fallback here would upgrade it on the next import.
+        columns = ['url', 'label', 'label_status', 'source', 'source_provenance', 'observed_at',
+                   'reviewed_by', 'reviewed_at', 'label_evidence', 'page_type']
+        writer = csv.DictWriter(handle, fieldnames=columns + sorted({key for row in records for key in row} - set(columns)))
         writer.writeheader()
         writer.writerows(records)
 

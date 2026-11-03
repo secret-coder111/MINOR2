@@ -1,0 +1,109 @@
+{
+  "passed": false,
+  "samples": 32,
+  "requirements": {
+    "version": "phishguard-release-v1",
+    "minimum_recall_lower_95ci": 0.8,
+    "maximum_false_positive_rate_upper_95ci": 0.01,
+    "minimum_independent_phishing_groups": 100,
+    "minimum_independent_legitimate_groups": 400,
+    "minimum_sources_per_class": 2,
+    "minimum_per_legitimate_page_type": 20,
+    "required_legitimate_page_types": [
+      "login",
+      "sso",
+      "banking",
+      "education",
+      "payment",
+      "non_login"
+    ]
+  },
+  "benchmark_review": {
+    "passed": false,
+    "reviewed_records": 0,
+    "samples": 32,
+    "sources_by_class": {
+      "0": [
+        "curated-official-login"
+      ],
+      "1": []
+    },
+    "legitimate_page_types": {
+      "": 32
+    },
+    "errors": [
+      "Record 1: missing reviewed_by, label_evidence, label_status=reviewed, valid reviewed_at after observed_at",
+      "Record 2: missing reviewed_by, label_evidence, label_status=reviewed, valid reviewed_at after observed_at",
+      "Record 3: missing reviewed_by, label_evidence, label_status=reviewed, valid reviewed_at after observed_at",
+      "Record 4: missing reviewed_by, label_evidence, label_status=reviewed, valid reviewed_at after observed_at",
+      "Record 5: missing reviewed_by, label_evidence, label_status=reviewed, valid reviewed_at after observed_at",
+      "Record 6: missing reviewed_by, label_evidence, label_status=reviewed, valid reviewed_at after observed_at",
+      "Record 7: missing reviewed_by, label_evidence, label_status=reviewed, valid reviewed_at after observed_at",
+      "Record 8: missing reviewed_by, label_evidence, label_status=reviewed, valid reviewed_at after observed_at",
+      "Record 9: missing reviewed_by, label_evidence, label_status=reviewed, valid reviewed_at after observed_at",
+      "Record 10: missing reviewed_by, label_evidence, label_status=reviewed, valid reviewed_at after observed_at",
+      "Record 11: missing reviewed_by, label_evidence, label_status=reviewed, valid reviewed_at after observed_at",
+      "Record 12: missing reviewed_by, label_evidence, label_status=reviewed, valid reviewed_at after observed_at",
+      "Record 13: missing reviewed_by, label_evidence, label_status=reviewed, valid reviewed_at after observed_at",
+      "Record 14: missing reviewed_by, label_evidence, label_status=reviewed, valid reviewed_at after observed_at",
+      "Record 15: missing reviewed_by, label_evidence, label_status=reviewed, valid reviewed_at after observed_at",
+      "Record 16: missing reviewed_by, label_evidence, label_status=reviewed, valid reviewed_at after observed_at",
+      "Record 17: missing reviewed_by, label_evidence, label_status=reviewed, valid reviewed_at after observed_at",
+      "Record 18: missing reviewed_by, label_evidence, label_status=reviewed, valid reviewed_at after observed_at",
+      "Record 19: missing reviewed_by, label_evidence, label_status=reviewed, valid reviewed_at after observed_at",
+      "Record 20: missing reviewed_by, label_evidence, label_status=reviewed, valid reviewed_at after observed_at",
+      "Class 0 needs at least 2 independently reviewed sources",
+      "Class 1 needs at least 2 independently reviewed sources",
+      "Legitimate page_type=login needs at least 20 reviewed records",
+      "Legitimate page_type=sso needs at least 20 reviewed records",
+      "Legitimate page_type=banking needs at least 20 reviewed records",
+      "Legitimate page_type=education needs at least 20 reviewed records",
+      "Legitimate page_type=payment needs at least 20 reviewed records",
+      "Legitimate page_type=non_login needs at least 20 reviewed records"
+    ],
+    "meaning": "Review evidence/composition checks only; independent human review must establish representative sampling and correct labels"
+  },
+  "independent_groups": {
+    "legitimate_groups": 29,
+    "phishing_groups": 0
+  },
+  "by_label": {
+    "0": 32
+  },
+  "by_page_type": {
+    "missing": 32
+  },
+  "errors": [
+    "Record 1: missing reviewed_by, label_evidence, label_status=reviewed, valid reviewed_at after observed_at",
+    "Record 2: missing reviewed_by, label_evidence, label_status=reviewed, valid reviewed_at after observed_at",
+    "Record 3: missing reviewed_by, label_evidence, label_status=reviewed, valid reviewed_at after observed_at",
+    "Record 4: missing reviewed_by, label_evidence, label_status=reviewed, valid reviewed_at after observed_at",
+    "Record 5: missing reviewed_by, label_evidence, label_status=reviewed, valid reviewed_at after observed_at",
+    "Record 6: missing reviewed_by, label_evidence, label_status=reviewed, valid reviewed_at after observed_at",
+    "Record 7: missing reviewed_by, label_evidence, label_status=reviewed, valid reviewed_at after observed_at",
+    "Record 8: missing reviewed_by, label_evidence, label_status=reviewed, valid reviewed_at after observed_at",
+    "Record 9: missing reviewed_by, label_evidence, label_status=reviewed, valid reviewed_at after observed_at",
+    "Record 10: missing reviewed_by, label_evidence, label_status=reviewed, valid reviewed_at after observed_at",
+    "Record 11: missing reviewed_by, label_evidence, label_status=reviewed, valid reviewed_at after observed_at",
+    "Record 12: missing reviewed_by, label_evidence, label_status=reviewed, valid reviewed_at after observed_at",
+    "Record 13: missing reviewed_by, label_evidence, label_status=reviewed, valid reviewed_at after observed_at",
+    "Record 14: missing reviewed_by, label_evidence, label_status=reviewed, valid reviewed_at after observed_at",
+    "Record 15: missing reviewed_by, label_evidence, label_status=reviewed, valid reviewed_at after observed_at",
+    "Record 16: missing reviewed_by, label_evidence, label_status=reviewed, valid reviewed_at after observed_at",
+    "Record 17: missing reviewed_by, label_evidence, label_status=reviewed, valid reviewed_at after observed_at",
+    "Record 18: missing reviewed_by, label_evidence, label_status=reviewed, valid reviewed_at after observed_at",
+    "Record 19: missing reviewed_by, label_evidence, label_status=reviewed, valid reviewed_at after observed_at",
+    "Record 20: missing reviewed_by, label_evidence, label_status=reviewed, valid reviewed_at after observed_at",
+    "Class 0 needs at least 2 independently reviewed sources",
+    "Class 1 needs at least 2 independently reviewed sources",
+    "Legitimate page_type=login needs at least 20 reviewed records",
+    "Legitimate page_type=sso needs at least 20 reviewed records",
+    "Legitimate page_type=banking needs at least 20 reviewed records",
+    "Legitimate page_type=education needs at least 20 reviewed records",
+    "Legitimate page_type=payment needs at least 20 reviewed records",
+    "Legitimate page_type=non_login needs at least 20 reviewed records",
+    "Too few independent phishing groups",
+    "Too few independent legitimate groups"
+  ],
+  "meaning": "Composition/review evidence only; freeze before model or policy selection and evaluate once"
+}

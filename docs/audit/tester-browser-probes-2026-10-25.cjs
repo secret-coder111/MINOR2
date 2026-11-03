@@ -1,0 +1,32 @@
+/* Additional local real-browser audit, reusing the maintained CDP test harness. */
+const fs = require('node:fs');
+const path = require('node:path');
+const workspace = path.resolve(__dirname, '../..');
+let source = fs.readFileSync(path.join(workspace, 'extension/tests/browser-smoke.cjs'), 'utf8');
+const start = source.indexOf('    await cdp.evaluate("history.pushState');
+const end = source.indexOf('    const report = { passed: true, ...observations };');
+if (start < 0 || end < start) throw new Error('The base harness changed; review this audit probe');
+const probe = `
+    const prior = await read();
+    await cdp.evaluate(${JSON.stringify("document.title='PayPal sign in';document.body.innerHTML='<style id=\"auditStyle\">#auditPassword{display:none}</style><form method=\"post\" action=\"https://collector.invalid/collect\"><input id=\"auditPassword\" type=\"password\"></form>';true")}, page.sessionId);
+    const hidden = await until(async () => { const value = await read();return value && value.identity.scanId > prior.identity.scanId && value.outcome==='SAFE' && value;}, 'hidden credential initial result');
+    await cdp.evaluate("document.getElementById('auditStyle').sheet.insertRule('#auditPassword{display:block}',1);true",page.sessionId);
+    await delay(4500);
+    const stale = await read();
+    assert.equal(stale.identity.scanId, hidden.identity.scanId, 'CSSOM changes do not schedule a rescan');
+    assert.equal(stale.outcome,'SAFE');
+    assert.equal(await cdp.evaluate("getComputedStyle(document.getElementById('auditPassword')).display", page.sessionId), 'block');
+    await cdp.evaluate(\`chrome.tabs.sendMessage(\${tabId},{type:'REQUEST_RESCAN'},{}).catch(()=>{})\`,workerSession);
+    const fresh = await until(async () => {const value=await read();return value && value.outcome==='HIGH_RISK' && value;},'explicit rescan reveals CSSOM risk');
+    observations.cssomVisibility = { hiddenScore:hidden.score, staleScore:stale.score, staleOutcome:stale.outcome, unchangedScanId:stale.identity.scanId===hidden.identity.scanId, afterExplicitRescan:fresh.outcome, freshScore:fresh.score, waitMs:4500 };
+    await cdp.evaluate(${JSON.stringify("document.title='College Portal';document.body.innerHTML='<details><summary>Archived login</summary><form method=\"post\" action=\"http://old-sso.invalid/collect\"><input type=\"password\"></form></details>';true")},page.sessionId);
+    const details = await until(async () => {const value=await read();return value && value.identity.scanId > fresh.identity.scanId && value;},'closed details analyzed');
+    const detailsRender = await cdp.evaluate("({open:document.querySelector('details').open, passwordRects:document.querySelector('input').getClientRects().length, passwordVisible:document.querySelector('input').checkVisibility({visibilityProperty:true,opacityProperty:true,contentVisibilityAuto:true})})",page.sessionId);
+    assert.equal(detailsRender.open,false);
+    assert.equal(detailsRender.passwordVisible,false);
+    assert.equal(details.outcome,'HIGH_RISK');
+    observations.closedDetails = { ...detailsRender, score:details.score, outcome:details.outcome };
+`;
+source = source.slice(0,start) + probe + source.slice(end);
+source = source.replaceAll("'docs/audit/browser-smoke-results.json'", "'docs/audit/tester-browser-probe-results-2026-10-25.json'");
+new Function('require','__dirname',source)(require,path.join(workspace,'extension/tests'));

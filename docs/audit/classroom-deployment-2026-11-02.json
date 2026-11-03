@@ -1,0 +1,14 @@
+{
+  "project_id": "appgprj_6ae82500d0708191a4d5889c96abec38",
+  "version_id": "appgprj_6ae82500d0708191a4d5889c96abec38~appgver_3307abb8d0608191a4321784d9cf4dde",
+  "version_number": 4,
+  "commit_sha": "37d073ccf4cb1d6ba87f3c0c51d143e42afc304c",
+  "deployment_id": "appgdep_6ae8b105f6708191bf3918bc8024551b",
+  "status": "succeeded",
+  "url": "https://phishguard-classroom-visual-lab.www-vikramsahu001.chatgpt.site",
+  "updated_at": "2026-11-02T15:49:48.909009+00:00",
+  "audience": "public",
+  "scope": "Read-only teaching assets only. The live dummy-request lab runs separately on loopback.",
+  "live_extension_rehearsal": "docs/audit/classroom-web-results-2026-11-02.json",
+  "rehearsal_note": "Extension/hosted fixture behavior verified against version 3; version 4 updates explanatory text and links only."
+}

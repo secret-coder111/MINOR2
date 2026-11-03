@@ -1,0 +1,23 @@
+{
+  "auditDate": "2026-10-25",
+  "networkRequestsSent": 0,
+  "probes": [
+    {
+      "case": "100 scans of the same unchanged hostname",
+      "mockedRequestsCreated": 100,
+      "obsoleteRequestsStillUnaborted": 99,
+      "totalUnaborted": 100
+    },
+    {
+      "case": "Embedded-credential endpoint accepted by options but rejected by Fetch",
+      "endpointAcceptedAndSaved": true,
+      "requestConstructionError": "Request cannot be constructed from a URL that includes credentials: https://username:password@rep.test/check",
+      "displayedStatus": "Settings saved. Open pages will be rescanned."
+    },
+    {
+      "case": "Storage failure falsely reported as success",
+      "failedSaveStatus": "Settings saved. Open pages will be rescanned.",
+      "failedClearStatus": "Saved corrections cleared."
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "model_version": "url-checker-research-2026-11-02",
+  "mode": "research_preview",
+  "deployment_eligible": false,
+  "cases": 1010,
+  "maximum_absolute_predictor_error": 3.3306690738754696e-16,
+  "all_url_features_match": true,
+  "artifact_sha256": "4de2d370dafa0a39462d9d4f5660ff66259064e48f00318d6f5deb3e4c992794",
+  "bytes": 3174955,
+  "test": {
+    "accuracy": 0.9011986760890957,
+    "precision": 0.9830587143188675,
+    "recall": 0.8041765543426673,
+    "f1": 0.8846655876364016,
+    "roc_auc": 0.9844853095578706,
+    "average_precision": 0.9832099493693026,
+    "positive_prevalence": 0.4711959924859111,
+    "threshold": 0.7662075550880134,
+    "false_positive_rate": 0.012348811638332064,
+    "false_positive_rate_95ci": [
+      0.010510568592898952,
+      0.014503841201192748
+    ],
+    "recall_95ci": [
+      0.7964885249738157,
+      0.8116428360531461
+    ],
+    "confusion_matrix": {
+      "tn": 11677,
+      "fp": 146,
+      "fn": 2063,
+      "tp": 8472
+    }
+  },
+  "scope": "Exploratory internal domain-separated URL-only model. No production accuracy claim."
+}

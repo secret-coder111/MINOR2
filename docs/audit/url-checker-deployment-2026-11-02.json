@@ -1,0 +1,14 @@
+{
+  "project_id": "appgprj_6ae82500d0708191a4d5889c96abec38",
+  "version_id": "appgprj_6ae82500d0708191a4d5889c96abec38~appgver_ed1615e1bf40819197cc4939350c0d57",
+  "version_number": 6,
+  "source_commit": "af83cb79642a4b3dd2d3f6084f4e6dd0c5657173",
+  "deployment_id": "appgdep_6ae8bfe8ffbc819195d33de8f84fc943",
+  "status": "succeeded",
+  "url": "https://phishguard-classroom-visual-lab.www-vikramsahu001.chatgpt.site",
+  "updated_at": "2026-11-02T16:53:17.812283+00:00",
+  "audience": "public",
+  "scope": "Three read-only demonstrations, URL-only input/evidence preview, and separate experimental model diagnostics. Full loaded-page inspection requires the packaged extension checker.",
+  "asset_count": 19,
+  "raw_datasets_or_estimators_published": false
+}

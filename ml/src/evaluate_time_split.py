@@ -25,7 +25,7 @@ def main() -> None:
             "use future_test_protocol.py for explicit grouping."
         )
     records, _ = load_records(phishing, legitimate, args.limit, seed=42)
-    print(json.dumps(evaluate(args.model, args.metadata, records, args.dataset), indent=2))
+    print(json.dumps(evaluate(args.model, args.metadata, records, args.dataset, exploratory=True), indent=2))
 
 
 if __name__ == "__main__":

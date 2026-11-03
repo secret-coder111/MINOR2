@@ -1,0 +1,17 @@
+[
+  {"url":"https://paypa1.com/","identity":"PayPal sign in","sensitive":true},
+  {"url":"https://micros0ft.com/","identity":"Microsoft account","sensitive":true},
+  {"url":"https://\u0430pple.com/","identity":"Apple sign in","sensitive":true},
+  {"url":"https://paypal.com.attacker.example/","identity":"PayPal sign in","sensitive":true},
+  {"url":"https://paypal.com.example/","identity":"PayPal sign in","sensitive":true},
+  {"url":"https://paypal.com.attacker.github.io/","identity":"PayPal sign in","sensitive":true},
+  {"url":"https://login.paypa1.github.io/","identity":"PayPal sign in","sensitive":true},
+  {"url":"https://paypa1.tenant.github.io/","identity":"PayPal sign in","sensitive":true},
+  {"url":"https://paypa1.com/","identity":"Microsoft account","sensitive":true},
+  {"url":"https://paypa1.com/","identity":"Sign in with PayPal","sensitive":true},
+  {"url":"https://paypa1.com/","identity":"PayPal sign in","sensitive":false},
+  {"url":"https://accounts.google.co.in/","identity":"Google account","sensitive":true},
+  {"url":"https://www.paypal.com/","identity":"PayPal sign in","sensitive":true},
+  {"url":"https://paypall.com/","identity":"PayPal sign in","sensitive":true},
+  {"url":"https://b\u00fccher.de/","identity":"Apple sign in","sensitive":true}
+]

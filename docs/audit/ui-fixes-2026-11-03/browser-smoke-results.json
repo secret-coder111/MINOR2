@@ -1,0 +1,248 @@
+{
+  "passed": true,
+  "browser": "Edg/156.0.4314.58",
+  "workerContext": {
+    "url": "chrome-extension://hhpgjcdcfahiilchnimhfnjclldkdgpd/src/background/service-worker.js",
+    "chrome": "object",
+    "self": "object",
+    "document": "undefined",
+    "phishguard": "object"
+  },
+  "extensionId": "hhpgjcdcfahiilchnimhfnjclldkdgpd",
+  "localHttpLogin": {
+    "score": 8,
+    "outcome": "SAFE",
+    "note": "Local HTTP/IP fixtures can produce transport/address caution; no high-risk banner."
+  },
+  "spaMutation": {
+    "score": 88,
+    "outcome": "HIGH_RISK"
+  },
+  "attributeCorrection": "warning removed",
+  "embeddedFrame": {
+    "score": 88,
+    "outcome": "HIGH_RISK",
+    "frameId": 8
+  },
+  "frameRemoval": "warning removed",
+  "sameOriginLookalike": {
+    "score": 80,
+    "outcome": "HIGH_RISK",
+    "externalDestination": false
+  },
+  "popup": "real origin, current-tab scope, high-risk next step, manual rescan, intrinsic width 540px and 600px screenshot verified",
+  "lookalikeProviderControl": "provider phrase alone remains low risk; no submission made",
+  "warningPresentation": "expanded contextual reasons, desktop/mobile layout and reduced motion verified",
+  "warningDismissal": "trusted close works; synthetic page click rejected; verdict retained; automatic rescan stays dismissed; explicit rescan restores warning",
+  "interactiveDemo": [
+    {
+      "scenario": "external",
+      "score": 43,
+      "outcome": "CAUTION"
+    },
+    {
+      "scenario": "phishing",
+      "score": 88,
+      "outcome": "HIGH_RISK"
+    },
+    {
+      "scenario": "normal",
+      "score": 8,
+      "outcome": "SAFE"
+    }
+  ],
+  "demoSubmission": "JavaScript cancellation and browser CSP verified; zero POST requests",
+  "visualJourneys": [
+    {
+      "page": "legitimate-demo.html",
+      "outcome": "SAFE",
+      "animation": "fictional tokens only; no submitted fields; route unchanged"
+    },
+    {
+      "page": "caution-demo.html",
+      "outcome": "CAUTION",
+      "animation": "fictional tokens only; no submitted fields; route unchanged"
+    },
+    {
+      "page": "phishing-demo.html",
+      "outcome": "HIGH_RISK",
+      "animation": "fictional tokens only; no submitted fields; route unchanged"
+    }
+  ],
+  "metadataMutation": "placeholder-only password prompt rescanned to high risk; correction cleared warning",
+  "detectionQuality": "OTP metadata recognized; unnamed GET avoids invented leakage; named GET remains high risk with brand mismatch",
+  "openShadow": "late root discovered, credentials detected, warning interference repaired, correction cleared risk",
+  "cssomReveal": {
+    "outcome": "HIGH_RISK",
+    "score": 88
+  },
+  "collapsedControls": "closed SAFE; open HIGH_RISK; closed SAFE",
+  "hashNavigation": "current document rescanned",
+  "inheritedDocument": {
+    "score": 88,
+    "outcome": "HIGH_RISK",
+    "origin": "http://127.0.0.1:54465"
+  },
+  "coverage": {
+    "complete": false,
+    "inventoryAvailable": true,
+    "limitations": [],
+    "pendingFrames": 1,
+    "recovering": true,
+    "uninspectedFrames": 1
+  },
+  "workerRestart": "actual worker stopped; top-only mutation restarted it and risky static iframe recovered",
+  "publicComparisonControls": "observation selection, summary and reset passed",
+  "previews": [
+    {
+      "name": "desktop",
+      "captured": true
+    },
+    {
+      "name": "mobile",
+      "captured": true
+    }
+  ],
+  "captureWorldIsolation": "real collector expression resisted page MAIN-world DOM/title prototype poisoning",
+  "captureDocumentBinding": {
+    "passed": true,
+    "original_status": 200,
+    "captured_document_status": 404,
+    "binding": "real Edge Network events and loader identity through actual DocumentResponses"
+  },
+  "optionsAndFeedback": "unusable endpoint rejected; settings saved; synthetic correction reviewed; export enabled; correction deletion confirmed",
+  "leavePageAction": "explicit user click replaced the risky fixture with about:blank",
+  "urlChecker": {
+    "checks": [
+      {
+        "address": "https://github.com/login",
+        "score": 0,
+        "band": "low"
+      },
+      {
+        "address": "http://http-password.badssl.com/",
+        "score": 15,
+        "band": "caution"
+      },
+      {
+        "address": "http://banamxr.com/1/mexico/",
+        "score": 15,
+        "band": "caution"
+      },
+      {
+        "address": "https://paypal.com.security-check.example.invalid/verify",
+        "score": 20,
+        "band": "caution"
+      }
+    ],
+    "invalidInputClearsOldResult": true,
+    "modelMetricsVisible": true,
+    "automaticVisits": false,
+    "modelVersion": "url-checker-research-2026-11-03-expanded",
+    "modelMetrics": [
+      "92.6%",
+      "98.2%",
+      "85.8%",
+      "91.6%"
+    ],
+    "popupEntry": "packaged checker opened; model metrics loaded under extension CSP",
+    "loadedPageChecks": [
+      {
+        "title": "No strong page indicators · 8/100",
+        "details": "http://127.0.0.1:54465 · 1 document(s) inspected. This is the extension's current evidence index, not a safety guarantee. Late content or a changed page may change the result.",
+        "reasons": "The address has unusual structural characteristics; this alone does not establish phishing."
+      },
+      {
+        "title": "High phishing risk · 88/100",
+        "details": "http://127.0.0.1:54465 · 1 document(s) inspected. This is the extension's current evidence index, not a safety guarantee. Late content or a changed page may change the result.",
+        "reasons": "This page asks for credentials while claiming a brand whose recognized domain does not match.A credential form sends information to another site. Verify the destination; some sign-in providers use this legitimately.The address has unusual structural characteristics; this alone does not establish phishing."
+      }
+    ]
+  },
+  "publicDemos": [
+    {
+      "requestedUrl": "https://phishguard-classroom-visual-lab.www-vikramsahu001.chatgpt.site/legitimate-demo.html",
+      "checkedAt": "2026-11-03T07:37:16.226Z",
+      "effectiveUrl": "https://phishguard-classroom-visual-lab.www-vikramsahu001.chatgpt.site/legitimate-demo",
+      "title": "Contoso Bank",
+      "phishguard": {
+        "score": 0,
+        "outcome": "SAFE",
+        "reasons": [
+          "No strong phishing indicators found. The website's identity has not been independently verified."
+        ],
+        "inspectedFrames": 1,
+        "securityTest": null,
+        "warningVisible": false
+      }
+    },
+    {
+      "requestedUrl": "https://phishguard-classroom-visual-lab.www-vikramsahu001.chatgpt.site/caution-demo.html",
+      "checkedAt": "2026-11-03T07:37:19.848Z",
+      "effectiveUrl": "https://phishguard-classroom-visual-lab.www-vikramsahu001.chatgpt.site/caution-demo",
+      "title": "College Portal",
+      "phishguard": {
+        "score": 35,
+        "outcome": "CAUTION",
+        "reasons": [
+          "A credential form sends information to another site. Verify the destination; some sign-in providers use this legitimately."
+        ],
+        "inspectedFrames": 1,
+        "securityTest": null,
+        "warningVisible": false
+      }
+    },
+    {
+      "requestedUrl": "https://phishguard-classroom-visual-lab.www-vikramsahu001.chatgpt.site/phishing-demo.html",
+      "checkedAt": "2026-11-03T07:37:20.480Z",
+      "effectiveUrl": "https://phishguard-classroom-visual-lab.www-vikramsahu001.chatgpt.site/phishing-demo",
+      "title": "PayPal Security Update",
+      "phishguard": {
+        "score": 80,
+        "outcome": "HIGH_RISK",
+        "reasons": [
+          "This page asks for credentials while claiming a brand whose recognized domain does not match.",
+          "A credential form sends information to another site. Verify the destination; some sign-in providers use this legitimately."
+        ],
+        "inspectedFrames": 1,
+        "securityTest": null,
+        "warningVisible": true
+      }
+    },
+    {
+      "requestedUrl": "https://phishguard-classroom-visual-lab.www-vikramsahu001.chatgpt.site/url-checker.html",
+      "checkedAt": "2026-11-03T07:37:21.068Z",
+      "effectiveUrl": "https://phishguard-classroom-visual-lab.www-vikramsahu001.chatgpt.site/url-checker",
+      "title": "Check a URL | PhishGuard",
+      "urlChecker": {
+        "host": "github.com",
+        "score": "0",
+        "band": "low",
+        "hidden": false,
+        "metrics": 4,
+        "modelVersion": "url-checker-research-2026-11-03-expanded",
+        "modelMetrics": [
+          "92.6%",
+          "98.2%",
+          "85.8%",
+          "91.6%"
+        ]
+      },
+      "httpScoreRegression": {
+        "score": "15",
+        "breakdown": "URL HTTP transport: +15",
+        "band": "caution"
+      },
+      "phishguard": {
+        "score": 0,
+        "outcome": "SAFE",
+        "reasons": [
+          "No strong phishing indicators found. The website's identity has not been independently verified."
+        ],
+        "inspectedFrames": 1,
+        "securityTest": null,
+        "warningVisible": false
+      }
+    }
+  ]
+}

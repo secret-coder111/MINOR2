@@ -9,3 +9,23 @@ ml/models/url-ensemble-selection-v0.2.0.joblib
 ml/models/url-multidataset-tuned-v0.4.0.joblib
 ml/models/url-tuned-ensemble-v0.3.0.joblib
 
+# Isolated local browser smoke-test profiles and scratch output.
+.browser-smoke/
+
+# Generated Sites publishing checkout. Canonical teaching assets live in extension/demo.
+/sites/phishguard-classroom/
+
+# Local research inputs/estimators. Previously tracked files remain tracked.
+/ml/data/
+/ml/models/*.joblib
+/ml/models/*.json
+
+# Local credentials and tool configuration must never be published.
+.env
+.env.*
+!.env.example
+/.aws/
+/.codex/
+/.agents/
+*.pem
+*.key

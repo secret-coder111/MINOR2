@@ -1,0 +1,489 @@
+{
+  "syntheticOnly": true,
+  "pageScriptsExecuted": false,
+  "cases": [
+    {
+      "name": "clone first-party HTTPS",
+      "score": 0,
+      "outcome": "SAFE",
+      "credential": 1,
+      "sensitive": 1,
+      "hasPassword": 1,
+      "bodyBrand": 0,
+      "mismatch": 0,
+      "cross": 0,
+      "script": 0,
+      "methodGet": 0,
+      "declaredGet": 0,
+      "categories": {
+        "identity": 0,
+        "destination": 0,
+        "transport": 0,
+        "address": 0,
+        "page": 0
+      }
+    },
+    {
+      "name": "recognized branded first-party clone",
+      "score": 45,
+      "outcome": "CAUTION",
+      "credential": 1,
+      "sensitive": 1,
+      "hasPassword": 1,
+      "bodyBrand": 0,
+      "mismatch": 1,
+      "cross": 0,
+      "script": 0,
+      "methodGet": 0,
+      "declaredGet": 0,
+      "categories": {
+        "identity": 45,
+        "destination": 0,
+        "transport": 0,
+        "address": 0,
+        "page": 0
+      }
+    },
+    {
+      "name": "same phishing hosted on recognized domain",
+      "score": 35,
+      "outcome": "CAUTION",
+      "credential": 1,
+      "sensitive": 1,
+      "hasPassword": 1,
+      "bodyBrand": 0,
+      "mismatch": 0,
+      "cross": 1,
+      "script": 0,
+      "methodGet": 0,
+      "declaredGet": 0,
+      "categories": {
+        "identity": 0,
+        "destination": 35,
+        "transport": 0,
+        "address": 0,
+        "page": 0
+      }
+    },
+    {
+      "name": "same phishing unknown domain",
+      "score": 80,
+      "outcome": "HIGH_RISK",
+      "credential": 1,
+      "sensitive": 1,
+      "hasPassword": 1,
+      "bodyBrand": 0,
+      "mismatch": 1,
+      "cross": 1,
+      "script": 0,
+      "methodGet": 0,
+      "declaredGet": 0,
+      "categories": {
+        "identity": 45,
+        "destination": 35,
+        "transport": 0,
+        "address": 0,
+        "page": 0
+      }
+    },
+    {
+      "name": "JS sends to cross-site",
+      "score": 0,
+      "outcome": "SAFE",
+      "credential": 1,
+      "sensitive": 1,
+      "hasPassword": 1,
+      "bodyBrand": 0,
+      "mismatch": 0,
+      "cross": 0,
+      "script": 1,
+      "methodGet": 0,
+      "declaredGet": 0,
+      "categories": {
+        "identity": 0,
+        "destination": 0,
+        "transport": 0,
+        "address": 0,
+        "page": 0
+      }
+    },
+    {
+      "name": "default GET missing method cross-site",
+      "score": 35,
+      "outcome": "CAUTION",
+      "credential": 1,
+      "sensitive": 1,
+      "hasPassword": 1,
+      "bodyBrand": 0,
+      "mismatch": 0,
+      "cross": 1,
+      "script": 0,
+      "methodGet": 1,
+      "declaredGet": 0,
+      "categories": {
+        "identity": 0,
+        "destination": 35,
+        "transport": 0,
+        "address": 0,
+        "page": 0
+      }
+    },
+    {
+      "name": "explicit GET same page cross-site",
+      "score": 70,
+      "outcome": "HIGH_RISK",
+      "credential": 1,
+      "sensitive": 1,
+      "hasPassword": 1,
+      "bodyBrand": 0,
+      "mismatch": 0,
+      "cross": 1,
+      "script": 0,
+      "methodGet": 1,
+      "declaredGet": 1,
+      "categories": {
+        "identity": 0,
+        "destination": 35,
+        "transport": 35,
+        "address": 0,
+        "page": 0
+      }
+    },
+    {
+      "name": "mailto password form",
+      "score": 35,
+      "outcome": "CAUTION",
+      "credential": 1,
+      "sensitive": 1,
+      "hasPassword": 1,
+      "bodyBrand": 0,
+      "mismatch": 0,
+      "cross": 0,
+      "script": 0,
+      "methodGet": 0,
+      "declaredGet": 0,
+      "categories": {
+        "identity": 0,
+        "destination": 35,
+        "transport": 0,
+        "address": 0,
+        "page": 0
+      }
+    },
+    {
+      "name": "hidden submit target fallback",
+      "score": 80,
+      "outcome": "HIGH_RISK",
+      "credential": 1,
+      "sensitive": 1,
+      "hasPassword": 1,
+      "bodyBrand": 0,
+      "mismatch": 0,
+      "cross": 1,
+      "script": 0,
+      "methodGet": 0,
+      "declaredGet": 0,
+      "categories": {
+        "identity": 0,
+        "destination": 35,
+        "transport": 45,
+        "address": 0,
+        "page": 0
+      }
+    },
+    {
+      "name": "contenteditable fake password",
+      "score": 20,
+      "outcome": "SAFE",
+      "credential": 0,
+      "sensitive": 0,
+      "hasPassword": 0,
+      "bodyBrand": 0,
+      "mismatch": 1,
+      "cross": 0,
+      "script": 0,
+      "methodGet": 0,
+      "declaredGet": 0,
+      "categories": {
+        "identity": 20,
+        "destination": 0,
+        "transport": 0,
+        "address": 0,
+        "page": 0
+      }
+    },
+    {
+      "name": "visible card generic labels",
+      "score": 0,
+      "outcome": "SAFE",
+      "credential": 0,
+      "sensitive": 0,
+      "hasPassword": 0,
+      "bodyBrand": 0,
+      "mismatch": 0,
+      "cross": 0,
+      "script": 0,
+      "methodGet": 0,
+      "declaredGet": 0,
+      "categories": {
+        "identity": 0,
+        "destination": 0,
+        "transport": 0,
+        "address": 0,
+        "page": 0
+      }
+    },
+    {
+      "name": "auto HTTP orphan password field",
+      "score": 80,
+      "outcome": "HIGH_RISK",
+      "credential": 1,
+      "sensitive": 1,
+      "hasPassword": 1,
+      "bodyBrand": 0,
+      "mismatch": 1,
+      "cross": 0,
+      "script": 0,
+      "methodGet": 0,
+      "declaredGet": 0,
+      "categories": {
+        "identity": 45,
+        "destination": 0,
+        "transport": 35,
+        "address": 0,
+        "page": 0
+      }
+    },
+    {
+      "name": "benign federated title with your account",
+      "score": 35,
+      "outcome": "CAUTION",
+      "credential": 1,
+      "sensitive": 0,
+      "hasPassword": 0,
+      "bodyBrand": 0,
+      "mismatch": 0,
+      "cross": 1,
+      "script": 0,
+      "methodGet": 0,
+      "declaredGet": 0,
+      "categories": {
+        "identity": 0,
+        "destination": 35,
+        "transport": 0,
+        "address": 0,
+        "page": 0
+      }
+    },
+    {
+      "name": "benign federated title with a account",
+      "score": 80,
+      "outcome": "HIGH_RISK",
+      "credential": 1,
+      "sensitive": 0,
+      "hasPassword": 0,
+      "bodyBrand": 0,
+      "mismatch": 1,
+      "cross": 1,
+      "script": 0,
+      "methodGet": 0,
+      "declaredGet": 0,
+      "categories": {
+        "identity": 45,
+        "destination": 35,
+        "transport": 0,
+        "address": 0,
+        "page": 0
+      }
+    },
+    {
+      "name": "benign continue with microsoft account",
+      "score": 35,
+      "outcome": "CAUTION",
+      "credential": 1,
+      "sensitive": 0,
+      "hasPassword": 0,
+      "bodyBrand": 0,
+      "mismatch": 0,
+      "cross": 1,
+      "script": 0,
+      "methodGet": 0,
+      "declaredGet": 0,
+      "categories": {
+        "identity": 0,
+        "destination": 35,
+        "transport": 0,
+        "address": 0,
+        "page": 0
+      }
+    },
+    {
+      "name": "email-only password recovery GET",
+      "score": 70,
+      "outcome": "HIGH_RISK",
+      "credential": 1,
+      "sensitive": 1,
+      "hasPassword": 1,
+      "bodyBrand": 0,
+      "mismatch": 0,
+      "cross": 1,
+      "script": 0,
+      "methodGet": 1,
+      "declaredGet": 1,
+      "categories": {
+        "identity": 0,
+        "destination": 35,
+        "transport": 35,
+        "address": 0,
+        "page": 0
+      }
+    },
+    {
+      "name": "email-only password recovery neutral label",
+      "score": 35,
+      "outcome": "CAUTION",
+      "credential": 1,
+      "sensitive": 0,
+      "hasPassword": 0,
+      "bodyBrand": 0,
+      "mismatch": 0,
+      "cross": 1,
+      "script": 0,
+      "methodGet": 1,
+      "declaredGet": 1,
+      "categories": {
+        "identity": 0,
+        "destination": 35,
+        "transport": 0,
+        "address": 0,
+        "page": 0
+      }
+    },
+    {
+      "name": "recognized country Google domain login",
+      "score": 80,
+      "outcome": "HIGH_RISK",
+      "credential": 1,
+      "sensitive": 1,
+      "hasPassword": 1,
+      "bodyBrand": 0,
+      "mismatch": 1,
+      "cross": 1,
+      "script": 0,
+      "methodGet": 0,
+      "declaredGet": 0,
+      "categories": {
+        "identity": 45,
+        "destination": 35,
+        "transport": 0,
+        "address": 0,
+        "page": 0
+      }
+    },
+    {
+      "name": "closed details inactive credential form",
+      "score": 80,
+      "outcome": "HIGH_RISK",
+      "credential": 1,
+      "sensitive": 1,
+      "hasPassword": 1,
+      "bodyBrand": 0,
+      "mismatch": 0,
+      "cross": 1,
+      "script": 0,
+      "methodGet": 0,
+      "declaredGet": 0,
+      "categories": {
+        "identity": 0,
+        "destination": 35,
+        "transport": 45,
+        "address": 0,
+        "page": 0
+      }
+    },
+    {
+      "name": "closed dialog inactive credential form",
+      "score": 0,
+      "outcome": "SAFE",
+      "credential": 0,
+      "sensitive": 0,
+      "hasPassword": 0,
+      "bodyBrand": 0,
+      "mismatch": 0,
+      "cross": 0,
+      "script": 0,
+      "methodGet": 0,
+      "declaredGet": 0,
+      "categories": {
+        "identity": 0,
+        "destination": 0,
+        "transport": 0,
+        "address": 0,
+        "page": 0
+      }
+    },
+    {
+      "name": "content visibility hidden credential form",
+      "score": 80,
+      "outcome": "HIGH_RISK",
+      "credential": 1,
+      "sensitive": 1,
+      "hasPassword": 1,
+      "bodyBrand": 0,
+      "mismatch": 0,
+      "cross": 1,
+      "script": 0,
+      "methodGet": 0,
+      "declaredGet": 0,
+      "categories": {
+        "identity": 0,
+        "destination": 35,
+        "transport": 45,
+        "address": 0,
+        "page": 0
+      }
+    },
+    {
+      "name": "body-only PayPal brand clone",
+      "score": 0,
+      "outcome": "SAFE",
+      "credential": 1,
+      "sensitive": 1,
+      "hasPassword": 1,
+      "bodyBrand": 1,
+      "mismatch": 0,
+      "cross": 0,
+      "script": 0,
+      "methodGet": 0,
+      "declaredGet": 0,
+      "categories": {
+        "identity": 0,
+        "destination": 0,
+        "transport": 0,
+        "address": 0,
+        "page": 0
+      }
+    },
+    {
+      "name": "closed shadow credential form",
+      "score": 20,
+      "outcome": "SAFE",
+      "credential": 0,
+      "sensitive": 0,
+      "hasPassword": 0,
+      "bodyBrand": 0,
+      "mismatch": 1,
+      "cross": 0,
+      "script": 0,
+      "methodGet": 0,
+      "declaredGet": 0,
+      "categories": {
+        "identity": 20,
+        "destination": 0,
+        "transport": 0,
+        "address": 0,
+        "page": 0
+      }
+    }
+  ]
+}
