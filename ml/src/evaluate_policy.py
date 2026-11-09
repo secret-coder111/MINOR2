@@ -35,7 +35,7 @@ def outcome_metrics(labels, positives) -> dict:
 
 def evaluate_policy(records: list[dict], warning_threshold: int = 65,
     frozen_manifest: dict | None = None, development_manifest: dict | None = None,
-    policy_lock: dict | None = None) -> dict:
+    policy_lock: dict | None = None, *, ablations: bool = False) -> dict:
     if not records or {record['label'] for record in records} != {0,1}:
         raise ValueError('Policy evaluation requires both reviewed classes')
     normalized_urls = [normalize_url(record['url']) for record in records]
@@ -67,6 +67,8 @@ def evaluate_policy(records: list[dict], warning_threshold: int = 65,
         features.append(structural)
     current = manifest(records,'frozen_policy_test')
     supplied = [value is not None for value in [frozen_manifest,development_manifest,policy_lock]]
+    if ablations and any(supplied):
+        raise ValueError('Run ablations on development captures, not a frozen release holdout')
     separated = False
     if any(supplied):
         if not all(supplied):
@@ -97,9 +99,10 @@ def evaluate_policy(records: list[dict], warning_threshold: int = 65,
         assert_reviews_frozen(records, frozen_at)
         separated = True
     bridge = Path(__file__).with_suffix('.cjs')
-    result = subprocess.run(['node',str(bridge)],input=json.dumps({'features':features,'warningThreshold':warning_threshold}),
+    result = subprocess.run(['node',str(bridge)],input=json.dumps({'features':features,'warningThreshold':warning_threshold,'ablations':ablations}),
         text=True,encoding='utf-8',capture_output=True,check=True)
-    verdicts = json.loads(result.stdout)
+    bridged = json.loads(result.stdout)
+    verdicts = bridged['verdicts'] if ablations else bridged
     if any(v.get('policyVersion') != POLICY_VERSION or v.get('warning') != (v.get('outcome') == 'HIGH_RISK') for v in verdicts):
         raise ValueError('Policy returned inconsistent canonical outcome/warning state')
     labels = np.asarray([record['label'] for record in records])
@@ -127,6 +130,16 @@ def evaluate_policy(records: list[dict], warning_threshold: int = 65,
         report['release_gate']['passed'] = False
         report['release_gate']['errors'].append('Exploratory results cannot qualify a policy release')
     report['score_meaning'] = 'Uncalibrated evidence index; a score is not the probability that a page is phishing'
+    if ablations:
+        report['ablations'] = {
+            'scope': 'Development-only removal of evidence categories, not separately fitted detectors or production accuracy',
+            'selection_performed': False,
+            'variants': {name: {
+                'high_risk_warning': outcome_metrics(labels, [v['outcome'] == 'HIGH_RISK' for v in values]),
+                'caution_or_high_risk': outcome_metrics(labels, [v['outcome'] != 'SAFE' for v in values]),
+                'independent_group_metrics': independent_group_metrics(records, [v['outcome'] == 'HIGH_RISK' for v in values]),
+                'changed_outcomes': sum(v['outcome'] != full['outcome'] for v, full in zip(values, verdicts)),
+            } for name, values in bridged['ablations'].items()}}
     return report
 
 
@@ -134,6 +147,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('snapshots',type=Path,nargs='+')
     parser.add_argument('--warning-threshold',type=int,default=65)
+    parser.add_argument('--ablations',action='store_true',help='Development-only evidence removal comparisons; unavailable on frozen holdouts')
     parser.add_argument('--frozen-manifest',type=Path)
     parser.add_argument('--development-manifest',type=Path)
     parser.add_argument('--policy-lock',type=Path,help='JSON with locked_at, policy_sha256, extractor_sha256 and warning_threshold')
@@ -146,7 +160,7 @@ def main():
     if receipt and receipt.exists():
         raise ValueError('This frozen policy holdout has already been evaluated; collect a new untouched test')
     records = [record for path in args.snapshots for record in load_snapshots(path)]
-    report = evaluate_policy(records,args.warning_threshold,load(args.frozen_manifest),load(args.development_manifest),load(args.policy_lock))
+    report = evaluate_policy(records,args.warning_threshold,load(args.frozen_manifest),load(args.development_manifest),load(args.policy_lock),ablations=args.ablations)
     rendered = json.dumps(report,indent=2)+'\n'
     args.output.parent.mkdir(parents=True,exist_ok=True)
     args.output.write_text(rendered,encoding='utf-8')

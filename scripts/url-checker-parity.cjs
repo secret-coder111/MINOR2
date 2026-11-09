@@ -9,7 +9,10 @@ process.stdin.on('end', () => {
   const context = { URL, console, document: { title: 'An unrelated page' }, location: new URL('https://checker.example/') };
   context.window = context; context.self = context;
   vm.createContext(context);
-  for (const name of ['url-core.js', 'url-model.js', 'url-analysis.js']) vm.runInContext(fs.readFileSync(`${root}/extension/demo/${name}`, 'utf8'), context);
+  for (const name of ['url-core.js', 'url-model.js', 'url-analysis.js']) {
+    const filename = name === 'url-model.js' && process.argv[2] ? process.argv[2] : `${root}/extension/demo/${name}`;
+    vm.runInContext(fs.readFileSync(filename, 'utf8'), context);
+  }
   process.stdout.write(JSON.stringify(JSON.parse(input).map(url => {
     const result = context.PhishGuard.URLChecker.analyze(url);
     return { probability: result.probability, features: result.features, url: result.url, band: result.band };

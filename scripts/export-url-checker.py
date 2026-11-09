@@ -24,25 +24,40 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--metadata', type=Path, default=ROOT / 'ml/models/url-checker-research-2026-11-03-expanded.json')
     parser.add_argument('--report', type=Path, default=ROOT / 'docs/audit/url-checker-model-2026-11-03.json')
+    parser.add_argument('--output', type=Path, default=ROOT / 'extension/demo/url-model.js')
     args = parser.parse_args()
     metadata = args.metadata
     meta = json.loads(metadata.read_text())
     estimator = metadata.with_suffix('.joblib')
     if hashlib.sha256(estimator.read_bytes()).hexdigest() != meta['model_file_sha256']:
         raise ValueError('Estimator hash mismatch')
-    if meta['extractor_sha256'] != extractor_source_hash() or meta['feature_schema'] != URL_FEATURE_SCHEMA:
-        raise ValueError('Training/extractor identity mismatch')
     bundle = joblib.load(estimator)
     if bundle['kind'] != BUNDLE_KIND:
         raise ValueError('Unsupported preview bundle')
-    if bundle.get('text_transform', 'none') != 'none':
-        raise ValueError('Browser export requires the established full-URL text transform')
     weight = bundle['numeric_weight']
+    if meta['feature_schema'] != URL_FEATURE_SCHEMA:
+        raise ValueError('Training/feature schema identity mismatch')
+    actual_extractor_hash = extractor_source_hash()
+    extractor_drift = meta['extractor_sha256'] != actual_extractor_hash
+    if extractor_drift:
+        # A URL-character estimator never consumes numeric/DOM features. Its
+        # canonicalization identity is narrower than the complete extractor.
+        # Preserve the real training hash and require an explicit input contract
+        # plus unchanged canonicalizer; never rebind an old numeric estimator.
+        contract = meta.get('predictor_input_contract', {})
+        canonicalizer = ROOT / 'ml/src/canonicalize_urls.cjs'
+        if (weight != 0 or contract.get('kind') != 'canonical_url_characters_only'
+                or contract.get('canonicalizer_sha256') != hashlib.sha256(canonicalizer.read_bytes()).hexdigest()):
+            raise ValueError('Training/extractor identity mismatch')
+    transform = bundle.get('text_transform', 'none')
+    if transform not in ['none', 'host_path_boundaries_v1']:
+        raise ValueError('Unsupported browser character transform')
     metrics = meta['test']
     audit = json.loads((ROOT / meta['data_audit']).read_text())
     export = {'mode': 'research_preview', 'deployment_eligible': False,
         'model_version': meta['model_version'], 'feature_schema': meta['feature_schema'],
         'numeric_weight': weight, 'threshold': meta['threshold'], 'metrics': metrics,
+        'text_transform': transform,
         'training_samples': audit['selected_rows'], 'input_files': len(audit['files']),
         'evaluation_samples': sum(metrics['confusion_matrix'].values()),
         'trees': [serialize_tree(tree) for tree in bundle['numeric_model'].estimators_] if weight else [],
@@ -55,8 +70,10 @@ def main():
             'ngram_range': list(vectorizer.ngram_range), 'idf': vectorizer.idf_.tolist(),
             'coefficients': model.coef_[0].tolist(), 'intercept': float(model.intercept_[0])}
     data = json.dumps(export, separators=(',', ':'), ensure_ascii=True, allow_nan=False)
-    output = ROOT / 'extension/demo/url-model.js'
-    output.write_text('// Standalone research preview; never loaded by the page-verdict worker.\n'
+    output = args.output
+    output.parent.mkdir(parents=True, exist_ok=True)
+    candidate_output = output.with_name(output.name + '.parity-candidate')
+    candidate_output.write_text('// Standalone research preview; never loaded by the page-verdict worker.\n'
         + 'globalThis.PHISHGUARD_URL_PREVIEW = JSON.parse(' + json.dumps(data) + ');\n', encoding='utf-8')
     # Include the training-independent public controls and URL parser/Unicode
     # boundary cases, plus deterministic randomized address combinations.
@@ -69,8 +86,17 @@ def main():
     for i in range(1000):
         cases.append(f'{"https" if i % 3 else "http"}://{"secure-" if i % 4 else ""}portal{i % 73}.example{ "/login?x=" + str(i) if i % 2 else "/Account/" + str(i) }')
     urls = canonicalize_urls(cases)
-    expected = predict_bundle(bundle, [{'url': url} for url in urls])[:, 1]
-    actual = json.loads(subprocess.run(['node', str(ROOT / 'scripts/url-checker-parity.cjs')], input=json.dumps(urls),
+    if transform == 'host_path_boundaries_v1':
+        # This experiment's generic component transform has a dedicated local
+        # predictor until the broader hybrid trainer supports this format.
+        from importlib.util import spec_from_file_location, module_from_spec
+        spec = spec_from_file_location('url_boundary_research', ROOT / 'scripts/research-url-checker-2026-11-06.py')
+        experiment = module_from_spec(spec)
+        spec.loader.exec_module(experiment)
+        expected = experiment.predict_research(bundle, [{'url': url} for url in urls])
+    else:
+        expected = predict_bundle(bundle, [{'url': url} for url in urls])[:, 1]
+    actual = json.loads(subprocess.run(['node', str(ROOT / 'scripts/url-checker-parity.cjs'), str(candidate_output.resolve())], input=json.dumps(urls),
         capture_output=True, text=True, encoding='utf-8', check=True).stdout)
     maximum = max(abs(float(a['probability']) - float(b)) for a, b in zip(actual, expected))
     if maximum > 1e-10:
@@ -80,9 +106,14 @@ def main():
         for name in URL_FEATURE_SCHEMA:
             if abs(python[name] - value['features'][name]) > 1e-9:
                 raise ValueError(f'Browser/Python feature parity failed for {name}')
+    # Replace the visible diagnostic only after inference and feature checks.
+    candidate_output.replace(output)
     report = {'model_version': meta['model_version'], 'mode': 'research_preview', 'deployment_eligible': False,
         'cases': len(cases), 'maximum_absolute_predictor_error': maximum, 'all_url_features_match': True,
         'artifact_sha256': hashlib.sha256(output.read_bytes()).hexdigest(), 'bytes': output.stat().st_size,
+        'text_transform': transform, 'training_extractor_sha256': meta['extractor_sha256'],
+        'current_extractor_sha256': actual_extractor_hash, 'extractor_changed_since_training': extractor_drift,
+        'predictor_input_contract': meta.get('predictor_input_contract'),
         'test': metrics, 'scope': 'Exploratory internal domain-separated URL-only model. No production accuracy claim.'}
     args.report.write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8')
     print(json.dumps(report, indent=2))

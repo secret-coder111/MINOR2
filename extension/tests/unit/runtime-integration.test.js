@@ -17,6 +17,7 @@ function worker(settings = {}, persistedSession = {}) {
   const sends = [];
   const requests = [];
   const scoredSettings = [];
+  const action = { text: '', title: '', color: '' };
   let liveFrames = null;
   const storageArea = (data) => ({
     get: (keys, cb) => cb(keys === null ? { ...data } : Object.fromEntries(keys.map((key) => [key, data[key]]))),
@@ -24,6 +25,9 @@ function worker(settings = {}, persistedSession = {}) {
     remove: (keys) => { for (const key of Array.isArray(keys) ? keys : [keys]) delete data[key]; }
   });
   const chrome = {
+    action: { setBadgeText: ({ text }) => { action.text = text; return Promise.resolve(); },
+      setBadgeBackgroundColor: ({ color }) => { action.color = color; return Promise.resolve(); },
+      setTitle: ({ title }) => { action.title = title; return Promise.resolve(); } },
     runtime: { onMessage: event() },
     storage: { local: storageArea(local), session: storageArea(session), onChanged: event() },
     tabs: { onUpdated: event(), onRemoved: event(), sendMessage: (tabId, message, options) => { sends.push(structuredClone({ tabId, message, options })); return Promise.resolve(); } },
@@ -48,7 +52,69 @@ function worker(settings = {}, persistedSession = {}) {
     return send({ type: 'ANALYZE_PAGE', identity: { documentToken: details.token || `token-${frameId}`, scanId, url, contextUrl: details.contextUrl }, payload: features },
       { tab: { id: details.tabId ?? 0 }, frameId, url, origin: details.origin, documentId: details.documentId || `doc-${frameId}` });
   };
-  return { local, session, sends, requests, chrome, send, scan, scoredSettings, setFrames: (frames) => { liveFrames = frames; } };
+  return { local, session, sends, requests, chrome, send, scan, scoredSettings, action, setFrames: (frames) => { liveFrames = frames; } };
+}
+
+async function testBrowserStatusAndTiming() {
+  const app = worker();
+  const url = 'https://college.test/login?token=PRIVATE#SECRET';
+  app.setFrames([{ frameId: 0, url, documentId: 'doc-0' }]);
+  await app.scan(1);
+  assert.equal(app.action.text, '', 'ordinary complete inspection does not use a reassuring green safety badge');
+  assert.match(app.action.title, /safety is not verified/);
+  assert.equal(app.session.tab_0.inspectionScope.scriptDataFlow, 'not_verified');
+  assert.equal(app.session.tab_0.coverage.complete, true, 'general static-inspection scope does not mark every document incomplete');
+  await app.scan(2, { testScore: 35, testOutcome: 'CAUTION' });
+  assert.equal(app.action.text, '!');
+  assert.match(app.action.title, /Caution/);
+  const cautionColor = app.action.color;
+  await app.scan(3, { testScore: 80, testOutcome: 'HIGH_RISK' });
+  assert.match(app.action.title, /High phishing risk/);
+  assert.notEqual(app.action.color, cautionColor);
+  assert.doesNotMatch(JSON.stringify(app.action), /PRIVATE|SECRET|college\.test/, 'browser-owned status excludes browsing identifiers');
+  const render = { type: 'REPORT_RENDER_METRICS', identity: { documentToken: 'token-0', scanId: 3 },
+    performance: { scan_to_result_ms: 10.125, scan_to_warning_dom_ms: 12, scheduling_delay_ms: 600,
+      arbitrarySecret: 'NEVER_RETAIN', extraction_ms: -1 } };
+  const sender = { tab: { id: 0 }, frameId: 0, documentId: 'doc-0', url };
+  const sendsBefore = app.sends.length;
+  assert.equal((await app.send(render, sender)).accepted, true);
+  assert.equal(app.session.tab_0.runtimeTiming.scan_to_result_ms, 10.13);
+  assert.equal(app.session.tab_0.runtimeTiming.scan_to_warning_dom_ms, 12);
+  assert.equal(app.sends.length, sendsBefore, 'recording durations cannot echo results into a measurement loop');
+  assert.ok(!JSON.stringify(app.session).includes('NEVER_RETAIN'));
+  assert.equal((await app.send({ ...render, identity: { ...render.identity, scanId: 2 } }, sender)).accepted, false);
+  assert.equal((await app.send(render, { ...sender, documentId: 'obsolete' })).accepted, false);
+  assert.equal((await app.send(render, { ...sender, url: 'https://college.test/original' })).accepted, true,
+    'browser sender URL can remain at the same document original address after SPA navigation');
+  assert.equal((await app.send(render, { ...sender, url: 'https://unrelated.test/' })).accepted, false);
+  assert.equal((await app.send(render, { ...sender, frameId: 2 })).accepted, false);
+  assert.equal((await app.send({ ...render, performance: { scan_to_result_ms: Infinity } }, sender)).accepted, false);
+  app.setFrames([{ frameId: 0, url, documentId: 'doc-0' }, { frameId: 4, url: 'data:text/html,opaque' }]);
+  await app.scan(4);
+  assert.equal(app.action.text, '?');
+  assert.match(app.action.title, /Incomplete inspection/);
+  assert.equal(app.session.tab_0.runtimeTiming, undefined, 'timing from an older scan cannot label a new result');
+  app.chrome.webNavigation.onHistoryStateUpdated.emit({ tabId: 0, frameId: 0, url: 'https://college.test/new' });
+  assert.equal(app.action.text, '...');
+  assert.match(app.action.title, /No current verdict/);
+  app.chrome.tabs.onUpdated.emit(0, { status: 'loading', url: 'chrome://extensions/' });
+  assert.equal(app.action.text, '');
+  assert.match(app.action.title, /No current page result/);
+  app.chrome.tabs.onRemoved.emit(0);
+  assert.equal(app.action.text, '');
+  delete app.chrome.action;
+  await app.scan(5, { testScore: 80, testOutcome: 'HIGH_RISK' });
+  const remote = worker({ reputationEnabled: true, reputationEndpoint: 'https://reputation.test/check' });
+  remote.setFrames([{ frameId: 0, url, documentId: 'doc-0' }]);
+  await remote.scan(1);
+  assert.equal(remote.action.text, '...');
+  assert.match(remote.action.title, /reputation pending/);
+  remote.requests[0].resolve('malicious');
+  await tick(); await tick();
+  assert.match(remote.action.title, /High phishing risk/);
+  assert.equal(remote.session.tab_0.metadata.reputation.source, 'user_configured_endpoint');
+  assert.equal(remote.session.tab_0.metadata.reputation.scope, 'hostname_only');
+  assert.ok(remote.session.tab_0.metadata.reputation.expiresAt > remote.session.tab_0.metadata.reputation.checkedAt);
 }
 
 async function testWorker() {
@@ -369,6 +435,14 @@ async function testContent() {
   input.setAttribute('aria-labelledby', label.id);
   await flush();
   assert.equal(sends.length, beforeAccessibleEdits + 4, 'ARIA label reference edits trigger credential-context rescan');
+  const image = window.document.createElement('img');
+  image.alt = 'Member service';
+  window.document.body.prepend(image);
+  await flush();
+  const beforeImageEdit = sends.length;
+  image.alt = 'PayPal logo';
+  await flush();
+  assert.equal(sends.length, beforeImageEdit + 1, 'image identity label changes trigger a fresh scan');
   const beforeRestore = sends.length;
   window.dispatchEvent(new window.PageTransitionEvent('pagehide', { persisted: true }));
   input.setAttribute('placeholder', 'Updated while cached');
@@ -388,6 +462,19 @@ async function testContent() {
   listeners[0]({ ...testResult, payload: { ...testResult.payload, securityTest: undefined } });
   await flush();
   assert.equal(window.document.getElementById('phishguard-warning-banner'), null);
+  const analysis = sends.filter((message) => message.type === 'ANALYZE_PAGE').at(-1);
+  assert.ok(Number.isFinite(analysis.performance.extraction_ms));
+  const timedResult = { type: 'ANALYZE_RESULT', payload: { identity: analysis.identity,
+    outcome: 'HIGH_RISK', score: 80, metadata: { runtime_timing: { policy_ms: 1 } } } };
+  listeners[0](timedResult);
+  const timingReport = sends.at(-1);
+  assert.equal(timingReport.type, 'REPORT_RENDER_METRICS');
+  assert.ok(timingReport.performance.scan_to_warning_dom_ms >= timingReport.performance.scan_to_result_ms);
+  assert.equal(timingReport.identity.url, undefined, 'timing reports carry only document identity and numeric durations');
+  const measuredCount = sends.length;
+  listeners[0](timedResult);
+  assert.equal(sends.length, measuredCount, 'duplicate result delivery cannot cause a timing-report loop');
+  window.dispatchEvent(new window.PageTransitionEvent('pagehide'));
   dom.window.close();
 }
 
@@ -561,4 +648,4 @@ async function testOptions() {
   dom.window.close();
 }
 
-(async () => { await testWorker(); await testRecoveryAndReputation(); await testContent(); await testContentIdCollision(); await testShadowObservation(); await testPopup(); await testOptions(); console.log('Runtime identity, recovery, coordinated reputation, privacy, dynamic DOM/shadow roots, live popup and settings validation passed.'); })().catch((error) => { console.error(error); process.exitCode = 1; });
+(async () => { await testBrowserStatusAndTiming(); await testWorker(); await testRecoveryAndReputation(); await testContent(); await testContentIdCollision(); await testShadowObservation(); await testPopup(); await testOptions(); console.log('Runtime identity, trusted browser status, bounded timing, recovery, coordinated reputation, privacy, dynamic DOM/shadow roots, live popup and settings validation passed.'); })().catch((error) => { console.error(error); process.exitCode = 1; });

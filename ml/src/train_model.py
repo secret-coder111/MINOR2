@@ -18,7 +18,8 @@ from sklearn.metrics import (accuracy_score, average_precision_score, confusion_
 from sklearn.model_selection import GroupShuffleSplit
 
 from dataset_contract import (PHISHING_LABELS, assert_separated, connected_groups, label_value, canonicalize_urls,
-                              manifest, normalize_url, registrable_domain, sha256, label_is_reviewed, source_identity)
+                              manifest, normalize_url, registrable_domain, sha256, label_is_reviewed, source_identity,
+                              group_annotations)
 from feature_engineering import FEATURE_SCHEMA, URL_FEATURE_SCHEMA, FEATURE_SCHEMA_VERSION, build_feature_row, validate_feature_row, extractor_source_hash
 
 DATASET_URL = 'https://raw.githubusercontent.com/faizann24/Using-machine-learning-to-detect-malicious-URLs/master/data/data.csv'
@@ -55,6 +56,12 @@ def read_dataset(paths: list[Path], limit: int | None = None, seed: int = 42,
                     rows_by_url.pop(url)
                     continue
                 source, provenance = source_identity(row, path.stem)
+                annotations = group_annotations(row)
+                if url in rows_by_url:
+                    previous = group_annotations(rows_by_url[url])
+                    if any(key in previous and previous[key] != value for key, value in annotations.items()):
+                        raise ValueError('Duplicate URL has conflicting campaign/template annotations; review before splitting')
+                    rows_by_url[url].update(annotations)
                 rows_by_url.setdefault(url, {
                     'url': url, 'label': label,
                     'source': source,
@@ -66,6 +73,7 @@ def read_dataset(paths: list[Path], limit: int | None = None, seed: int = 42,
                     'observed_at': (row.get('observed_at') or row.get('date') or '').strip(),
                     'page_type': (row.get('page_type') or '').strip(),
                     **{name: (row.get(name) or '').strip() for name in ['reviewed_by', 'reviewed_at', 'label_evidence']},
+                    **annotations,
                     'label_scope': 'mixed_threat' if include_other_threats else 'phishing',
                 })
     rows = list(rows_by_url.values())

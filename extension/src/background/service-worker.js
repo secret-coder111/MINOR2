@@ -1,4 +1,4 @@
-﻿importScripts('../shared/feature-schema.js', '../shared/browser-api.js', '../shared/model-policy.js', '../shared/model-release.js');
+importScripts('../shared/feature-schema.js', '../shared/browser-api.js', '../shared/model-policy.js', '../shared/model-release.js');
 
 importScripts('../shared/feedback.js');
 self.PhishGuard = self.PhishGuard || {};
@@ -16,6 +16,43 @@ self.PhishGuard = self.PhishGuard || {};
   const reputationStarts = [];
   const CACHE_KEY = 'phishguard_reputation_cache';
   const MAX_CACHE = 256;
+  const actionStates = new Map();
+  const monotonicNow = () => self.performance && typeof self.performance.now === 'function' ? self.performance.now() : Date.now();
+  const duration = (value) => Number.isFinite(value) && value >= 0 && value <= 600000 ? Math.round(value * 100) / 100 : null;
+
+  function actionCall(method, value) {
+    if (!api.action || typeof api.action[method] !== 'function') return;
+    try {
+      const pending = api.action[method](value);
+      if (pending && pending.catch) pending.catch(() => {});
+    } catch (_) { /* Unsupported/closed tabs must not interrupt local scoring. */ }
+  }
+
+  // A page can imitate or cover document UI. This status belongs to browser UI
+  // and is derived only from the worker's current canonical result.
+  function updateAction(tabId, result = null, pending = false) {
+    const incomplete = result && result.coverage && !result.coverage.complete;
+    let text = '', color = '#596b7c', title = 'PhishGuard: No current page result. Open to inspect coverage.';
+    if (pending) { text = '...'; title = 'PhishGuard: Checking page. No current verdict.'; }
+    if (result) {
+      if (result.outcome === 'HIGH_RISK') { text = '!'; color = '#a5263c'; title = 'PhishGuard: High phishing risk. Open to review indicators.'; }
+      else if (result.securityTest) { text = 'TEST'; color = '#8a5700'; title = 'PhishGuard: Known security test recognised. This does not measure detection accuracy.'; }
+      else if (result.outcome === 'CAUTION') { text = '!'; color = '#8a5700'; title = 'PhishGuard: Caution. Check the address and sign-in destination.'; }
+      else if (incomplete) { text = '?'; title = 'PhishGuard: Incomplete inspection. Some content remains unchecked.'; }
+      else if (result.reputationStatus === 'pending') { text = '...'; title = 'PhishGuard: Local check found no strong indicators; optional reputation pending.'; }
+      else if (result.reputationStatus === 'error') { text = '?'; title = 'PhishGuard: Local check found no strong indicators; optional reputation unavailable.'; }
+      else title = 'PhishGuard: No strong indicators in inspected content. Website safety is not verified.';
+      if (result.outcome !== 'SAFE' && incomplete) title += ' Inspection is incomplete.';
+      if (result.outcome !== 'SAFE' && result.reputationStatus === 'pending') title += ' Optional reputation pending.';
+      if (result.outcome !== 'SAFE' && result.reputationStatus === 'error') title += ' Optional reputation unavailable.';
+    }
+    const key = JSON.stringify([text, color, title]);
+    if (actionStates.get(tabId) === key) return;
+    actionStates.set(tabId, key);
+    actionCall('setBadgeText', { tabId, text });
+    actionCall('setBadgeBackgroundColor', { tabId, color });
+    actionCall('setTitle', { tabId, title });
+  }
   function sessionUpdate(method, ...args) {
     if (!session || typeof session[method] !== 'function') return;
     try {
@@ -63,6 +100,7 @@ self.PhishGuard = self.PhishGuard || {};
     if (url && documentId) state.expectedUrls.set(0, url);
     tabs.set(tabId, state);
     clearStored(tabId);
+    updateAction(tabId, null, /^(?:https?|file):/i.test(url));
     return state;
   }
 
@@ -81,6 +119,7 @@ self.PhishGuard = self.PhishGuard || {};
   }
 
   function analyzePage(features, settings = {}) {
+    const policyStarted = monotonicNow();
     const verdict = self.PhishGuard.scoreEvidence(features, settings);
     return {
       score: verdict.score,
@@ -97,12 +136,13 @@ self.PhishGuard = self.PhishGuard || {};
         evidence_categories: verdict.categories,
         active_evidence_categories: verdict.activeCategories,
         normal_first_party_login: verdict.normalFirstPartyLogin,
-        policy_version: verdict.policyVersion || '0.5.0',
+        policy_version: verdict.policyVersion || '0.6.0',
         warning_threshold: verdict.warningThreshold || settings.warningThreshold || 65,
-        model_version: 'rules-0.5.0',
+        model_version: 'rules-0.6.0',
         trained_model_applied: false,
         character_model_applied: false,
         model_influence: 'disabled_pending_compatible_calibration',
+        runtime_timing: { policy_ms: duration(monotonicNow() - policyStarted) },
         inspection_limits: [
           ...(features.runtime_coverage && features.runtime_coverage.visibility_watch_truncated ? ['visibility_watch_truncated'] : []),
           ...(Array.isArray(features.credential_contexts) && features.credential_contexts.some((context) => context.credential_destination_unknown === 1) ? ['credential_destination_unknown'] : [])
@@ -214,6 +254,12 @@ self.PhishGuard = self.PhishGuard || {};
         recovering: pendingFrames > 0, complete: !!state.frameInventory && uninspectedFrames === 0 && limitations.length === 0, limitations },
       evidenceFrame: { frameId: selectedFrameId, origin: publicOrigin(selected.identity.contextUrl || selected.identity.url) }
     };
+    result.inspectionScope = { formDestinations: 'declared_only', scriptDataFlow: 'not_verified',
+      closedShadowRoots: 'not_inspected', visualIdentity: 'not_verified', protection: 'advisory' };
+    if (state.runtimeTiming && state.runtimeTiming.scanId === top.identity.scanId) {
+      result.runtimeTiming = { ...state.runtimeTiming.values };
+      if (result.outcome !== 'HIGH_RISK' && !result.securityTest) delete result.runtimeTiming.scan_to_warning_dom_ms;
+    }
     if (selectedFrameId !== 0 && result.outcome !== 'SAFE') {
       result.reasons.unshift(`An embedded frame (${result.evidenceFrame.origin}) has these indicators.`);
       result.reasons = result.reasons.slice(0, 6);
@@ -221,14 +267,15 @@ self.PhishGuard = self.PhishGuard || {};
     return result;
   }
 
-  function publish(tabId) {
+  function publish(tabId, notify = true) {
     const state = tabs.get(tabId);
     const result = state && aggregate(state);
-    if (!result) { clearStored(tabId); return null; }
+    if (!result) { clearStored(tabId); updateAction(tabId, null, !!state && /^(?:https?|file):/i.test(state.topUrl)); return null; }
     // Exact URLs stay in worker/content-script memory for identity checks only.
     const stored = { ...result, identity: { documentToken: result.identity.documentToken, scanId: result.identity.scanId }, createdAt: Date.now() };
     sessionUpdate('set', { [`tab_${tabId}`]: stored });
-    quietSend(tabId, { type: 'ANALYZE_RESULT', payload: result });
+    updateAction(tabId, result);
+    if (notify) quietSend(tabId, { type: 'ANALYZE_RESULT', payload: result });
     return result;
   }
 
@@ -302,7 +349,8 @@ self.PhishGuard = self.PhishGuard || {};
     const result = { ...base, reasons: [...base.reasons], evidence: [...base.evidence], metadata: { ...base.metadata },
       reputationStatus: report.status, reputationError: report.error || null };
     if (report.status !== 'available') return result;
-    result.metadata.reputation = { verdict: report.verdict, checkedAt: report.checkedAt, expiresAt: report.expiresAt };
+    result.metadata.reputation = { verdict: report.verdict, checkedAt: report.checkedAt, expiresAt: report.expiresAt,
+      source: 'user_configured_endpoint', scope: 'hostname_only' };
     if (!['malicious', 'phishing'].includes(report.verdict)) return result;
     result.score = Math.max(90, result.score);
     result.outcome = 'HIGH_RISK';
@@ -316,6 +364,7 @@ self.PhishGuard = self.PhishGuard || {};
   }
 
   async function scan(message, sender) {
+    const workerStarted = monotonicNow();
     const tabId = sender.tab && sender.tab.id;
     const frameId = Number(sender.frameId) || 0;
     const identity = message.identity;
@@ -355,6 +404,7 @@ self.PhishGuard = self.PhishGuard || {};
     state.requestedFrames.delete(frameId);
     state.expectedUrls.delete(frameId);
     if (frameId === 0) state.topUrl = identity.url;
+    if (frameId === 0 && !previous) updateAction(tabId, null, true);
     const revision = configurationRevision;
     const [settings, frames] = await Promise.all([options(), getFrames(tabId)]);
     if (!current(tabId, frameId, record) || revision !== configurationRevision) return null;
@@ -371,6 +421,8 @@ self.PhishGuard = self.PhishGuard || {};
     }
     const features = { ...(message.payload || {}), url: contextUrl.href };
     const baseResult = analyzePage(features, settings);
+    const extractionMs = duration(message.performance && message.performance.extraction_ms);
+    if (extractionMs !== null) baseResult.metadata.runtime_timing.extraction_ms = extractionMs;
     const securityTest = frameId === 0 && sender.url === identity.url ? officialSecurityTest(sender.url) : null;
     if (securityTest) {
       baseResult.securityTest = securityTest;
@@ -379,6 +431,7 @@ self.PhishGuard = self.PhishGuard || {};
     }
     const remote = await prepareReputation(contextUrl.hostname, settings, revision);
     if (!current(tabId, frameId, record) || revision !== configurationRevision) return null;
+    baseResult.metadata.runtime_timing.worker_ms = duration(monotonicNow() - workerStarted);
     record.result = withReputation(baseResult, remote.initial);
     const result = publish(tabId);
     // Do not hold the response open while a remote service runs.
@@ -392,6 +445,32 @@ self.PhishGuard = self.PhishGuard || {};
 
   api.runtime.onMessage.addListener((message, sender, respond) => {
     if (!message) return;
+    if (message.type === 'REPORT_RENDER_METRICS') {
+      const tabId = sender.tab && sender.tab.id;
+      const state = tabs.get(tabId);
+      const top = state && state.frames.get(0);
+      const identity = message.identity;
+      // MessageSender.url can retain the document's original URL after
+      // pushState. Browser documentId plus same origin binds that SPA report.
+      const senderMatches = top && (sender.url === top.identity.url || (top.documentId
+        && sender.documentId === top.documentId && publicOrigin(sender.url) === publicOrigin(top.identity.url)));
+      if (!top || !top.result || sender.frameId !== 0 || !identity
+          || identity.documentToken !== top.identity.documentToken || identity.scanId !== top.identity.scanId
+          || !senderMatches || (top.documentId && sender.documentId !== top.documentId)) {
+        respond({ accepted: false }); return;
+      }
+      const values = {};
+      for (const name of ['scan_to_result_ms', 'scan_to_warning_dom_ms', 'scheduling_delay_ms']) {
+        const value = duration(message.performance && message.performance[name]);
+        if (value !== null) values[name] = value;
+      }
+      if (!Object.prototype.hasOwnProperty.call(values, 'scan_to_result_ms')) { respond({ accepted: false }); return; }
+      const result = aggregate(state);
+      if (result.outcome !== 'HIGH_RISK' && !result.securityTest) delete values.scan_to_warning_dom_ms;
+      state.runtimeTiming = { scanId: identity.scanId, values };
+      publish(tabId, false);
+      respond({ accepted: true }); return;
+    }
     if (message.type === 'REQUEST_TAB_RESCAN' && Number.isInteger(message.tabId)) {
       // A popup can ask for a new scan only for the exact current document.
       // Checking browser inventory avoids sending an obsolete popup request to
@@ -419,6 +498,7 @@ self.PhishGuard = self.PhishGuard || {};
           requestMissingFrames(message.tabId, state);
         }
         const result = state && tabs.get(message.tabId) === state && state.topUrl === message.url ? aggregate(state) : null;
+        updateAction(message.tabId, result, !result && !!state && /^(?:https?|file):/i.test(state.topUrl));
         respond({ result });
         if (!result) quietSend(message.tabId, { type: 'REQUEST_RESCAN' }, {});
       }).catch(() => respond({ result: null }));
@@ -426,7 +506,7 @@ self.PhishGuard = self.PhishGuard || {};
     }
   });
 
-  if (api.tabs.onRemoved) api.tabs.onRemoved.addListener((tabId) => { tabs.delete(tabId); clearStored(tabId); });
+  if (api.tabs.onRemoved) api.tabs.onRemoved.addListener((tabId) => { tabs.delete(tabId); clearStored(tabId); updateAction(tabId); actionStates.delete(tabId); });
   if (api.tabs.onUpdated) api.tabs.onUpdated.addListener((tabId, change) => {
     if (change.status === 'loading') resetTab(tabId, change.url || '');
     // A restored cached page can finish loading after its pageshow scan. Ask all
@@ -451,9 +531,10 @@ self.PhishGuard = self.PhishGuard || {};
       if (state) {
         state.frames.delete(event.frameId);
         state.expectedUrls.set(event.frameId, event.url);
-        if (event.frameId === 0) { state.topUrl = event.url; clearStored(event.tabId); }
+        if (event.frameId === 0) { state.topUrl = event.url; clearStored(event.tabId); updateAction(event.tabId, null, true); }
         else publish(event.tabId);
       }
+      else if (event.frameId === 0) updateAction(event.tabId, null, true);
       quietSend(event.tabId, { type: 'REQUEST_RESCAN' }, { frameId: event.frameId });
     };
     api.webNavigation.onHistoryStateUpdated.addListener(locationChanged);

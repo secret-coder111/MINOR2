@@ -1,0 +1,948 @@
+{
+  "model_version": "url-checker-research-2026-11-06-login-boundaries",
+  "algorithm": "character_logistic_regression",
+  "feature_scope": "hybrid_url",
+  "feature_schema": [
+    "url_length",
+    "hostname_length",
+    "subdomain_count",
+    "dot_count",
+    "digit_count",
+    "suspicious_char_count",
+    "has_ip_address",
+    "uses_http",
+    "has_punycode",
+    "suspicious_keyword_count",
+    "hostname_entropy",
+    "brand_name_in_url",
+    "has_unusual_port"
+  ],
+  "feature_schema_version": "0.2.0",
+  "extractor_version": "0.2.0",
+  "extractor_sha256": "eb555d09f72ccd550620a3554b8f6ecdbac81ed8aba6226a265411eafa1e50b7",
+  "extractor_hash_at_completion": "eb555d09f72ccd550620a3554b8f6ecdbac81ed8aba6226a265411eafa1e50b7",
+  "extractor_changed_during_training": false,
+  "seed": 20261102,
+  "scikit_learn": "1.9.1",
+  "candidate_search": {
+    "model_version": "url-checker-research-2026-11-06-login-boundaries",
+    "started_at": "2026-11-06T00:09:23.211088+00:00",
+    "seed": 20261102,
+    "candidates": {
+      "none_c_1_login_1": {
+        "text_transform": "none",
+        "character_c": 1.0,
+        "login_sample_weight": 1.0
+      },
+      "none_c_1_login_50": {
+        "text_transform": "none",
+        "character_c": 1.0,
+        "login_sample_weight": 50.0
+      },
+      "none_c_4_login_1": {
+        "text_transform": "none",
+        "character_c": 4.0,
+        "login_sample_weight": 1.0
+      },
+      "none_c_4_login_50": {
+        "text_transform": "none",
+        "character_c": 4.0,
+        "login_sample_weight": 50.0
+      },
+      "host_path_boundaries_v1_c_1_login_1": {
+        "text_transform": "host_path_boundaries_v1",
+        "character_c": 1.0,
+        "login_sample_weight": 1.0
+      },
+      "host_path_boundaries_v1_c_1_login_50": {
+        "text_transform": "host_path_boundaries_v1",
+        "character_c": 1.0,
+        "login_sample_weight": 50.0
+      },
+      "host_path_boundaries_v1_c_4_login_1": {
+        "text_transform": "host_path_boundaries_v1",
+        "character_c": 4.0,
+        "login_sample_weight": 1.0
+      },
+      "host_path_boundaries_v1_c_4_login_50": {
+        "text_transform": "host_path_boundaries_v1",
+        "character_c": 4.0,
+        "login_sample_weight": 50.0
+      }
+    },
+    "fit_limit": 240000,
+    "selection": "highest tuning recall at URL-level FPR Wilson-upper <=1%; tie lower FPR, AP, AUC",
+    "final_threshold": "fresh independent calibration at URL-level FPR Wilson-upper <=1%",
+    "known_login_sites": "All curated-official-login sites reserved for fitting, excluded from evaluation",
+    "test_use": "Previously inspected internal test, candidate and threshold fixed before scoring",
+    "promotion": "Research diagnostic only; no production eligibility claim or model activation"
+  },
+  "winner": "host_path_boundaries_v1_c_4_login_1",
+  "configuration": {
+    "text_transform": "host_path_boundaries_v1",
+    "character_c": 4.0,
+    "login_sample_weight": 1.0
+  },
+  "preprocessing": {
+    "character": {
+      "analyzer": "char",
+      "ngram_range": [
+        3,
+        5
+      ],
+      "min_df": 2,
+      "max_features": 60000,
+      "sublinear_tf": true,
+      "lowercase": true
+    },
+    "text_transform": "host_path_boundaries_v1"
+  },
+  "selection": "highest tuning recall at URL-level FPR Wilson-upper <=1%; tie lower FPR, AP, AUC",
+  "tuning": {
+    "none_c_1_login_1": {
+      "accuracy": 0.8056137173900741,
+      "precision": 0.9885782475281282,
+      "recall": 0.6325951783571506,
+      "f1": 0.7715026940730393,
+      "roc_auc": 0.9803835406583864,
+      "average_precision": 0.9809453473409528,
+      "positive_prevalence": 0.5187595495444514,
+      "threshold": 0.8364714028563919,
+      "false_positive_rate": 0.007878645343367827,
+      "false_positive_rate_95ci": [
+        0.006209099723005095,
+        0.009992596028833808
+      ],
+      "recall_95ci": [
+        0.6226726232541002,
+        0.6424066511958813
+      ],
+      "confusion_matrix": {
+        "tn": 8437,
+        "fp": 67,
+        "fn": 3368,
+        "tp": 5799
+      },
+      "maximum_fpr_upper_95ci": 0.01,
+      "effective_empirical_fpr_budget": 0.007878645343367829,
+      "interval_scope": "Descriptive URL-level; not selection-adjusted or a release guarantee"
+    },
+    "none_c_1_login_50": {
+      "accuracy": 0.8006903966951503,
+      "precision": 0.9884062986675896,
+      "recall": 0.623104614377659,
+      "f1": 0.7643516659975913,
+      "roc_auc": 0.9801535267870015,
+      "average_precision": 0.9806052103574086,
+      "positive_prevalence": 0.5187595495444514,
+      "threshold": 0.8471101440828838,
+      "false_positive_rate": 0.007878645343367827,
+      "false_positive_rate_95ci": [
+        0.006209099723005095,
+        0.009992596028833808
+      ],
+      "recall_95ci": [
+        0.6131346796290359,
+        0.6329714176287214
+      ],
+      "confusion_matrix": {
+        "tn": 8437,
+        "fp": 67,
+        "fn": 3455,
+        "tp": 5712
+      },
+      "maximum_fpr_upper_95ci": 0.01,
+      "effective_empirical_fpr_budget": 0.007878645343367829,
+      "interval_scope": "Descriptive URL-level; not selection-adjusted or a release guarantee"
+    },
+    "none_c_4_login_1": {
+      "accuracy": 0.8155735385660121,
+      "precision": 0.9889109566368752,
+      "recall": 0.65179448020072,
+      "f1": 0.785718982181603,
+      "roc_auc": 0.9806562708418401,
+      "average_precision": 0.9818034897246012,
+      "positive_prevalence": 0.5187595495444514,
+      "threshold": 0.8517151464393968,
+      "false_positive_rate": 0.007878645343367827,
+      "false_positive_rate_95ci": [
+        0.006209099723005095,
+        0.009992596028833808
+      ],
+      "recall_95ci": [
+        0.6419804191285854,
+        0.6614813746987689
+      ],
+      "confusion_matrix": {
+        "tn": 8437,
+        "fp": 67,
+        "fn": 3192,
+        "tp": 5975
+      },
+      "maximum_fpr_upper_95ci": 0.01,
+      "effective_empirical_fpr_budget": 0.007878645343367829,
+      "interval_scope": "Descriptive URL-level; not selection-adjusted or a release guarantee"
+    },
+    "none_c_4_login_50": {
+      "accuracy": 0.811102937015449,
+      "precision": 0.9889280322093609,
+      "recall": 0.6430675248172794,
+      "f1": 0.7793495505023796,
+      "roc_auc": 0.9805493902676181,
+      "average_precision": 0.9816435897000094,
+      "positive_prevalence": 0.5187595495444514,
+      "threshold": 0.8653500197364168,
+      "false_positive_rate": 0.007761053621825023,
+      "false_positive_rate_95ci": [
+        0.0061054194569779095,
+        0.009861199041755102
+      ],
+      "recall_95ci": [
+        0.6332020251210715,
+        0.6528131689892953
+      ],
+      "confusion_matrix": {
+        "tn": 8438,
+        "fp": 66,
+        "fn": 3272,
+        "tp": 5895
+      },
+      "maximum_fpr_upper_95ci": 0.01,
+      "effective_empirical_fpr_budget": 0.007878645343367829,
+      "interval_scope": "Descriptive URL-level; not selection-adjusted or a release guarantee"
+    },
+    "host_path_boundaries_v1_c_1_login_1": {
+      "accuracy": 0.807764133325788,
+      "precision": 0.9886517615176151,
+      "recall": 0.6367404821642849,
+      "f1": 0.7746002255988322,
+      "roc_auc": 0.9870093665968804,
+      "average_precision": 0.9873388753255877,
+      "positive_prevalence": 0.5187595495444514,
+      "threshold": 0.8164577312917017,
+      "false_positive_rate": 0.007878645343367827,
+      "false_positive_rate_95ci": [
+        0.006209099723005095,
+        0.009992596028833808
+      ],
+      "recall_95ci": [
+        0.6268399077982496,
+        0.646526501517301
+      ],
+      "confusion_matrix": {
+        "tn": 8437,
+        "fp": 67,
+        "fn": 3330,
+        "tp": 5837
+      },
+      "maximum_fpr_upper_95ci": 0.01,
+      "effective_empirical_fpr_budget": 0.007878645343367829,
+      "interval_scope": "Descriptive URL-level; not selection-adjusted or a release guarantee"
+    },
+    "host_path_boundaries_v1_c_1_login_50": {
+      "accuracy": 0.8053307679248486,
+      "precision": 0.988568503668316,
+      "recall": 0.6320497436456856,
+      "f1": 0.771093957945169,
+      "roc_auc": 0.9868860537116191,
+      "average_precision": 0.9871869853952392,
+      "positive_prevalence": 0.5187595495444514,
+      "threshold": 0.8198187076225958,
+      "false_positive_rate": 0.007878645343367827,
+      "false_positive_rate_95ci": [
+        0.006209099723005095,
+        0.009992596028833808
+      ],
+      "recall_95ci": [
+        0.6221243548502835,
+        0.6418645071173863
+      ],
+      "confusion_matrix": {
+        "tn": 8437,
+        "fp": 67,
+        "fn": 3373,
+        "tp": 5794
+      },
+      "maximum_fpr_upper_95ci": 0.01,
+      "effective_empirical_fpr_budget": 0.007878645343367829,
+      "interval_scope": "Descriptive URL-level; not selection-adjusted or a release guarantee"
+    },
+    "host_path_boundaries_v1_c_4_login_1": {
+      "accuracy": 0.8295512421481523,
+      "precision": 0.9893464779774209,
+      "recall": 0.6787389549470928,
+      "f1": 0.8051242236024845,
+      "roc_auc": 0.9882034222102861,
+      "average_precision": 0.9885408551955186,
+      "positive_prevalence": 0.5187595495444514,
+      "threshold": 0.8482879697078769,
+      "false_positive_rate": 0.007878645343367827,
+      "false_positive_rate_95ci": [
+        0.006209099723005095,
+        0.009992596028833808
+      ],
+      "recall_95ci": [
+        0.6691067406103124,
+        0.6882214298432414
+      ],
+      "confusion_matrix": {
+        "tn": 8437,
+        "fp": 67,
+        "fn": 2945,
+        "tp": 6222
+      },
+      "maximum_fpr_upper_95ci": 0.01,
+      "effective_empirical_fpr_budget": 0.007878645343367829,
+      "interval_scope": "Descriptive URL-level; not selection-adjusted or a release guarantee"
+    },
+    "host_path_boundaries_v1_c_4_login_50": {
+      "accuracy": 0.8292682926829268,
+      "precision": 0.9893380012730745,
+      "recall": 0.6781935202356278,
+      "f1": 0.8047375574396479,
+      "roc_auc": 0.9881192595305607,
+      "average_precision": 0.9884417595795333,
+      "positive_prevalence": 0.5187595495444514,
+      "threshold": 0.8520088416759518,
+      "false_positive_rate": 0.007878645343367827,
+      "false_positive_rate_95ci": [
+        0.006209099723005095,
+        0.009992596028833808
+      ],
+      "recall_95ci": [
+        0.6685572708346873,
+        0.687680487136555
+      ],
+      "confusion_matrix": {
+        "tn": 8437,
+        "fp": 67,
+        "fn": 2950,
+        "tp": 6217
+      },
+      "maximum_fpr_upper_95ci": 0.01,
+      "effective_empirical_fpr_budget": 0.007878645343367829,
+      "interval_scope": "Descriptive URL-level; not selection-adjusted or a release guarantee"
+    }
+  },
+  "threshold": 0.7639060512756054,
+  "calibration": {
+    "accuracy": 0.8684026112934754,
+    "precision": 0.990134946486738,
+    "recall": 0.7544854974824481,
+    "f1": 0.8563953956371246,
+    "roc_auc": 0.9848522754892447,
+    "average_precision": 0.9861003804562103,
+    "positive_prevalence": 0.5200826171947036,
+    "threshold": 0.7639060512756054,
+    "false_positive_rate": 0.008146326467875806,
+    "false_positive_rate_95ci": [
+      0.006740436147139382,
+      0.009842545406805459
+    ],
+    "recall_95ci": [
+      0.7473130758819364,
+      0.7615193006430578
+    ],
+    "confusion_matrix": {
+      "tn": 12906,
+      "fp": 106,
+      "fn": 3462,
+      "tp": 10639
+    },
+    "maximum_fpr_upper_95ci": 0.01,
+    "effective_empirical_fpr_budget": 0.008223178604365203,
+    "interval_scope": "Descriptive URL-level; not selection-adjusted or a release guarantee"
+  },
+  "test": {
+    "accuracy": 0.9329260013577733,
+    "precision": 0.9841879872625453,
+    "recall": 0.8701096980875643,
+    "f1": 0.9236397361912614,
+    "roc_auc": 0.9885348253453696,
+    "average_precision": 0.9883336062081111,
+    "positive_prevalence": 0.466214075582711,
+    "threshold": 0.7639060512756054,
+    "false_positive_rate": 0.012209598100729184,
+    "false_positive_rate_95ci": [
+      0.010380407840789654,
+      0.014356444221457536
+    ],
+    "recall_95ci": [
+      0.8634793933278447,
+      0.8764640624225769
+    ],
+    "confusion_matrix": {
+      "tn": 11650,
+      "fp": 144,
+      "fn": 1338,
+      "tp": 8963
+    }
+  },
+  "independent_group_metrics": {
+    "unit": "connected_original_final_site_and_exact_content_group",
+    "negative_rule": "any warned legitimate page is a group false positive",
+    "positive_rule": "every phishing page must be detected for group success",
+    "legitimate_groups": 7349,
+    "phishing_groups": 7503,
+    "confusion_matrix": {
+      "tn": 7215,
+      "fp": 134,
+      "fn": 832,
+      "tp": 6671
+    },
+    "false_positive_rate_95ci": [
+      0.015416951357209217,
+      0.021553988427516428
+    ],
+    "recall_95ci": [
+      0.8818061155471981,
+      0.8960176911803375
+    ]
+  },
+  "baseline_original_threshold": {
+    "accuracy": 0.9311608961303462,
+    "precision": 0.9824175824175824,
+    "recall": 0.8678769051548393,
+    "f1": 0.9216019792794186,
+    "roc_auc": 0.9867581605115563,
+    "average_precision": 0.986700738812557,
+    "positive_prevalence": 0.466214075582711,
+    "threshold": 0.7668868035783822,
+    "false_positive_rate": 0.013566220111921316,
+    "false_positive_rate_95ci": [
+      0.011631184266258966,
+      0.015818028367343005
+    ],
+    "recall_95ci": [
+      0.8612003148434392,
+      0.8742792197313075
+    ],
+    "confusion_matrix": {
+      "tn": 11634,
+      "fp": 160,
+      "fn": 1361,
+      "tp": 8940
+    }
+  },
+  "baseline_same_calibration_budget": {
+    "accuracy": 0.9265444670739986,
+    "precision": 0.9844796784278695,
+    "recall": 0.8559363168624405,
+    "f1": 0.915718959339461,
+    "roc_auc": 0.9867581605115563,
+    "average_precision": 0.986700738812557,
+    "positive_prevalence": 0.466214075582711,
+    "threshold": 0.7966324437503276,
+    "false_positive_rate": 0.011785653722231643,
+    "false_positive_rate_95ci": [
+      0.009990768813278888,
+      0.013898470570419935
+    ],
+    "recall_95ci": [
+      0.8490223987443978,
+      0.8625848617169584
+    ],
+    "confusion_matrix": {
+      "tn": 11655,
+      "fp": 139,
+      "fn": 1484,
+      "tp": 8817
+    }
+  },
+  "baseline_recalibration": {
+    "accuracy": 0.8702467451038247,
+    "precision": 0.9900898397703065,
+    "recall": 0.7581022622509042,
+    "f1": 0.8587035103221142,
+    "roc_auc": 0.9860452140178037,
+    "average_precision": 0.9871501522939872,
+    "positive_prevalence": 0.5200826171947036,
+    "threshold": 0.7966324437503276,
+    "false_positive_rate": 0.008223178604365201,
+    "false_positive_rate_95ci": [
+      0.006810092227853749,
+      0.009926548235223289
+    ],
+    "recall_95ci": [
+      0.7509644769281983,
+      0.7650994590792465
+    ],
+    "confusion_matrix": {
+      "tn": 12905,
+      "fp": 107,
+      "fn": 3411,
+      "tp": 10690
+    },
+    "maximum_fpr_upper_95ci": 0.01,
+    "effective_empirical_fpr_budget": 0.008223178604365203,
+    "interval_scope": "Descriptive URL-level; not selection-adjusted or a release guarantee"
+  },
+  "baseline_model_version": "url-checker-research-2026-11-03-expanded",
+  "controls": [
+    {
+      "url": "https://accounts.google.com/signin",
+      "label": 0,
+      "scope": "known development login seed",
+      "model_estimate": 0.9828179191346511,
+      "above_threshold": true,
+      "baseline_model_estimate": 0.9902532402050918,
+      "baseline_above_threshold": true
+    },
+    {
+      "url": "https://accounts.google.com/ServiceLogin",
+      "label": 0,
+      "scope": "known development login seed",
+      "model_estimate": 0.976330148870068,
+      "above_threshold": true,
+      "baseline_model_estimate": 0.9900166024667344,
+      "baseline_above_threshold": true
+    },
+    {
+      "url": "https://login.microsoftonline.com/",
+      "label": 0,
+      "scope": "known development login seed",
+      "model_estimate": 0.8710910827815206,
+      "above_threshold": true,
+      "baseline_model_estimate": 0.9414408977018606,
+      "baseline_above_threshold": true
+    },
+    {
+      "url": "https://login.live.com/",
+      "label": 0,
+      "scope": "known development login seed",
+      "model_estimate": 0.982448129362602,
+      "above_threshold": true,
+      "baseline_model_estimate": 0.9902404312142339,
+      "baseline_above_threshold": true
+    },
+    {
+      "url": "https://account.microsoft.com/",
+      "label": 0,
+      "scope": "known development login seed",
+      "model_estimate": 0.7771439710167422,
+      "above_threshold": true,
+      "baseline_model_estimate": 0.8985298336295757,
+      "baseline_above_threshold": true
+    },
+    {
+      "url": "https://appleid.apple.com/sign-in",
+      "label": 0,
+      "scope": "known development login seed",
+      "model_estimate": 0.9188786545747029,
+      "above_threshold": true,
+      "baseline_model_estimate": 0.95907900749246,
+      "baseline_above_threshold": true
+    },
+    {
+      "url": "https://www.amazon.com/ap/signin",
+      "label": 0,
+      "scope": "known development login seed",
+      "model_estimate": 0.23902068614493566,
+      "above_threshold": false,
+      "baseline_model_estimate": 0.5612673299823934,
+      "baseline_above_threshold": false
+    },
+    {
+      "url": "https://signin.aws.amazon.com/",
+      "label": 0,
+      "scope": "known development login seed",
+      "model_estimate": 0.9198361640435612,
+      "above_threshold": true,
+      "baseline_model_estimate": 0.9357024955590266,
+      "baseline_above_threshold": true
+    },
+    {
+      "url": "https://www.paypal.com/signin",
+      "label": 0,
+      "scope": "known development login seed",
+      "model_estimate": 0.9388989694345159,
+      "above_threshold": true,
+      "baseline_model_estimate": 0.9952514793469454,
+      "baseline_above_threshold": true
+    },
+    {
+      "url": "https://github.com/login",
+      "label": 0,
+      "scope": "known development login seed",
+      "model_estimate": 0.8849814803842656,
+      "above_threshold": true,
+      "baseline_model_estimate": 0.9683560607092137,
+      "baseline_above_threshold": true
+    },
+    {
+      "url": "https://gitlab.com/users/sign_in",
+      "label": 0,
+      "scope": "known development login seed",
+      "model_estimate": 0.2116537787853437,
+      "above_threshold": false,
+      "baseline_model_estimate": 0.2657540919685675,
+      "baseline_above_threshold": false
+    },
+    {
+      "url": "https://login.yahoo.com/",
+      "label": 0,
+      "scope": "known development login seed",
+      "model_estimate": 0.728333784882683,
+      "above_threshold": false,
+      "baseline_model_estimate": 0.7145447194092518,
+      "baseline_above_threshold": false
+    },
+    {
+      "url": "https://www.linkedin.com/login",
+      "label": 0,
+      "scope": "known development login seed",
+      "model_estimate": 0.23777029106153183,
+      "above_threshold": false,
+      "baseline_model_estimate": 0.32086236135304175,
+      "baseline_above_threshold": false
+    },
+    {
+      "url": "https://www.dropbox.com/login",
+      "label": 0,
+      "scope": "known development login seed",
+      "model_estimate": 0.9872964667003931,
+      "above_threshold": true,
+      "baseline_model_estimate": 0.9849916177041949,
+      "baseline_above_threshold": true
+    },
+    {
+      "url": "https://id.atlassian.com/login",
+      "label": 0,
+      "scope": "known development login seed",
+      "model_estimate": 0.5848071407206962,
+      "above_threshold": false,
+      "baseline_model_estimate": 0.8087916295810389,
+      "baseline_above_threshold": true
+    },
+    {
+      "url": "https://login.salesforce.com/",
+      "label": 0,
+      "scope": "known development login seed",
+      "model_estimate": 0.7679045398771547,
+      "above_threshold": true,
+      "baseline_model_estimate": 0.8399009074582924,
+      "baseline_above_threshold": true
+    },
+    {
+      "url": "https://app.slack.com/signin",
+      "label": 0,
+      "scope": "known development login seed",
+      "model_estimate": 0.6912805060270921,
+      "above_threshold": false,
+      "baseline_model_estimate": 0.822642575668716,
+      "baseline_above_threshold": true
+    },
+    {
+      "url": "https://zoom.us/signin",
+      "label": 0,
+      "scope": "known development login seed",
+      "model_estimate": 0.5122280819631364,
+      "above_threshold": false,
+      "baseline_model_estimate": 0.8150262313687632,
+      "baseline_above_threshold": true
+    },
+    {
+      "url": "https://www.adobe.com/account.html",
+      "label": 0,
+      "scope": "known development login seed",
+      "model_estimate": 0.8622648549269556,
+      "above_threshold": true,
+      "baseline_model_estimate": 0.8763502121721242,
+      "baseline_above_threshold": true
+    },
+    {
+      "url": "https://login.okta.com/",
+      "label": 0,
+      "scope": "known development login seed",
+      "model_estimate": 0.9440428296025813,
+      "above_threshold": true,
+      "baseline_model_estimate": 0.9360646562517575,
+      "baseline_above_threshold": true
+    },
+    {
+      "url": "https://accounts.spotify.com/en/login",
+      "label": 0,
+      "scope": "known development login seed",
+      "model_estimate": 0.7680003494496148,
+      "above_threshold": true,
+      "baseline_model_estimate": 0.9062694460058451,
+      "baseline_above_threshold": true
+    },
+    {
+      "url": "https://www.netflix.com/login",
+      "label": 0,
+      "scope": "known development login seed",
+      "model_estimate": 0.8270035903177275,
+      "above_threshold": true,
+      "baseline_model_estimate": 0.9574482520437284,
+      "baseline_above_threshold": true
+    },
+    {
+      "url": "https://login.shopify.com/",
+      "label": 0,
+      "scope": "known development login seed",
+      "model_estimate": 0.9841336369536766,
+      "above_threshold": true,
+      "baseline_model_estimate": 0.9945116430345466,
+      "baseline_above_threshold": true
+    },
+    {
+      "url": "https://myaccount.google.com/",
+      "label": 0,
+      "scope": "known development login seed",
+      "model_estimate": 0.9895355074051978,
+      "above_threshold": true,
+      "baseline_model_estimate": 0.9757235341636413,
+      "baseline_above_threshold": true
+    },
+    {
+      "url": "https://login.oracle.com/",
+      "label": 0,
+      "scope": "known development login seed",
+      "model_estimate": 0.855650966542779,
+      "above_threshold": true,
+      "baseline_model_estimate": 0.798469537493297,
+      "baseline_above_threshold": true
+    },
+    {
+      "url": "https://login.ibm.com/",
+      "label": 0,
+      "scope": "known development login seed",
+      "model_estimate": 0.9338784638908121,
+      "above_threshold": true,
+      "baseline_model_estimate": 0.9739053444541844,
+      "baseline_above_threshold": true
+    },
+    {
+      "url": "https://secure.bankofamerica.com/login/sign-in/signOnV2Screen.go",
+      "label": 0,
+      "scope": "known development login seed",
+      "model_estimate": 0.9966810952034798,
+      "above_threshold": true,
+      "baseline_model_estimate": 0.9982466474392345,
+      "baseline_above_threshold": true
+    },
+    {
+      "url": "https://www.chase.com/login",
+      "label": 0,
+      "scope": "known development login seed",
+      "model_estimate": 0.7697244073840449,
+      "above_threshold": true,
+      "baseline_model_estimate": 0.9177958776828563,
+      "baseline_above_threshold": true
+    },
+    {
+      "url": "https://www.wellsfargo.com/online-banking/sign-on",
+      "label": 0,
+      "scope": "known development login seed",
+      "model_estimate": 0.8395454445685894,
+      "above_threshold": true,
+      "baseline_model_estimate": 0.9633413887275897,
+      "baseline_above_threshold": true
+    },
+    {
+      "url": "https://www.icicibank.com/personal-banking/online-services/internet-banking",
+      "label": 0,
+      "scope": "known development login seed",
+      "model_estimate": 0.19919845057042804,
+      "above_threshold": false,
+      "baseline_model_estimate": 0.31283287640994745,
+      "baseline_above_threshold": false
+    },
+    {
+      "url": "https://netbanking.hdfcbank.com/netbanking",
+      "label": 0,
+      "scope": "known development login seed",
+      "model_estimate": 0.8383363022331755,
+      "above_threshold": true,
+      "baseline_model_estimate": 0.9305331758811839,
+      "baseline_above_threshold": true
+    },
+    {
+      "url": "https://retail.onlinesbi.sbi/retail/login.htm",
+      "label": 0,
+      "scope": "known development login seed",
+      "model_estimate": 0.8124094123317438,
+      "above_threshold": true,
+      "baseline_model_estimate": 0.8084260046021564,
+      "baseline_above_threshold": true
+    },
+    {
+      "url": "https://paypal.com/",
+      "scope": "previously inspected diagnostic control; no live-page label claim",
+      "model_estimate": 0.9933608790023027,
+      "above_threshold": true,
+      "baseline_model_estimate": 0.9993500769316621,
+      "baseline_above_threshold": true
+    },
+    {
+      "url": "https://www.google.com/",
+      "scope": "previously inspected diagnostic control; no live-page label claim",
+      "model_estimate": 0.2567521524173871,
+      "above_threshold": false,
+      "baseline_model_estimate": 0.031103029717990244,
+      "baseline_above_threshold": false
+    },
+    {
+      "url": "https://www.amtso.org/check-desktop-phishing-page/",
+      "scope": "previously inspected diagnostic control; no live-page label claim",
+      "model_estimate": 0.06033866285903043,
+      "above_threshold": false,
+      "baseline_model_estimate": 0.04466796485020002,
+      "baseline_above_threshold": false
+    },
+    {
+      "url": "http://banamxr.com/1/mexico/",
+      "scope": "previously inspected diagnostic control; no live-page label claim",
+      "model_estimate": 0.8652515336228315,
+      "above_threshold": true,
+      "baseline_model_estimate": 0.9301585470987584,
+      "baseline_above_threshold": true
+    }
+  ],
+  "partition_summary": {
+    "fit": {
+      "samples": 244068,
+      "classes": {
+        "0": 136066,
+        "1": 108002
+      },
+      "sources": {
+        "malicious_urls": 67831,
+        "phishtank": 39675,
+        "edgephish_balanced_urls": 136346,
+        "openphish": 184,
+        "curated-official-login": 32
+      }
+    },
+    "tuning": {
+      "samples": 17671,
+      "classes": {
+        "0": 8504,
+        "1": 9167
+      },
+      "sources": {
+        "edgephish_balanced_urls": 8837,
+        "phishtank": 4814,
+        "malicious_urls": 3995,
+        "openphish": 25
+      }
+    },
+    "calibration": {
+      "samples": 27113,
+      "classes": {
+        "1": 14101,
+        "0": 13012
+      },
+      "sources": {
+        "phishtank": 8086,
+        "malicious_urls": 6963,
+        "edgephish_balanced_urls": 12028,
+        "openphish": 36
+      }
+    },
+    "test": {
+      "samples": 22095,
+      "classes": {
+        "0": 11794,
+        "1": 10301
+      },
+      "sources": {
+        "edgephish_balanced_urls": 12133,
+        "phishtank": 4030,
+        "malicious_urls": 5882,
+        "openphish": 50
+      }
+    }
+  },
+  "known_login_sites_reserved_for_development": [
+    "adobe.com",
+    "amazon.com",
+    "apple.com",
+    "atlassian.com",
+    "bankofamerica.com",
+    "chase.com",
+    "dropbox.com",
+    "github.com",
+    "gitlab.com",
+    "google.com",
+    "hdfcbank.com",
+    "ibm.com",
+    "icicibank.com",
+    "linkedin.com",
+    "live.com",
+    "microsoft.com",
+    "microsoftonline.com",
+    "netflix.com",
+    "okta.com",
+    "onlinesbi.sbi",
+    "oracle.com",
+    "paypal.com",
+    "salesforce.com",
+    "shopify.com",
+    "slack.com",
+    "spotify.com",
+    "wellsfargo.com",
+    "yahoo.com",
+    "zoom.us"
+  ],
+  "moved_known_sites_to_fit": {
+    "tuning": {
+      "records": 924,
+      "class_counts": {
+        "0": 891,
+        "1": 33
+      }
+    },
+    "calibration": {
+      "records": 2881,
+      "class_counts": {
+        "1": 2814,
+        "0": 67
+      }
+    },
+    "test": {
+      "records": 263,
+      "class_counts": {
+        "0": 29,
+        "1": 234
+      }
+    }
+  },
+  "partition_manifest": "ml/models/url-checker-research-2026-11-06-login-boundaries-partitions.json",
+  "partition_manifest_sha256": "fcc954b2215d1dc7667ba39368515b62fc46e63921ebb0daae07f300aef0e134",
+  "data_audit": "ml/reports/url-checker-research-2026-11-06-login-boundaries-data-audit.json",
+  "model_file_sha256": "e7038cf75526135330e2099a74d3fd5eae198f113d54e51e3be7868b8fa14a8c",
+  "release_requirements": {
+    "version": "phishguard-release-v1",
+    "minimum_recall_lower_95ci": 0.8,
+    "maximum_false_positive_rate_upper_95ci": 0.01,
+    "minimum_independent_phishing_groups": 100,
+    "minimum_independent_legitimate_groups": 400,
+    "minimum_sources_per_class": 2,
+    "minimum_per_legitimate_page_type": 20,
+    "required_legitimate_page_types": [
+      "login",
+      "sso",
+      "banking",
+      "education",
+      "payment",
+      "non_login"
+    ]
+  },
+  "label_scope": "phishing",
+  "deployment_eligible": false,
+  "deployment_status": "research_only",
+  "browser_inference_supported": false,
+  "internal_test_previously_inspected": true,
+  "started_at": "2026-11-06T00:09:23.211088+00:00",
+  "completed_at": "2026-11-06T00:33:46.418070+00:00",
+  "evaluation_scope": "Exploratory reused internal test after excluding known login development sites",
+  "limitations": [
+    "Known official-login scores are development controls, not independent generalization evidence",
+    "Feed/caller URL labels are not reviewed captured-document ground truth",
+    "No new source/time-separated or campaign-reviewed benchmark",
+    "Calibration selects a threshold, not calibrated theft probabilities",
+    "All results are URL-only; extension page verdicts remain rules-based"
+  ]
+}

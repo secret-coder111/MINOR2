@@ -90,8 +90,8 @@ window.PhishGuard.extractDomFeatures = function (knownFormFeatures) {
   const path = page.pathname || '';
   const isFrontPage = path === '' || path === '/' || /^\/(home|index|welcome)(\.[a-z0-9]+)?$/i.test(path);
   const formFeatures = knownFormFeatures || (window.PhishGuard.extractFormFeatures ? window.PhishGuard.extractFormFeatures() : {});
-  // An exact, short primary login heading is a stronger identity claim than
-  // arbitrary body mentions (reviews, footer links and provider buttons).
+  // Exact, short branding next to sensitive controls can identify a login at
+  // any heading level. Semantic article wrappers do not make a live form inert.
   // Read only non-editable label nodes; never read credential/editor contents.
   const headingText = (heading) => {
     const parts = [], pending = [heading];
@@ -106,11 +106,10 @@ window.PhishGuard.extractDomFeatures = function (knownFormFeatures) {
   };
   const headingClaimPattern = /^(?:(?:welcome to|sign in to|log in to|login to)\s+)?(?:google|microsoft|apple|paypal|amazon|icici|hdfc|sbi|axis)(?:\s+(?:account|accounts|login|sign in|log in|secure login|internet banking|online banking))?\s*[.!]?$/i;
   const details = window.PhishGuard.formFeatureDomContexts.get(formFeatures) || { sensitiveControls: [], contextControls: [] };
-  const contextualSelector = 'article, [role="article"], nav, footer, aside, [role="comment"]';
+  const contextualSelector = 'nav, footer, aside, [role="comment"]';
   const inContextualContent = (element) => {
-    // Element.closest stops at a shadow boundary. An article/footer component
-    // remains contextual content even when its login example lives in a root
-    // or arrives through a slot in the composed tree.
+    // Element.closest stops at a shadow boundary. Preserve the contextual
+    // boundary when a footer/widget arrives through a component or slot.
     for (let node = element; node; node = window.PhishGuard.composedParent(node)) {
       if (node.matches && node.matches(contextualSelector)) return true;
     }
@@ -129,23 +128,62 @@ window.PhishGuard.extractDomFeatures = function (knownFormFeatures) {
     // of this identity claim. A nearby short instruction may precede the UI.
     let sibling = heading.nextElementSibling;
     for (let index = 0; sibling && index < 3; index += 1, sibling = sibling.nextElementSibling) {
-      if (sibling.matches(contextualSelector + ', h1, h2, [role="heading"]')) break;
+      if (sibling.matches(contextualSelector + ', h1, h2, h3, h4, h5, h6, [role="heading"]')) break;
       const controls = details.sensitiveControls.filter((control) => !inContextualContent(control) && containsControl(sibling, control));
       if (controls.length) return controls;
     }
     return [];
   };
   const headingClaims = Number(formFeatures.sensitive_credential_field_count) > 0
-    ? query('h1, [role="heading"][aria-level="1"]').slice(0, 20)
+    ? query('h1, h2, h3, h4, h5, h6, [role="heading"]')
+      .filter((heading) => !heading.hasAttribute('role') || heading.getAttribute('role') !== 'heading'
+        || /^[1-6]$/.test(heading.getAttribute('aria-level') || '2'))
+      .filter((heading) => !inProviderControl(heading))
       .filter(window.PhishGuard.isRenderedControl).map((heading) => ({ text: headingText(heading), controls: nearbySensitiveControls(heading) }))
       .filter(({ text, controls }) => controls.length > 0 && text.length <= 100 && headingClaimPattern.test(text))
       .map((claim) => ({ ...claim, brand: window.PhishGuard.getBrandInfo(page.href, claim.text) })) : [];
-  const bodyMismatch = headingClaims.some((claim) => claim.brand.brandDomainMismatch);
-  const bodyIdentity = headingClaims.some((claim) => claim.brand.brandIdentityClaim);
+  const imageNameText = (node) => {
+    if (!node || window.PhishGuard.isEditableMetadata(node)) return '';
+    const parts = [], pending = [node];
+    while (pending.length) {
+      const current = pending.pop();
+      if (current.nodeType === 3) { parts.push(current.nodeValue || ''); continue; }
+      if (current.nodeType !== 1 || current.matches('input, textarea, select, option, script, style, template, [contenteditable]')) continue;
+      for (let index = current.childNodes.length - 1; index >= 0; index -= 1) pending.push(current.childNodes[index]);
+    }
+    return parts.join(' ');
+  };
+  const imageName = (node) => {
+    const root = node.getRootNode();
+    const referenced = String(node.getAttribute('aria-labelledby') || '').split(/\s+/)
+      .filter(Boolean).map((id) => imageNameText(root.getElementById(id))).join(' ');
+    const title = node.tagName.toLowerCase() === 'svg' ? imageNameText(node.querySelector('title')) : '';
+    return String(referenced || node.getAttribute('aria-label') || node.getAttribute('alt') || title).normalize('NFKC').replace(/\s+/g, ' ').trim();
+  };
+  const imagePattern = /^(?:(?:logo of|logo for)\s+)?(google|microsoft|apple|paypal|amazon|icici|hdfc|sbi|axis)(?:\s+logo)?\s*[.!]?$/i;
+  function inProviderControl(node) {
+    for (let current = node; current; current = window.PhishGuard.composedParent(current)) {
+      if (current.matches && current.matches('a, button, [role="button"], [role="link"]')) return true;
+    }
+    return false;
+  }
+  // Accessible image names only: no image downloads, filename guesses or OCR.
+  // Logos on provider buttons/links and distant page furniture are not claims
+  // that the surrounding credential form belongs to that provider.
+  const imageClaims = Number(formFeatures.sensitive_credential_field_count) > 0
+    ? query('img, svg[role="img"], [role="img"][aria-label], [role="img"][aria-labelledby]')
+      .filter((node) => window.PhishGuard.isRenderedControl(node) && !window.PhishGuard.isEditableMetadata(node) && !inProviderControl(node))
+      .map((node) => ({ name: imageName(node), controls: nearbySensitiveControls(node) }))
+      .map(({ name, controls }) => ({ match: imagePattern.exec(name), controls }))
+      .filter(({ match, controls }) => match && controls.length > 0)
+      .map(({ match, controls }) => ({ controls, brand: window.PhishGuard.getBrandInfo(page.href, match[1]) })) : [];
+  const identityClaims = [...headingClaims, ...imageClaims];
+  const bodyMismatch = identityClaims.some((claim) => claim.brand.brandDomainMismatch);
+  const bodyIdentity = identityClaims.some((claim) => claim.brand.brandIdentityClaim);
   const pageBrand = window.PhishGuard.getBrandInfo(page.href, document.title || '');
   const credentialContexts = (formFeatures.credential_contexts || []).map((context, index) => {
     const controls = details.contextControls[index] || [];
-    const contextClaims = headingClaims.filter((claim) => claim.controls.some((control) => controls.includes(control)));
+    const contextClaims = identityClaims.filter((claim) => claim.controls.some((control) => controls.includes(control)));
     const contextMismatch = contextClaims.some((claim) => claim.brand.brandDomainMismatch);
     // Address and identity must describe the SAME brand at the SAME sensitive
     // submission context. Titles/mentions/provider buttons cannot supply this

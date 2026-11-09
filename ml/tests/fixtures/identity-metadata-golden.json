@@ -1,0 +1,138 @@
+[
+  {
+    "name": "lower heading in active article login",
+    "url": "https://paypa1.test/login",
+    "title": "Member login",
+    "html": "<title>Member login</title><article><h2>PayPal sign in</h2><form method=post><input type=password></form></article>",
+    "outcome": "HIGH_RISK",
+    "expected": {"has_password_input": 1, "body_brand_identity_claim": 1}
+  },
+  {
+    "name": "accessible image identity beside sensitive form",
+    "url": "https://paypa1.test/login",
+    "title": "Member login",
+    "html": "<title>Member login</title><img alt='PayPal logo'><form method=post><input type=password></form>",
+    "outcome": "HIGH_RISK",
+    "expected": {"has_password_input": 1, "body_brand_identity_claim": 1}
+  },
+  {
+    "name": "SVG accessible name inside sensitive form",
+    "url": "https://paypa1.test/login",
+    "title": "Member login",
+    "html": "<title>Member login</title><form method=post><svg role=img aria-label=PayPal></svg><input type=password></form>",
+    "outcome": "HIGH_RISK",
+    "expected": {"body_brand_identity_claim": 1}
+  },
+  {
+    "name": "SVG title name is metadata",
+    "url": "https://paypa1.test/login",
+    "title": "Member login",
+    "html": "<title>Member login</title><form method=post><svg role=img><title>PayPal</title></svg><input type=password></form>",
+    "outcome": "HIGH_RISK",
+    "expected": {"body_brand_identity_claim": 1}
+  },
+  {
+    "name": "provider button logo is not form ownership",
+    "url": "https://paypa1.test/login",
+    "title": "Member login",
+    "html": "<title>Member login</title><form method=post><button type=button><img alt=PayPal>Continue with PayPal</button><input type=password></form>",
+    "outcome": "SAFE",
+    "expected": {"body_brand_identity_claim": 0}
+  },
+  {
+    "name": "provider button heading is not form ownership",
+    "url": "https://paypa1.test/login",
+    "title": "Member login",
+    "html": "<title>Member login</title><form method=post><button type=button><h2>PayPal</h2></button><input type=password></form>",
+    "outcome": "SAFE",
+    "expected": {"body_brand_identity_claim": 0}
+  },
+  {
+    "name": "provider link logo is not form ownership",
+    "url": "https://paypa1.test/login",
+    "title": "Member login",
+    "html": "<title>Member login</title><form method=post><a href=/oauth><img alt=PayPal></a><input type=password></form>",
+    "outcome": "SAFE",
+    "expected": {"body_brand_identity_claim": 0}
+  },
+  {
+    "name": "tutorial prose and disabled example remain neutral",
+    "url": "https://paypa1.test/guide",
+    "title": "Member guide",
+    "html": "<title>Member guide</title><article><h2>PayPal sign in</h2><form method=post><fieldset disabled><input type=password></fieldset></form></article>",
+    "outcome": "SAFE",
+    "expected": {"credential_field_count": 0, "body_brand_identity_claim": 0}
+  },
+  {
+    "name": "integration guide is not an exact identity heading",
+    "url": "https://paypa1.test/guide",
+    "title": "Member guide",
+    "html": "<title>Member guide</title><article><h2>PayPal integration guide</h2><form method=post><input type=password></form></article>",
+    "outcome": "SAFE",
+    "expected": {"credential_field_count": 1, "body_brand_identity_claim": 0}
+  },
+  {
+    "name": "unrelated article branding cannot reach outside form",
+    "url": "https://paypa1.test/login",
+    "title": "Member login",
+    "html": "<title>Member login</title><article><h2>PayPal</h2><p>Payment integration article.</p></article><form method=post><input type=password></form>",
+    "outcome": "SAFE",
+    "expected": {"body_brand_identity_claim": 0}
+  },
+  {
+    "name": "unrelated logo in footer cannot claim login identity",
+    "url": "https://paypa1.test/login",
+    "title": "Member login",
+    "html": "<title>Member login</title><form method=post><input type=password></form><footer><img alt=PayPal></footer>",
+    "outcome": "SAFE",
+    "expected": {"body_brand_identity_claim": 0}
+  },
+  {
+    "name": "Hindi sensitive prompt and lookalike heading",
+    "url": "https://paypa1.test/login",
+    "title": "Member login",
+    "html": "<title>Member login</title><h3>PayPal sign in</h3><form method=post><label>पासवर्ड<input name=x></label></form>",
+    "outcome": "HIGH_RISK",
+    "expected": {"has_password_input": 1, "sensitive_credential_field_count": 1}
+  },
+  {
+    "name": "Hindi recovery identity is not a password request",
+    "url": "https://members.example/login",
+    "title": "Member login",
+    "html": "<title>Member login</title><form method=post><input placeholder='पासवर्ड रीसेट के लिए ईमेल'></form>",
+    "outcome": "SAFE",
+    "expected": {"has_password_input": 0, "credential_field_count": 1, "sensitive_credential_field_count": 0}
+  },
+  {
+    "name": "Hindi email verification code remains sensitive",
+    "url": "https://members.example/login",
+    "title": "Member login",
+    "html": "<title>Member login</title><form method=post><input placeholder='ईमेल सत्यापन कोड'></form>",
+    "outcome": "SAFE",
+    "expected": {"credential_field_count": 1, "sensitive_credential_field_count": 1}
+  },
+  {
+    "name": "French and Spanish password labels",
+    "url": "https://members.example/login",
+    "title": "Member login",
+    "html": "<title>Member login</title><form method=post><input aria-label='Mot de passe'><input aria-label='Contraseña'></form>",
+    "outcome": "SAFE",
+    "expected": {"has_password_input": 1, "credential_field_count": 2}
+  },
+  {
+    "name": "fullwidth and format-character metadata normalization",
+    "url": "https://members.example/login",
+    "title": "Member login",
+    "html": "<title>Member login</title><form method=post><input aria-label='Ｐａｓｓｗｏｒｄ'><input placeholder='Pass​word'><input name='पासवर्ड'></form>",
+    "outcome": "SAFE",
+    "expected": {"has_password_input": 1, "credential_field_count": 3}
+  },
+  {
+    "name": "French email recovery remains identity only",
+    "url": "https://members.example/login",
+    "title": "Member login",
+    "html": "<title>Member login</title><form method=post><input placeholder='Courriel pour réinitialiser le mot de passe'></form>",
+    "outcome": "SAFE",
+    "expected": {"has_password_input": 0, "credential_field_count": 1, "sensitive_credential_field_count": 0}
+  }
+]

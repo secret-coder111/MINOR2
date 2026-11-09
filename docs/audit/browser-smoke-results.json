@@ -1,5 +1,5 @@
 {
-  "passed": true,
+  "passed": false,
   "browser": "Edg/156.0.4314.58",
   "workerContext": {
     "url": "chrome-extension://hhpgjcdcfahiilchnimhfnjclldkdgpd/src/background/service-worker.js",
@@ -14,6 +14,27 @@
     "outcome": "SAFE",
     "note": "Local HTTP/IP fixtures can produce transport/address caution; no high-risk banner."
   },
+  "browserOwnedCaution": {
+    "text": "!",
+    "title": "PhishGuard: Caution. Check the address and sign-in destination."
+  },
+  "runtimeTiming": {
+    "evidenceFrame": {
+      "extraction_ms": 4.1,
+      "policy_ms": 0.3,
+      "worker_ms": 1.8
+    },
+    "topDocument": {
+      "scan_to_result_ms": 103.7,
+      "scan_to_warning_dom_ms": 108.2,
+      "scheduling_delay_ms": 245
+    },
+    "scope": "Latest observed local scan and warning DOM insertion; not paint, prevention, or an accuracy benchmark."
+  },
+  "browserOwnedHighRisk": {
+    "text": "!",
+    "title": "PhishGuard: High phishing risk. Open to review indicators."
+  },
   "spaMutation": {
     "score": 88,
     "outcome": "HIGH_RISK"
@@ -22,9 +43,26 @@
   "embeddedFrame": {
     "score": 88,
     "outcome": "HIGH_RISK",
-    "frameId": 8
+    "frameId": 9
   },
   "frameRemoval": "warning removed",
+  "semanticBrandChecks": [
+    {
+      "name": "article heading",
+      "outcome": "HIGH_RISK",
+      "score": 88
+    },
+    {
+      "name": "local image alternate text",
+      "outcome": "HIGH_RISK",
+      "score": 88
+    },
+    {
+      "name": "provider button image",
+      "outcome": "CAUTION",
+      "score": 43
+    }
+  ],
   "sameOriginLookalike": {
     "score": 80,
     "outcome": "HIGH_RISK",
@@ -81,7 +119,7 @@
   "inheritedDocument": {
     "score": 88,
     "outcome": "HIGH_RISK",
-    "origin": "http://127.0.0.1:54465"
+    "origin": "http://127.0.0.1:56562"
   },
   "coverage": {
     "complete": false,
@@ -144,105 +182,8 @@
       "98.2%",
       "85.8%",
       "91.6%"
-    ],
-    "popupEntry": "packaged checker opened; model metrics loaded under extension CSP",
-    "loadedPageChecks": [
-      {
-        "title": "No strong page indicators · 8/100",
-        "details": "http://127.0.0.1:54465 · 1 document(s) inspected. This is the extension's current evidence index, not a safety guarantee. Late content or a changed page may change the result.",
-        "reasons": "The address has unusual structural characteristics; this alone does not establish phishing."
-      },
-      {
-        "title": "High phishing risk · 88/100",
-        "details": "http://127.0.0.1:54465 · 1 document(s) inspected. This is the extension's current evidence index, not a safety guarantee. Late content or a changed page may change the result.",
-        "reasons": "This page asks for credentials while claiming a brand whose recognized domain does not match.A credential form sends information to another site. Verify the destination; some sign-in providers use this legitimately.The address has unusual structural characteristics; this alone does not establish phishing."
-      }
     ]
   },
-  "publicDemos": [
-    {
-      "requestedUrl": "https://phishguard-classroom-visual-lab.www-vikramsahu001.chatgpt.site/legitimate-demo.html",
-      "checkedAt": "2026-11-03T07:37:16.226Z",
-      "effectiveUrl": "https://phishguard-classroom-visual-lab.www-vikramsahu001.chatgpt.site/legitimate-demo",
-      "title": "Contoso Bank",
-      "phishguard": {
-        "score": 0,
-        "outcome": "SAFE",
-        "reasons": [
-          "No strong phishing indicators found. The website's identity has not been independently verified."
-        ],
-        "inspectedFrames": 1,
-        "securityTest": null,
-        "warningVisible": false
-      }
-    },
-    {
-      "requestedUrl": "https://phishguard-classroom-visual-lab.www-vikramsahu001.chatgpt.site/caution-demo.html",
-      "checkedAt": "2026-11-03T07:37:19.848Z",
-      "effectiveUrl": "https://phishguard-classroom-visual-lab.www-vikramsahu001.chatgpt.site/caution-demo",
-      "title": "College Portal",
-      "phishguard": {
-        "score": 35,
-        "outcome": "CAUTION",
-        "reasons": [
-          "A credential form sends information to another site. Verify the destination; some sign-in providers use this legitimately."
-        ],
-        "inspectedFrames": 1,
-        "securityTest": null,
-        "warningVisible": false
-      }
-    },
-    {
-      "requestedUrl": "https://phishguard-classroom-visual-lab.www-vikramsahu001.chatgpt.site/phishing-demo.html",
-      "checkedAt": "2026-11-03T07:37:20.480Z",
-      "effectiveUrl": "https://phishguard-classroom-visual-lab.www-vikramsahu001.chatgpt.site/phishing-demo",
-      "title": "PayPal Security Update",
-      "phishguard": {
-        "score": 80,
-        "outcome": "HIGH_RISK",
-        "reasons": [
-          "This page asks for credentials while claiming a brand whose recognized domain does not match.",
-          "A credential form sends information to another site. Verify the destination; some sign-in providers use this legitimately."
-        ],
-        "inspectedFrames": 1,
-        "securityTest": null,
-        "warningVisible": true
-      }
-    },
-    {
-      "requestedUrl": "https://phishguard-classroom-visual-lab.www-vikramsahu001.chatgpt.site/url-checker.html",
-      "checkedAt": "2026-11-03T07:37:21.068Z",
-      "effectiveUrl": "https://phishguard-classroom-visual-lab.www-vikramsahu001.chatgpt.site/url-checker",
-      "title": "Check a URL | PhishGuard",
-      "urlChecker": {
-        "host": "github.com",
-        "score": "0",
-        "band": "low",
-        "hidden": false,
-        "metrics": 4,
-        "modelVersion": "url-checker-research-2026-11-03-expanded",
-        "modelMetrics": [
-          "92.6%",
-          "98.2%",
-          "85.8%",
-          "91.6%"
-        ]
-      },
-      "httpScoreRegression": {
-        "score": "15",
-        "breakdown": "URL HTTP transport: +15",
-        "band": "caution"
-      },
-      "phishguard": {
-        "score": 0,
-        "outcome": "SAFE",
-        "reasons": [
-          "No strong phishing indicators found. The website's identity has not been independently verified."
-        ],
-        "inspectedFrames": 1,
-        "securityTest": null,
-        "warningVisible": false
-      }
-    }
-  ]
+  "error": "Error: Timed out waiting for packaged URL checker tab opened from popup; last=undefined",
+  "browserOutput": "\r\nDevTools listening on ws://127.0.0.1:56564/devtools/browser/ae8723db-e398-4013-a37f-2b44f103c6de\r\n[46956:46276:1106/054218.439:ERROR:components\\sync\\engine\\get_updates_processor.cc:426] PostClientToServerMessage() failed during GetUpdates with error Network error (ERR_CONNECTION_RESET)\r\n[46956:14116:1106/054218.885:ERROR:chrome\\browser\\task_manager\\providers\\fallback_task_provider.cc:126] Every renderer should have at least one task provided by a primary task provider. If a \"Renderer\" fallback task is shown, it is a bug. If you have repro steps, please file a new bug and tag it as a dependency of crbug.com/40528867.\r\n[46956:14116:1106/054218.900:ERROR:chrome\\browser\\task_manager\\providers\\fallback_task_provider.cc:126] Every renderer should have at least one task provided by a primary task provider. If a \"Renderer\" fallback task is shown, it is a bug. If you have repro steps, please file a new bug and tag it as a dependency of crbug.com/40528867.\r\n[46956:14116:1106/054224.441:ERROR:components\\edge_smartscreen\\browser\\smartscreen_dns_resolver.cc:109] SmartScreenDnsResolver::OnComplete Error: -105 DidTimeOut: 0 URL: https://paypa1.test/login\r\n[46956:14116:1106/054225.257:ERROR:components\\edge_smartscreen\\browser\\smartscreen_dns_resolver.cc:109] SmartScreenDnsResolver::OnComplete Error: -105 DidTimeOut: 0 URL: https://paypa1.test/provider\r\n"
 }

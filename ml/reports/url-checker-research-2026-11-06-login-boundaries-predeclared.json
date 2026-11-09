@@ -1,0 +1,53 @@
+{
+  "model_version": "url-checker-research-2026-11-06-login-boundaries",
+  "started_at": "2026-11-06T00:09:23.211088+00:00",
+  "seed": 20261102,
+  "candidates": {
+    "none_c_1_login_1": {
+      "text_transform": "none",
+      "character_c": 1.0,
+      "login_sample_weight": 1.0
+    },
+    "none_c_1_login_50": {
+      "text_transform": "none",
+      "character_c": 1.0,
+      "login_sample_weight": 50.0
+    },
+    "none_c_4_login_1": {
+      "text_transform": "none",
+      "character_c": 4.0,
+      "login_sample_weight": 1.0
+    },
+    "none_c_4_login_50": {
+      "text_transform": "none",
+      "character_c": 4.0,
+      "login_sample_weight": 50.0
+    },
+    "host_path_boundaries_v1_c_1_login_1": {
+      "text_transform": "host_path_boundaries_v1",
+      "character_c": 1.0,
+      "login_sample_weight": 1.0
+    },
+    "host_path_boundaries_v1_c_1_login_50": {
+      "text_transform": "host_path_boundaries_v1",
+      "character_c": 1.0,
+      "login_sample_weight": 50.0
+    },
+    "host_path_boundaries_v1_c_4_login_1": {
+      "text_transform": "host_path_boundaries_v1",
+      "character_c": 4.0,
+      "login_sample_weight": 1.0
+    },
+    "host_path_boundaries_v1_c_4_login_50": {
+      "text_transform": "host_path_boundaries_v1",
+      "character_c": 4.0,
+      "login_sample_weight": 50.0
+    }
+  },
+  "fit_limit": 240000,
+  "selection": "highest tuning recall at URL-level FPR Wilson-upper <=1%; tie lower FPR, AP, AUC",
+  "final_threshold": "fresh independent calibration at URL-level FPR Wilson-upper <=1%",
+  "known_login_sites": "All curated-official-login sites reserved for fitting, excluded from evaluation",
+  "test_use": "Previously inspected internal test, candidate and threshold fixed before scoring",
+  "promotion": "Research diagnostic only; no production eligibility claim or model activation"
+}

@@ -10,7 +10,7 @@ import json
 from collections import Counter
 from pathlib import Path
 
-from dataset_contract import manifest
+from dataset_contract import manifest, group_annotations
 from dom_dataset import load_snapshots
 from release_contract import benchmark_review, independent_group_metrics, release_requirements
 from train_model import read_dataset
@@ -33,6 +33,10 @@ def review(records: list[dict], require_dom: bool = False) -> dict:
             'independent_groups': {name: groups[name] for name in ['legitimate_groups', 'phishing_groups']},
             'by_label': dict(Counter(str(r['label']) for r in records)),
             'by_page_type': dict(Counter(str(r.get('page_type') or 'missing') for r in records)),
+            'group_annotation_coverage': {
+                name: sum(name in group_annotations(r) for r in records)
+                for name in ['campaign_id', 'template_group']},
+            'campaign_review_limit': 'Only supplied relationships are grouped; absent annotations do not prove unseen campaigns or template independence',
             'errors': errors,
             'meaning': 'Composition/review evidence only; freeze before model or policy selection and evaluate once'}
 

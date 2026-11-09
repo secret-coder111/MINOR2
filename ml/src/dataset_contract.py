@@ -19,6 +19,31 @@ PSL_PATH = Path(__file__).resolve().parents[2] / 'extension/src/shared/public-su
 PHISHING_LABELS = {'0': 0, 'benign': 0, 'legitimate': 0, 'good': 0, 'safe': 0,
                    '1': 1, 'phishing': 1}
 MIXED_THREAT_LABELS = {'bad': 1, 'malicious': 1, 'malware': 1, 'defacement': 1}
+GROUP_ANNOTATION_FIELDS = ('campaign_id', 'template_group')
+
+
+def group_annotations(record: dict) -> dict[str, str]:
+    """Explicit reviewer-supplied relationships, not automatic label evidence.
+
+    Related campaigns/templates can span registrable sites and have different
+    HTML. Keep their reviewed identifiers through imports and frozen identities.
+    Absent annotations do not imply campaigns are independent.
+    """
+    result = {}
+    for name in GROUP_ANNOTATION_FIELDS:
+        value = record.get(name)
+        if value is None or value == '':
+            continue
+        if not isinstance(value, str) or len(value) > 200 or any(ord(c) < 32 for c in value):
+            raise ValueError(f'{name} must be a short plain-text group identifier')
+        value = re.sub(r'\s+', ' ', value.strip()).casefold()
+        if value:
+            result[name] = value
+    return result
+
+
+def annotation_keys(record: dict) -> list[str]:
+    return [name + ':' + sha256(value) for name, value in group_annotations(record).items()]
 
 
 def source_identity(record: dict, fallback: str = '') -> tuple[str, str]:
@@ -167,7 +192,7 @@ def record_domains(record: dict) -> set[str]:
 
 
 def connected_groups(records: list[dict]) -> list[str]:
-    """Union original/final sites and duplicate content before splitting."""
+    """Union sites, duplicate content and explicit campaign/template relationships."""
     parents: dict[str, str] = {}
     sizes: dict[str, int] = {}
 
@@ -198,6 +223,7 @@ def connected_groups(records: list[dict]) -> list[str]:
         digest = content_hash(record)
         if digest:
             group_keys.append('html:' + digest)
+        group_keys.extend('annotation:' + key for key in annotation_keys(record))
         for key in group_keys[1:]:
             union(group_keys[0], key)
         keys.append(group_keys[0])
@@ -206,7 +232,8 @@ def connected_groups(records: list[dict]) -> list[str]:
 
 def manifest(records: list[dict], purpose: str) -> dict:
     times = sorted({record.get('observed_at', '') for record in records if record.get('observed_at')})
-    return {
+    annotated = any(group_annotations(record) for record in records)
+    result = {
         'version': 3, 'purpose': purpose, 'created_at': datetime.now(timezone.utc).isoformat(),
         'samples': len(records),
         'class_counts': {str(label): sum(r['label'] == label for r in records) for label in [0, 1]},
@@ -228,6 +255,7 @@ def manifest(records: list[dict], purpose: str) -> dict:
             'policy_features': r.get('policy_features'), 'policy_version':r.get('policy_version'),
             'policy_sha256':r.get('policy_sha256'),
             'capture_execution_world': r.get('capture_execution_world'),
+            **({'group_annotations': group_annotations(r)} if group_annotations(r) else {}),
         }, sort_keys=True, separators=(',', ':'))) for r in records),
         'sources': sorted({str(r.get('source') or '').strip().casefold() for r in records}),
         'identified_source_samples': sum(bool(source_identity(r)[0])
@@ -235,11 +263,16 @@ def manifest(records: list[dict], purpose: str) -> dict:
         'observed_at': times,
         'dated_samples': sum(bool(r.get('observed_at')) for r in records),
     }
+    # Preserve historical v3 identities for unannotated collections. Adding or
+    # changing annotations creates a new identity and cannot bless an old test.
+    if annotated:
+        result.update(version=4, group_sha256=sorted({sha256(key) for r in records for key in annotation_keys(r)}))
+    return result
 
 
 def assert_separated(reference: dict, candidate: dict, *, source_time: bool = False) -> dict:
     overlaps = {key: len(set(reference.get(key, [])) & set(candidate.get(key, [])))
-                for key in ['url_sha256', 'domain_sha256', 'content_sha256']}
+                for key in ['url_sha256', 'domain_sha256', 'content_sha256', 'group_sha256']}
     if any(overlaps.values()):
         raise ValueError(f'Dataset overlaps training/selection data: {overlaps}')
     if source_time:

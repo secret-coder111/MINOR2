@@ -5,6 +5,7 @@
   const statusText = document.getElementById('statusText');
   const coverageText = document.getElementById('coverageText');
   const reputationText = document.getElementById('reputationText');
+  const timingText = document.getElementById('timingText');
   const feedbackStatus = document.getElementById('feedbackStatus');
   const reasonList = document.getElementById('reasonList');
   const expected = document.getElementById('expectedVerdict');
@@ -59,6 +60,7 @@
       statusText.textContent = restricted ? 'The browser does not allow inspection of this page.' : 'Waiting for page analysis. Refresh this tab after loading or reloading the extension.';
       coverageText.textContent = 'No document inspected.';
       reputationText.textContent = '';
+      timingText.textContent = '';
       nextStep.textContent = 'Refresh the website after loading the extension, then check again.';
       return;
     }
@@ -91,6 +93,19 @@
     const remoteSummary = remoteCoverage && ['available', 'pending', 'error'].every((key) => Number.isInteger(remoteCoverage[key]) && remoteCoverage[key] >= 0)
       && data.reputationStatus !== 'disabled' ? ` ${remoteCoverage.available} completed, ${remoteCoverage.pending} pending, ${remoteCoverage.error} failed.` : '';
     reputationText.textContent = `${reputationMessages[data.reputationStatus] || ''}${remoteSummary}`;
+    const reputation = data.metadata && data.metadata.reputation;
+    if (reputation && Number.isFinite(reputation.checkedAt) && Number.isFinite(reputation.expiresAt)) {
+      reputationText.textContent += ` Source: user-configured service; hostname only. Checked ${new Date(reputation.checkedAt).toLocaleTimeString()}; cache expires ${new Date(reputation.expiresAt).toLocaleTimeString()}. Local rule score: ${data.metadata.rule_score}/100.`;
+    }
+    const timing = data.metadata && data.metadata.runtime_timing || {};
+    const renderTiming = data.runtimeTiming || {};
+    const measured = [];
+    if (Number.isFinite(timing.extraction_ms)) measured.push(`evidence-frame extraction ${timing.extraction_ms.toFixed(1)} ms`);
+    if (Number.isFinite(timing.policy_ms)) measured.push(`rules ${timing.policy_ms.toFixed(1)} ms`);
+    if (Number.isFinite(renderTiming.scan_to_result_ms)) measured.push(`top-page scan to result ${renderTiming.scan_to_result_ms.toFixed(1)} ms`);
+    if (Number.isFinite(renderTiming.scan_to_warning_dom_ms)) measured.push(`top-page scan to warning insertion ${renderTiming.scan_to_warning_dom_ms.toFixed(1)} ms`);
+    if (Number.isFinite(renderTiming.scheduling_delay_ms)) measured.push(`scheduled wait ${renderTiming.scheduling_delay_ms.toFixed(1)} ms`);
+    timingText.textContent = measured.length ? `Latest observed timing: ${measured.join('; ')}. Warning insertion does not measure paint or prevent submission.` : 'No timing sample is available for this result.';
     const sourceOrigin = webOrigin(data.evidenceFrame && data.evidenceFrame.origin);
     if (sourceOrigin && data.evidenceFrame.frameId !== 0) {
       evidenceOrigin.hidden = false;

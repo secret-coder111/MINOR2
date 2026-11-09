@@ -8,6 +8,7 @@ from __future__ import annotations
 import ipaddress
 import math
 import re
+import unicodedata
 import hashlib
 from pathlib import Path
 from functools import lru_cache
@@ -17,7 +18,7 @@ from urllib.parse import urljoin, urlsplit
 from dataset_contract import normalize_url, registrable_domain
 
 FEATURE_SCHEMA_VERSION = '0.2.0'
-POLICY_VERSION = '0.5.0'
+POLICY_VERSION = '0.6.0'
 FEATURE_SCHEMA = [
     'url_length', 'hostname_length', 'subdomain_count', 'dot_count', 'digit_count',
     'suspicious_char_count', 'has_ip_address', 'uses_http', 'has_punycode',
@@ -85,6 +86,9 @@ METADATA_CODE = re.compile(r'\b(?:otp|totp|one time (?:code|password)|verificati
 METADATA_SENSITIVE = re.compile(r'\b(?:password|passwd|pwd|passcode|otp|totp|cvv|cvc|aadhaar|aadhar)\b|\b(?:one time (?:code|password)|verification code|authentication code|authenticator code|two factor(?: authentication)? code|(?:credit )?card number|credit card|security code|card security code|expiration(?: date)?|expiry(?: date)?|seed phrase|recovery phrase|pan number)\b')
 METADATA_PASSWORD = re.compile(r'\b(?:password|passwd|pwd)\b')
 METADATA_IDENTITY = re.compile(r'\b(?:email|e mail|username|user name|userid|user id)\b')
+LOCALIZED_PASSWORD = ['पासवर्ड', 'कूटशब्द', 'mot de passe', 'contraseña', 'passwort', 'senha', 'пароль', 'كلمة المرور', '密码', 'パスワード']
+LOCALIZED_IDENTITY = ['ईमेल', 'ई मेल', 'उपयोगकर्ता नाम', 'courriel', 'adresse e mail', 'correo electrónico', 'correo electronico', 'usuario', 'البريد الإلكتروني', '邮箱', '电子邮件', 'メールアドレス']
+LOCALIZED_CODE = ['ओटीपी', 'सत्यापन कोड', 'एक बार का पासवर्ड', 'code de vérification', 'código de verificación']
 SENSITIVE_AUTOCOMPLETE = {'current-password','new-password','one-time-code','cc-number','cc-csc','cc-exp','cc-exp-month','cc-exp-year'}
 VOID_TAGS = {'area','base','br','col','embed','hr','img','input','link','meta','param','source','track','wbr'}
 INPUT_TYPES = {'hidden','text','search','tel','url','email','password','date','month','week',
@@ -139,8 +143,8 @@ def brand_address_info(host: str) -> set[str]:
 def brand_address_policy_features(url: str, primary_identity: str = '', *, sensitive_context: bool = False) -> dict:
     """Numeric policy extras for reviewed address + already-bound primary UI.
 
-    The caller must establish a rendered, non-editor, non-article primary
-    heading tied to this sensitive submission flow. A title/body mention is
+    The caller must establish a rendered, non-editor, nearby heading or
+    accessible logo tied to this sensitive submission flow. A title/body mention is
     not a substitute. Browser captures do that binding in dom-features.js;
     static build_feature_row intentionally remains only the 29-field schema.
     """
@@ -229,10 +233,18 @@ def hidden_style(attrs: dict, ancestors: list[dict], inert: bool = False) -> boo
 
 
 def metadata_tokens(value: str) -> str:
+    value = re.sub(r'[\u200b-\u200f\u202a-\u202e\u2060-\u206f\ufeff]', '', unicodedata.normalize('NFKC', value))
     value = re.sub(r'([a-z])([A-Z])', r'\1 \2', value)
     value = re.sub(r'([a-zA-Z])([0-9])', r'\1 \2', value)
     value = re.sub(r'([0-9])([a-zA-Z])', r'\1 \2', value)
-    return re.sub(r'[^a-z0-9]+', ' ', value.lower()).strip()
+    # Match JavaScript's Unicode Letter/Mark/Number tokenization, preserving
+    # combining signs in Hindi and other reviewed prompt metadata.
+    return ' '.join(''.join(character if unicodedata.category(character)[0] in {'L','M','N'} else ' '
+                            for character in value.lower()).split())
+
+
+def contains_phrase(text: str, phrases: list[str]) -> bool:
+    return any(' '+metadata_tokens(phrase)+' ' in ' '+text+' ' for phrase in phrases)
 
 
 def control_type(node: dict) -> str:
@@ -402,17 +414,20 @@ def build_feature_row(url: str, title: str = '', html: str = '') -> dict:
         compact = {re.sub(r'[^a-z0-9]', '', (attrs.get(key) or '').lower()) for key in ['name','id']}
         autocomplete = set((attrs.get('autocomplete') or '').lower().split())
         metadata = accessible_metadata(node) if kind in {'text','password','email','tel','number','textarea'} else ''
-        explicit_identity = kind == 'email' or bool(tokens & IDENTITY_NAMES or compact & IDENTITY_NAMES or autocomplete & {'username','email'})
+        name_metadata = metadata_tokens((attrs.get('name') or '')+' '+(attrs.get('id') or ''))
+        explicit_identity = kind == 'email' or bool(tokens & IDENTITY_NAMES or compact & IDENTITY_NAMES or autocomplete & {'username','email'} or contains_phrase(name_metadata, LOCALIZED_IDENTITY))
         identity_control = kind == 'email' or bool(autocomplete & {'username','email'})
-        metadata_requests_identity = explicit_identity or bool(METADATA_IDENTITY.search(metadata))
-        password_metadata = not metadata_requests_identity and bool(METADATA_PASSWORD.search(metadata))
-        sensitive_metadata = (not metadata_requests_identity or (not identity_control and bool(METADATA_CODE.search(metadata)))) and bool(METADATA_SENSITIVE.search(metadata))
-        sensitive = kind == 'password' or bool((not identity_control and (tokens & SENSITIVE_NAMES or compact & (SENSITIVE_NAMES | {'creditcardnumber'}))) or autocomplete & SENSITIVE_AUTOCOMPLETE or sensitive_metadata)
-        identity = kind == 'email' or bool(tokens & IDENTITY_NAMES or compact & IDENTITY_NAMES or autocomplete & {'username','email'} or METADATA_IDENTITY.search(metadata))
+        metadata_requests_identity = explicit_identity or bool(METADATA_IDENTITY.search(metadata)) or contains_phrase(metadata, LOCALIZED_IDENTITY)
+        password_metadata = not metadata_requests_identity and bool(METADATA_PASSWORD.search(metadata) or contains_phrase(metadata, LOCALIZED_PASSWORD))
+        requests_code = bool(METADATA_CODE.search(metadata)) or contains_phrase(metadata, LOCALIZED_CODE)
+        sensitive_metadata = (not metadata_requests_identity or (not identity_control and requests_code)) and bool(METADATA_SENSITIVE.search(metadata) or contains_phrase(metadata, LOCALIZED_PASSWORD) or requests_code)
+        password_name = not identity_control and contains_phrase(name_metadata, LOCALIZED_PASSWORD)
+        sensitive = kind == 'password' or bool((not identity_control and (tokens & SENSITIVE_NAMES or compact & (SENSITIVE_NAMES | {'creditcardnumber'}))) or autocomplete & SENSITIVE_AUTOCOMPLETE or sensitive_metadata or password_name or (not identity_control and contains_phrase(name_metadata, LOCALIZED_CODE)))
+        identity = kind == 'email' or bool(tokens & IDENTITY_NAMES or compact & IDENTITY_NAMES or autocomplete & {'username','email'} or METADATA_IDENTITY.search(metadata) or contains_phrase(metadata, LOCALIZED_IDENTITY) or contains_phrase(name_metadata, LOCALIZED_IDENTITY))
         if sensitive or identity:
             fields.append({'node': node, 'form': node.get('form'), 'sensitive': sensitive,
                 'username': 'username' in autocomplete,
-                'password': kind == 'password' or bool((not identity_control and tokens & {'password','passwd','pwd'}) or autocomplete & {'current-password','new-password'} or password_metadata)})
+                'password': kind == 'password' or bool((not identity_control and tokens & {'password','passwd','pwd'}) or autocomplete & {'current-password','new-password'} or password_metadata or password_name)})
     any_sensitive = any(field['sensitive'] for field in fields)
     def auth_context(form, form_fields):
         return any(field['sensitive'] or field['username'] for field in form_fields) or bool(
@@ -447,8 +462,11 @@ def build_feature_row(url: str, title: str = '', html: str = '') -> dict:
         styles = dict(re.findall(r'(?:^|;)\s*([\w-]+)\s*:\s*([^;]+)', attrs.get('style') or ''))
         return node['hidden'] or any(key in attrs and zero_size(attrs[key]) for key in ['width','height']) or any(zero_size(styles.get(key, '')) for key in ['width','height'])
     heading_pattern = re.compile(r'^(?:(?:welcome to|sign in to|log in to|login to)\s+)?(?:google|microsoft|apple|paypal|amazon|icici|hdfc|sbi|axis)(?:\s+(?:account|accounts|login|sign in|log in|secure login|internet banking|online banking))?\s*[.!]?$',re.I)
-    heading_nodes = [node for node in parser.nodes if node['tag'] == 'h1' or (node['attrs'].get('role') == 'heading' and node['attrs'].get('aria-level') == '1')][:20]
-    contextual = lambda node: any(item['tag'] in {'article','nav','footer','aside'} or item['attrs'].get('role') in {'article','comment'} for item in [node,*node['ancestors']])
+    heading_tags = {'h1','h2','h3','h4','h5','h6'}
+    heading_nodes = [node for node in parser.nodes if (node['tag'] in heading_tags or node['attrs'].get('role') == 'heading')
+        and (node['attrs'].get('role') != 'heading' or re.fullmatch('[1-6]', node['attrs'].get('aria-level') or '2'))]
+    contextual = lambda node: any(item['tag'] in {'nav','footer','aside'} or item['attrs'].get('role') == 'comment' for item in [node,*node['ancestors']])
+    provider_control = lambda node: any(item['tag'] in {'a','button'} or item['attrs'].get('role') in {'button','link'} for item in [node,*node['ancestors']])
     def contains_sensitive(scope, exclude_contextual=False):
         return any(field['sensitive'] and (not exclude_contextual or not contextual(field['node']))
             and (field['form'] is scope or field['node'] is scope or any(item is scope for item in field['node']['ancestors'])) for field in fields)
@@ -463,16 +481,37 @@ def build_feature_row(url: str, title: str = '', html: str = '') -> dict:
         heading_index = next(index for index,node in enumerate(siblings) if node is heading)
         following = siblings[heading_index+1:][:3]
         for sibling in following:
-            if contextual(sibling) or sibling['tag'] in {'h1','h2'} or sibling['attrs'].get('role') == 'heading':
+            if contextual(sibling) or sibling['tag'] in heading_tags or sibling['attrs'].get('role') == 'heading':
                 break
             if contains_sensitive(sibling,True):
                 return True
         return False
     headings = [text for node in heading_nodes if not node['hidden'] and not hidden_style(node['attrs'],[item['attrs'] for item in node['ancestors']],inert=True)
         and not any('contenteditable' in item['attrs'] for item in [node,*node['ancestors']])
+        and not provider_control(node)
         and nearby_sensitive(node)
         and (text := ' '.join(node['rendered_text'].split())) and len(text) <= 100 and heading_pattern.fullmatch(text)] if any_sensitive else []
-    body_mismatch = brand_info(normalized_host,' - '.join(headings))[0] if headings else 0
+    def image_name(node):
+        attrs = node['attrs']
+        referenced = ' '.join(nodes_by_id[identifier]['metadata_text'] for identifier in (attrs.get('aria-labelledby') or '').split() if identifier in nodes_by_id)
+        svg_title = next((child['metadata_text'] for child in parser.nodes if child['tag'] == 'title' and any(item is node for item in child['ancestors'])), '') if node['tag'] == 'svg' else ''
+        return ' '.join(unicodedata.normalize('NFKC', referenced or attrs.get('aria-label') or attrs.get('alt') or svg_title).split())
+    image_pattern = re.compile(r'^(?:(?:logo of|logo for)\s+)?(google|microsoft|apple|paypal|amazon|icici|hdfc|sbi|axis)(?:\s+logo)?\s*[.!]?$', re.I)
+    images = []
+    if any_sensitive:
+        for node in parser.nodes:
+            attrs = node['attrs']
+            if not (node['tag'] == 'img' or (node['tag'] == 'svg' and attrs.get('role') == 'img') or (attrs.get('role') == 'img' and ('aria-label' in attrs or 'aria-labelledby' in attrs))):
+                continue
+            if node['hidden'] or hidden_style(attrs,[item['attrs'] for item in node['ancestors']],inert=True):
+                continue
+            if provider_control(node) or any('contenteditable' in item['attrs'] for item in [node,*node['ancestors']]):
+                continue
+            match = image_pattern.fullmatch(image_name(node))
+            if match and nearby_sensitive(node):
+                images.append(match[1])
+    identities = headings + images
+    body_mismatch = brand_info(normalized_host,' - '.join(identities))[0] if identities else 0
     return {
         'url_length': len(url), 'hostname_length': len(browser_host),
         'subdomain_count': max(0, len(normalized_host.split('.'))-len(site.split('.'))) if site and not is_ip else 0,

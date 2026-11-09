@@ -78,8 +78,15 @@ window.PhishGuard.extractFormFeatures = function () {
     'current-password', 'new-password', 'one-time-code', 'cc-number', 'cc-csc', 'cc-exp', 'cc-exp-month', 'cc-exp-year'
   ]);
   const tokens = (text) => String(text || '')
+    .normalize('NFKC').replace(/[\u200b-\u200f\u202a-\u202e\u2060-\u206f\ufeff]/g, '')
     .replace(/([a-z])([A-Z])/g, '$1 $2').replace(/([a-zA-Z])([0-9])/g, '$1 $2')
-    .replace(/([0-9])([a-zA-Z])/g, '$1 $2').toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
+    .replace(/([0-9])([a-zA-Z])/g, '$1 $2').toLowerCase().split(/[^\p{L}\p{M}\p{N}]+/u).filter(Boolean);
+  // Finite, reviewed prompt phrases, not a claim of arbitrary language coverage.
+  // Preserve combining marks (including Hindi vowel signs) during tokenization.
+  const localizedPassword = ['पासवर्ड', 'कूटशब्द', 'mot de passe', 'contraseña', 'passwort', 'senha', 'пароль', 'كلمة المرور', '密码', 'パスワード'];
+  const localizedIdentity = ['ईमेल', 'ई मेल', 'उपयोगकर्ता नाम', 'courriel', 'adresse e mail', 'correo electrónico', 'correo electronico', 'usuario', 'البريد الإلكتروني', '邮箱', '电子邮件', 'メールアドレス'];
+  const localizedCode = ['ओटीपी', 'सत्यापन कोड', 'एक बार का पासवर्ड', 'code de vérification', 'código de verificación'];
+  const containsPhrase = (text, phrases) => phrases.some((phrase) => ` ${text} `.includes(` ${tokens(phrase).join(' ')} `));
   const metadataCache = new WeakMap();
   const metadataText = (node) => {
     if (!node || window.PhishGuard.isEditableMetadata(node)) return '';
@@ -137,31 +144,35 @@ window.PhishGuard.extractFormFeatures = function () {
     const compactNames = [input.getAttribute('name'), input.id].map((name) => String(name || '').toLowerCase().replace(/[^a-z0-9]/g, ''));
     const autocomplete = String(input.getAttribute('autocomplete') || '').toLowerCase().split(/\s+/);
     const metadata = accessibleMetadata(input);
+    const nameMetadata = nameTokens.join(' ');
     const explicitIdentity = input.type === 'email' || nameTokens.some((token) => identityNames.has(token))
-      || compactNames.some((name) => identityNames.has(name)) || autocomplete.some((token) => ['username', 'email'].includes(token));
+      || compactNames.some((name) => identityNames.has(name)) || autocomplete.some((token) => ['username', 'email'].includes(token))
+      || containsPhrase(nameMetadata, localizedIdentity);
     const identityControl = input.type === 'email' || autocomplete.some((token) => ['username', 'email'].includes(token));
     // "Email to reset your password" requests an identity, not a password.
     // Keep concrete type/name/autocomplete evidence independent of label prose.
-    const metadataRequestsIdentity = explicitIdentity || identityMetadata.test(metadata);
-    const passwordFromMetadata = !metadataRequestsIdentity && passwordMetadata.test(metadata);
+    const metadataRequestsIdentity = explicitIdentity || identityMetadata.test(metadata) || containsPhrase(metadata, localizedIdentity);
+    const passwordFromMetadata = !metadataRequestsIdentity && (passwordMetadata.test(metadata) || containsPhrase(metadata, localizedPassword));
     // "Email verification code" asks for a secret code, not an email address.
     // Generic coupon/postal codes remain neutral; recovery prose still cannot
     // turn an actual email control into a password prompt.
-    const sensitiveFromMetadata = (!metadataRequestsIdentity || (!identityControl && codeMetadata.test(metadata)))
-      && sensitiveMetadata.test(metadata);
+    const requestsCode = codeMetadata.test(metadata) || containsPhrase(metadata, localizedCode);
+    const sensitiveFromMetadata = (!metadataRequestsIdentity || (!identityControl && requestsCode))
+      && (sensitiveMetadata.test(metadata) || containsPhrase(metadata, localizedPassword) || requestsCode);
+    const passwordFromName = !identityControl && containsPhrase(nameMetadata, localizedPassword);
     const sensitive = input.type === 'password'
       || (!identityControl && (nameTokens.some((token) => sensitiveNames.has(token))
         || compactNames.some((name) => sensitiveNames.has(name) || name === 'creditcardnumber')))
       || autocomplete.some((token) => sensitiveAutocomplete.has(token))
-      || sensitiveFromMetadata;
+      || sensitiveFromMetadata || passwordFromName || (!identityControl && containsPhrase(nameMetadata, localizedCode));
     const identity = input.type === 'email' || nameTokens.some((token) => identityNames.has(token))
       || compactNames.some((name) => identityNames.has(name))
       || autocomplete.includes('username') || autocomplete.includes('email')
-      || identityMetadata.test(metadata);
+      || identityMetadata.test(metadata) || containsPhrase(metadata, localizedIdentity) || containsPhrase(nameMetadata, localizedIdentity);
     if (!sensitive && !identity) return null;
     const password = input.type === 'password' || (!identityControl && nameTokens.some((token) => ['password', 'passwd', 'pwd'].includes(token)))
       || autocomplete.some((token) => ['current-password', 'new-password'].includes(token))
-      || passwordFromMetadata;
+      || passwordFromMetadata || passwordFromName;
     // Custom editors have no native form submission semantics. Recognize their
     // prompt without inventing a destination or reading editable contents.
     return { input, form: input.matches('input, textarea') ? input.form : null, sensitive, identity, password, explicitUsername: autocomplete.includes('username') };

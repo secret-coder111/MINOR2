@@ -22,6 +22,9 @@
   let watchedControls = [];
   let renderingFingerprint = '';
   let visibilityWatchTruncated = false;
+  let latestScanTiming = null;
+  let reportedTimingKey = null;
+  const monotonicNow = () => window.performance && typeof window.performance.now === 'function' ? window.performance.now() : Date.now();
   const warningNodes = new WeakSet();
   const resetStyle = 'all:initial!important;box-sizing:border-box!important;visibility:visible!important;opacity:1!important;';
   const warningStyle = resetStyle + 'display:block!important;position:fixed!important;top:16px!important;left:auto!important;right:16px!important;bottom:auto!important;width:calc(100vw - 32px)!important;max-width:640px!important;background:#fff!important;color:#253d53!important;z-index:2147483647!important;padding:20px!important;margin:0!important;border:1px solid #edcbd1!important;border-top:4px solid #b32e42!important;border-radius:16px!important;font:14px/1.5 system-ui,sans-serif!important;box-shadow:0 12px 48px #172d4533!important;transform:none!important;filter:none!important;clip-path:none!important;max-height:min(78vh,560px)!important;overflow:auto!important;animation:none!important;transition:none!important;';
@@ -140,16 +143,18 @@
     const result = message.payload;
     const identity = result.identity;
     if (!identity || identity.documentToken !== documentToken || identity.scanId !== scanId || identity.url !== window.location.href) return;
+    const receivedAt = monotonicNow();
     if (result.outcome !== 'HIGH_RISK' && !result.securityTest) {
       // A cold worker must recover the child verdict before clearing its warning.
       if (!(result.coverage && result.coverage.recovering)) {
         dismissedWarning = null;
         removeWarningBanner();
       }
+      reportRenderTiming(result, receivedAt, false);
       return;
     }
     latestWarningKey = JSON.stringify([window.location.href, result.outcome, result.securityTest?.id || '', result.reasons || []]);
-    if (dismissedWarning === latestWarningKey) return;
+    if (dismissedWarning === latestWarningKey) { reportRenderTiming(result, receivedAt, false); return; }
     if (!document.documentElement) return;
     if (!warningBanner) {
       warningBanner = document.createElement('div');
@@ -185,17 +190,39 @@
       reason.text.value = (reasons[index] || '').slice(0, 240);
     });
     repairWarningBanner();
+    reportRenderTiming(result, receivedAt, !!warningBanner.isConnected);
   }
 
-  function sendForAnalysis() {
+  function reportRenderTiming(result, receivedAt, warningInserted) {
+    if (!latestScanTiming || latestScanTiming.scanId !== scanId || !result.metadata || !result.metadata.runtime_timing) return;
+    const key = `${scanId}:${result.outcome}:${warningInserted}:${result.securityTest?.id || ''}`;
+    if (reportedTimingKey === key) return;
+    reportedTimingKey = key;
+    const performance = { scan_to_result_ms: Math.max(0, receivedAt - latestScanTiming.startedAt),
+      scheduling_delay_ms: latestScanTiming.schedulingDelay };
+    if (warningInserted) performance.scan_to_warning_dom_ms = Math.max(0, monotonicNow() - latestScanTiming.startedAt);
+    // Durations describe the latest local scan and DOM insertion, never field
+    // contents, page text, paint completion or successful prevention.
+    try {
+      const pending = api.runtime.sendMessage({ type: 'REPORT_RENDER_METRICS',
+        identity: { documentToken, scanId }, performance });
+      if (pending && pending.catch) pending.catch(() => {});
+    } catch (_) { /* Timing reporting is optional and must not affect protection. */ }
+  }
+
+  function sendForAnalysis(schedulingDelay = 0) {
     if (stopped) return;
+    const startedAt = monotonicNow();
     refreshObservedRoots();
     refreshRenderingWatch();
     scanId += 1;
     const context = window.PhishGuard.getPageContext && window.PhishGuard.getPageContext();
     if (context && !context.supported) return;
+    const features = buildFeatureObject();
+    latestScanTiming = { scanId, startedAt, schedulingDelay: Number.isFinite(schedulingDelay) ? Math.max(0, schedulingDelay) : 0 };
     const message = { type: 'ANALYZE_PAGE', identity: { documentToken, scanId, url: window.location.href,
-      ...(context && context.inherited ? { contextUrl: context.url } : {}) }, payload: buildFeatureObject() };
+      ...(context && context.inherited ? { contextUrl: context.url } : {}) }, payload: features,
+      performance: { extraction_ms: Math.max(0, monotonicNow() - startedAt) } };
     try {
       const pending = api.runtime.sendMessage(message);
       if (pending && pending.then) pending.then(handleResult).catch(() => {});
@@ -211,8 +238,9 @@
     const wait = Math.max(0, Math.min(delay, 2000 - (now - firstScheduledAt)));
     scanTimer = window.setTimeout(() => {
       scanTimer = null;
+      const schedulingDelay = Math.max(0, Date.now() - firstScheduledAt);
       firstScheduledAt = 0;
-      sendForAnalysis();
+      sendForAnalysis(schedulingDelay);
     }, wait);
   }
 
@@ -222,7 +250,7 @@
 
   const observation = {
     childList: true, subtree: true, characterData: true, attributes: true,
-    attributeFilter: ['action', 'formaction', 'formmethod', 'form', 'method', 'type', 'name', 'id', 'src', 'href', 'content', 'http-equiv', 'hidden', 'inert', 'disabled', 'readonly', 'aria-disabled', 'aria-readonly', 'style', 'width', 'height', 'class', 'autocomplete', 'aria-label', 'aria-labelledby', 'aria-hidden', 'aria-level', 'placeholder', 'role', 'open', 'slot', 'contenteditable']
+    attributeFilter: ['action', 'formaction', 'formmethod', 'form', 'method', 'type', 'name', 'id', 'src', 'alt', 'href', 'content', 'http-equiv', 'hidden', 'inert', 'disabled', 'readonly', 'aria-disabled', 'aria-readonly', 'style', 'width', 'height', 'class', 'autocomplete', 'aria-label', 'aria-labelledby', 'aria-hidden', 'aria-level', 'placeholder', 'role', 'open', 'slot', 'contenteditable']
   };
 
   function controlVisibility(element) {

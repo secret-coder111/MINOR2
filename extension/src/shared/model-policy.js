@@ -1,6 +1,6 @@
 (function (global) {
   'use strict';
-  const POLICY_VERSION = '0.5.0';
+  const POLICY_VERSION = '0.6.0';
   const flag = (features, key) => Number(features[key]) === 1;
   const count = (features, key) => {
     const value = Number(features[key]);

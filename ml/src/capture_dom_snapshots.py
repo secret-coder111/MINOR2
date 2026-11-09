@@ -281,7 +281,7 @@ def capture(input_file: Path, output_file: Path, limit: int | None, timeout_ms: 
                     "source": source,
                     'source_provenance': provenance,
                     'label_status': (row.get('label_status') or '').strip(),
-                    **{name: (row.get(name) or '').strip() for name in ['reviewed_by', 'reviewed_at', 'label_evidence', 'page_type']},
+                    **{name: (row.get(name) or '').strip() for name in ['reviewed_by', 'reviewed_at', 'label_evidence', 'page_type', 'campaign_id', 'template_group']},
                     'observed_at': datetime.now(timezone.utc).isoformat(),
                     'capture_success': False,
                 }

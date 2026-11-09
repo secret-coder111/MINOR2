@@ -46,7 +46,16 @@
     if (weight < 1) {
       const char = model.character;
       if (!char?.vocabulary || char.idf.length !== char.coefficients.length) throw new Error('The character model is unavailable.');
-      const text = url.toLowerCase().replace(/\s\s+/g, ' ');
+      let modelText = url;
+      if (model.text_transform === 'host_path_boundaries_v1') {
+        const parsed = new URL(url);
+        const userinfo = parsed.username || parsed.password
+          ? `${parsed.username}${parsed.password ? ':' + parsed.password : ''}@` : '';
+        modelText = `host=${userinfo}${parsed.host}|path=${parsed.pathname}|query=${parsed.search.slice(1)}|fragment=${parsed.hash.slice(1)}|scheme=${parsed.protocol.slice(0, -1)}`;
+      } else if (model.text_transform && model.text_transform !== 'none') {
+        throw new Error('Unsupported research URL representation.');
+      }
+      const text = modelText.toLowerCase().replace(/\s\s+/g, ' ');
       const counts = new Map();
       for (let length = char.ngram_range[0]; length <= char.ngram_range[1]; length++) {
         for (let i = 0; i + length <= text.length; i++) {

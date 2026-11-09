@@ -23,7 +23,7 @@ class BrandAddressTests(unittest.TestCase):
                 self.assertEqual(expected, observed)
 
     def test_schema_and_capture_projection(self):
-        self.assertEqual(POLICY_VERSION, '0.5.0')
+        self.assertEqual(POLICY_VERSION, '0.6.0')
         self.assertEqual(len(policy_source_hash()), 64)
         self.assertEqual(list(build_feature_row('https://paypa1.com/')), FEATURE_SCHEMA)
         context = {key:0 for key in ['credential_context','has_password_input','credential_field_count',

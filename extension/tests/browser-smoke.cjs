@@ -106,18 +106,40 @@ async function until(check, description, timeout = 15000) {
     observations.extensionId = await cdp.evaluate('chrome.runtime.id', workerSession);
     const tabId = await until(() => cdp.evaluate(`chrome.tabs.query({}).then(tabs => tabs.find(tab => tab.url && tab.url.startsWith(${JSON.stringify(origin)}))?.id)`, workerSession), 'fixture tab');
     const read = () => cdp.evaluate(`chrome.storage.session.get('tab_${tabId}').then(value => value.tab_${tabId} || null)`, workerSession);
+    const readAction = () => cdp.evaluate(`Promise.all([chrome.action.getBadgeText({tabId:${tabId}}), chrome.action.getTitle({tabId:${tabId}})]).then(([text,title])=>({text,title}))`, workerSession);
     let result = await until(read, 'ordinary local login result');
     assert.notEqual(result.outcome, 'HIGH_RISK');
     assert.equal(await cdp.evaluate("!!document.getElementById('phishguard-warning-banner')", page.sessionId), false);
     observations.localHttpLogin = { score: result.score, outcome: result.outcome, note: 'Local HTTP/IP fixtures can produce transport/address caution; no high-risk banner.' };
+    assert.equal(result.inspectionScope.scriptDataFlow, 'not_verified');
+    assert.equal(result.inspectionScope.formDestinations, 'declared_only');
+    assert.match((await readAction()).title, /safety is not verified|Incomplete inspection/);
+
+    await cdp.evaluate("document.querySelector('form').action='https://collector.invalid/collect'", page.sessionId);
+    result = await until(async () => { const value = await read(); return value && value.outcome === 'CAUTION' && value; }, 'external destination caution');
+    const cautionAction = await until(async () => { const value = await readAction(); return /Caution/.test(value.title) && value; }, 'browser-owned caution status');
+    assert.equal(cautionAction.text, '!');
+    assert.equal(await cdp.evaluate("!!document.getElementById('phishguard-warning-banner')", page.sessionId), false);
+    observations.browserOwnedCaution = cautionAction;
 
     await cdp.evaluate("history.pushState({}, '', '/spa'); document.title='PayPal Account Verification'; document.querySelector('form').action='https://collector.invalid/collect'", page.sessionId);
     result = await until(async () => { const value = await read(); return value && value.outcome === 'HIGH_RISK' && value; }, 'SPA/attribute-change high-risk verdict');
     await until(() => cdp.evaluate("!!document.getElementById('phishguard-warning-banner')", page.sessionId), 'SPA warning banner');
+    const highAction = await until(async () => { const value = await readAction(); return /High phishing risk/.test(value.title) && value; }, 'browser-owned high-risk status');
+    assert.equal(highAction.text, '!');
+    const timedWarning = await until(async () => { const value = await read(); return value && value.outcome === 'HIGH_RISK'
+      && Number.isFinite(value.runtimeTiming?.scan_to_warning_dom_ms) && value; }, 'bounded warning DOM timing recorded');
+    assert.ok(timedWarning.metadata.runtime_timing.extraction_ms >= 0);
+    assert.ok(timedWarning.metadata.runtime_timing.policy_ms >= 0);
+    assert.ok(timedWarning.runtimeTiming.scan_to_warning_dom_ms >= timedWarning.runtimeTiming.scan_to_result_ms);
+    observations.runtimeTiming = { evidenceFrame: timedWarning.metadata.runtime_timing, topDocument: timedWarning.runtimeTiming,
+      scope: 'Latest observed local scan and warning DOM insertion; not paint, prevention, or an accuracy benchmark.' };
+    observations.browserOwnedHighRisk = highAction;
     observations.spaMutation = { score: result.score, outcome: result.outcome };
     await cdp.evaluate("document.title='College Portal'; document.querySelector('form').action='/session'", page.sessionId);
     await until(async () => { const value = await read(); return value && value.outcome !== 'HIGH_RISK' && value; }, 'attribute correction rescanned');
     await until(async () => !(await cdp.evaluate("!!document.getElementById('phishguard-warning-banner')", page.sessionId)), 'corrected warning removed');
+    await until(async () => /safety is not verified/.test((await readAction()).title), 'browser-owned stale warning cleared');
     observations.attributeCorrection = 'warning removed';
 
     const priorToken = (await read()).identity.documentToken;
@@ -129,6 +151,21 @@ async function until(check, description, timeout = 15000) {
     await until(async () => { const value = await read(); return value && value.inspectedFrames === 1 && value.outcome !== 'HIGH_RISK' && value; }, 'removed frame warning cleared');
     observations.frameRemoval = 'warning removed';
     assert.ok(!JSON.stringify(await read()).includes('/suspicious'), 'session result must omit full frame path');
+
+    const semanticBrandChecks = [];
+    for (const scenario of [
+      { name: 'article heading', html: '<article><h2>PayPal sign in</h2><form method="post" action="https://collector.invalid/collect"><input type="password" name="password"><button>Sign in</button></form></article>', outcome: 'HIGH_RISK' },
+      { name: 'local image alternate text', html: '<img alt="PayPal logo"><form method="post" action="https://collector.invalid/collect"><input type="password" name="password"><button>Sign in</button></form>', outcome: 'HIGH_RISK' },
+      { name: 'provider button image', html: '<button type="button">Continue with <img alt="PayPal logo"></button><form method="post" action="https://collector.invalid/collect"><input type="password" name="password"><button>Sign in</button></form>', outcome: 'CAUTION' }
+    ]) {
+      const priorScan = (await read()).identity.scanId;
+      await cdp.evaluate(`document.title='Member login'; document.body.innerHTML=${JSON.stringify(scenario.html)}`, page.sessionId);
+      const value = await until(async () => { const value = await read(); return value && value.identity.scanId > priorScan
+        && value.outcome === scenario.outcome && value; }, `semantic brand ${scenario.name}`);
+      if (scenario.outcome === 'CAUTION') assert.equal(value.metadata.evidence_categories.identity, 0, 'provider branding alone cannot establish impersonation');
+      semanticBrandChecks.push({ name: scenario.name, outcome: value.outcome, score: value.score });
+    }
+    observations.semanticBrandChecks = semanticBrandChecks;
 
     // Reserved .test URLs are fulfilled from this process before networking.
     // This exercises a real HTTPS-origin URL without visiting a phishing site.

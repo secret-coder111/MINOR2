@@ -26,7 +26,6 @@ for (const [name, html, url] of [
   ['shared hosting alone', login(), 'https://tenant.github.io/'],
   ['lookalike only below another tenant boundary', login(), 'https://paypa1.tenant.github.io/'],
   ['provider phrase', '<h1>Sign in with PayPal</h1><form method=post><input type=password></form>', 'https://paypa1.com/'],
-  ['article heading', `<article>${login()}</article>`, 'https://paypa1.com/'],
   ['footer form', `<footer>${login()}</footer>`, 'https://paypa1.com/'],
   ['different form brand', login('Microsoft'), 'https://paypa1.com/'],
   ['title alone', '<title>PayPal sign in</title><form method=post><input type=password></form>', 'https://paypa1.com/'],
@@ -48,14 +47,23 @@ const hostileAggregate = { ...separate, credential_brand_identity_claim: 1, cred
 assert.notEqual(policy.scoreEvidence(hostileAggregate).outcome, 'HIGH_RISK', 'per-context defaults prevent aggregate leakage');
 const noClaim = policy.scoreEvidence({credential_context:1, has_password_input:1, brand_address_deception:1});
 assert.equal(noClaim.outcome, 'SAFE', 'address resemblance alone remains inconclusive');
-for (const context of ['article', 'footer', 'nav', 'aside']) {
+for (const context of ['footer', 'nav', 'aside']) {
   const features = extract(`<${context}><div id="component"></div></${context}>`, 'https://paypa1.com/', (window) => {
     window.document.getElementById('component').attachShadow({mode:'open'}).innerHTML = '<form method="post"><h1>PayPal sign in</h1><input type="password"></form>';
   });
   assert.notEqual(policy.scoreEvidence(features).outcome, 'HIGH_RISK', `${context} exclusion crosses shadow roots`);
 }
+for (const wrapper of ['article', 'div role="article"']) {
+  const tag = wrapper.split(' ')[0];
+  const features = extract(`<${wrapper}>${login()}</${tag}>`, 'https://paypa1.com/');
+  assert.equal(policy.scoreEvidence(features).outcome, 'HIGH_RISK', 'an article wrapper does not neutralize active credential UI');
+}
+const shadowArticle = extract('<article><div id="component"></div></article>', 'https://paypa1.com/', (window) => {
+  window.document.getElementById('component').attachShadow({mode:'open'}).innerHTML = '<form method="post"><h2>PayPal sign in</h2><input type="password"></form>';
+});
+assert.equal(policy.scoreEvidence(shadowArticle).outcome, 'HIGH_RISK', 'active article identity crosses an open shadow boundary');
 const slottedArticle = extract('<div id="component"><div slot="example">' + login() + '</div></div>', 'https://paypa1.com/', (window) => {
   window.document.getElementById('component').attachShadow({mode:'open'}).innerHTML = '<article><slot name="example"></slot></article>';
 });
-assert.notEqual(policy.scoreEvidence(slottedArticle).outcome, 'HIGH_RISK', 'slotted article example is contextual content');
+assert.equal(policy.scoreEvidence(slottedArticle).outcome, 'HIGH_RISK', 'a slotted active form retains identity through its article wrapper');
 console.log('Reviewed address deception and contextual identity regressions passed.');
