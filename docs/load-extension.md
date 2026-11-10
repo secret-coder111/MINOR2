@@ -5,9 +5,9 @@ of this release.
 
 1. Open `chrome://extensions` (Edge: `edge://extensions`).
 2. Turn on **Developer mode** and choose **Load unpacked**.
-3. Select **`C:\Users\wwwvi\Desktop\MINOR2\extension`**. This folder contains
+3. Select **`extension/`** in your project folder. This folder contains
    `manifest.json`. Do not select `MINOR2` or `ml`.
-4. Confirm the card says **PhishGuard 0.5.0**, enable it, and pin it using the
+4. Confirm the card says **PhishGuard 0.6.0**, enable it, and pin it using the
    toolbar's Extensions menu.
 5. Refresh a normal website tab, then open PhishGuard to see the current result.
 
@@ -23,13 +23,13 @@ https://developer.chrome.com/docs/extensions/get-started/tutorial/hello-world#lo
 
 **Repeatable local demonstration**
 
-From the project directory, start the built-in local server:
+With Node.js 22 or newer, start the built-in server from the repository root:
 
 ```powershell
 npm.cmd run demo
 ```
 
-Open **http://127.0.0.1:8080/** for the walkthrough. Set the extension warning
+Open **http://127.0.0.1:8080/** for the walkthrough or **http://127.0.0.1:8080/url-checker.html** for the URL checker. The server uses built-in Node modules. Set the extension warning
 threshold to its default **65**. The interactive page changes evidence and lets
 you show rescans and warning removal. See [presentation notes](presentation-demo.md).
 
@@ -72,7 +72,7 @@ be inspected. A Safe Browsing block may prevent the extension from seeing a page
 For `file://` tests, enable **Allow access to file URLs** in extension details;
 the HTTP demo avoids that requirement. The popup updates as scans finish.
 
-In 0.3.0, **Incomplete inspection** means a local low score has missing document
+**Incomplete inspection** means a local low score has missing document
 or control coverage. It is not a confirmation that the entire page is legitimate.
 Optional reputation pending/errors are shown separately. Worker restarts request
 fresh frame results rather than trusting stale stored tab output.
