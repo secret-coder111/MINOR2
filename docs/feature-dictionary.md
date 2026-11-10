@@ -1,7 +1,7 @@
 # Feature dictionary
 
 Numeric schema version: **0.2.0** (29 names/order unchanged); policy version:
-**0.5.0**. Exact extractor hashes change with semantics, including the document
+**0.6.0**. Exact extractor hashes change with semantics, including the document
 context helper; older captures/models cannot silently qualify for this policy.
 
 The 29 numeric names and order below are the browser research contract. Missing
@@ -52,19 +52,20 @@ Relevant flags include `credential_context`, `sensitive_credential_field_count`,
 `credential_transport_downgrade`, `credential_insecure_transport`,
 `credential_target_ip`, `credential_form_method_get`, `credential_form_explicit_get`,
 `credential_script_action`, `credential_form_native_get`,
-`credential_destination_unknown` and `invalid_credential_action`. Sensitive GET
-contributes transport evidence when explicitly declared, or when a cross-site
-named sensitive control has a detectable native submission path without static
-indications of interception. This fallback is deliberately conservative; scripts
-may alter actual behavior. JavaScript actions do not establish a network destination
-or credential theft. Inherited documents with empty actions retain credential
+`credential_form_get_exposes_sensitive`, `credential_destination_unknown`
+and `invalid_credential_action`. The GET observation checks whether the
+submission includes a named sensitive field. The policy accepts an explicit
+GET or a qualifying implicit native GET path. The implicit check looks for a
+native submission path without static indications of script interception.
+Script-controlled actions leave the actual destination uncertain. Inherited documents with empty actions retain credential
 context but mark the actual destination unknown.
 Dialog-method forms retain credential context but do not add a network destination.
 Dynamic label text, placeholder and ARIA naming edits trigger rescanning.
 `credential_form_cross_origin` and `credential_target_unusual_port` are diagnostic.
 
 `body_brand_identity_claim` and `body_brand_domain_mismatch` describe a narrowly
-scoped, visible primary authentication heading near credential UI. Incidental
+scoped, rendered authentication heading or accessible image name associated
+with sensitive credential controls. Incidental
 paragraph/provider/article mentions do not become identity claims. Each brand is
 matched independently; ownership of a hosting platform cannot cancel a different
 claimed identity. No recognized owner bypasses destination/transport checks.
@@ -72,8 +73,8 @@ claimed identity. No recognized owner bypasses destination/transport checks.
 Policy 0.4.0 adds `brand_address_deception` as a diagnostic flag and per-submission
 `credential_brand_identity_claim` / `credential_brand_address_match`. The former
 records finite reviewed visual hostname substitutions or embedded official-domain
-labels. The latter require a short rendered primary brand heading attached to
-that same sensitive form and a matching deceptive address. A top-level aggregate
+labels. The latter require a rendered authentication heading or qualifying accessible
+image name attached to that same sensitive form and a matching deceptive address. A top-level aggregate
 cannot leak these flags into a different submission context. Only this combined
 context can supply strong address evidence; generic punycode and hostname
 similarity do not. The numeric research vector remains 29 fields at schema 0.2.0.
