@@ -106,6 +106,15 @@ cases, including Unicode/canonicalization boundaries. All 13 browser/Python
 numeric URL features matched. This validates inference mechanics, not real-world
 accuracy. Historical experiment artifacts are retained separately.
 
+## 6 November research follow-up
+
+The login-boundary candidate recorded 93.29% accuracy, 98.42% precision,
+87.01% recall, 92.36% F1 and 1.22% false-positive rate on a reused internal test
+after excluding known login development sites. It remains an offline research
+experiment. The checker continues to show the 3 November expanded diagnostic
+described above. Live page warnings use the 0.6.0 evidence policy.
+[6 November comparison](audit/url-checker-research-2026-11-06-login-boundaries-comparison.json)
+
 ## Limits and next quality work
 
 A URL-only model cannot inspect redirects, page content, form destinations or
