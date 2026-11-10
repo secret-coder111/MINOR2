@@ -1,4 +1,4 @@
-# PhishGuard 0.5.0 architecture
+# PhishGuard 0.6.0 architecture
 
 The extension uses a local, explainable evidence policy. Historical learned models
 remain research artifacts and are not loaded by the default service worker.
@@ -23,7 +23,7 @@ flowchart LR
 ## Extraction and privacy
 
 `feature-schema.js` retains the 29 numeric research features at schema version
-`0.2.0`; the current policy and runtime release are `0.5.0`. Form analysis also
+`0.2.0`; the current policy and runtime release are `0.6.0`. Form analysis also
 supplies structured submission contexts and policy flags. Actual extractor and
 policy source hashes distinguish changed behavior even when numeric feature names
 remain stable. Older models cannot silently reuse the current extractor merely
@@ -48,8 +48,10 @@ CSS visibility/opacity and supported browser rendering checks. Editable metadata
 descendants are excluded, including labels or headings that contain an editor.
 Closed shadow roots and image/canvas-only prompts are not inspected.
 
-Brand detection considers deliberate title/hostname claims and short primary
-login headings when sensitive fields are present. Arbitrary body mentions,
+Brand detection considers deliberate title/hostname claims and short rendered
+authentication headings or accessible image names associated with nearby
+sensitive controls. Image identity uses accessible text such as alt text or
+ARIA labels and excludes provider buttons and links. Arbitrary body mentions,
 reviews, footer text and federated-provider phrases do not by themselves establish
 ownership claims. A title saying "Sign in with a Google Account" is handled as a
 provider mention. URL query mentions are ignored. Each claimed brand is checked
@@ -72,9 +74,9 @@ than accumulating repeated versions of the same claim.
 
 Identity mismatch with credentials contributes 45, cross-site submission 35,
 an IP credential target 45, invalid target 35, HTTP transport 35 and HTTPS-to-HTTP
-downgrade 45. A sensitive form's native GET submission path contributes 35
-transport points, including the browser's default GET when the method is omitted
-or invalid. JavaScript-only/non-native submission remains inconclusive; detection
+downgrade 45. A native GET submission path that includes a named sensitive control contributes
+35 transport points. The implicit GET check also requires an observable native
+submission path without indications of script interception. JavaScript-only/non-native submission remains inconclusive; detection
 does not assert that a handler actually executed. An inherited-origin document
 with an unresolved native action reports unknown destination coverage rather
 than inventing a same-site destination.
@@ -86,9 +88,9 @@ page supplies no independently observable deception or unsafe transport evidence
 This is an observation limit, not proof that the submission is safe.
 
 A narrowly scoped address-deception check can contribute 35 address points when
-a short exact visible primary login heading matches a reviewed visual hostname
-substitution or an embedded official domain, and that heading belongs to the
-same sensitive credential context. Combined with the 45-point identity mismatch,
+a visible authentication heading or a qualifying accessible image name claims
+the same brand as a reviewed visual hostname substitution or embedded official
+domain, and the claim belongs to that sensitive credential context. Combined with the 45-point identity mismatch,
 this catches certain same-origin HTTPS impersonation forms. Exactly one reviewed
 ASCII/Cyrillic character substitution is recognized; arbitrary edit distance,
 internationalized domains, shared hosting and title-only claims cannot activate
@@ -120,6 +122,10 @@ origin when relevant, practical next steps, settings access and a manual scan
 request. The worker verifies the request's exact URL against browser inventory;
 the popup confirms completion only after a newer document/scan identity arrives.
 No extra website or model server is needed for this interface.
+
+The toolbar badge is derived from the current worker result. The popup reports
+available evidence-frame extraction, policy, worker and message timing. These
+values describe parts of a scan. [Runtime benchmark record](audit/runtime-benchmark-2026-11-06.json)
 
 ## Runtime identity, refresh and recovery
 
