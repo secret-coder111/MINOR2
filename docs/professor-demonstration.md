@@ -20,7 +20,7 @@ serve as the extension's verdict.
 1. Open `chrome://extensions` in Chrome or `edge://extensions` in Edge.
 2. Enable **Developer mode**, choose **Load unpacked**, and select
    `C:\Users\wwwvi\Desktop\MINOR2\extension`. If already installed, use
-   **Reload**. Confirm **PhishGuard 0.5.0**, disable older copies and pin it.
+   **Reload**. Confirm **PhishGuard 0.6.0**, disable older copies and pin it.
 3. In PhishGuard settings, use the default warning threshold **65** and keep
    optional reputation lookup disabled. This isolates local detection.
 4. Use Node.js **22 or newer**. In PowerShell run:
@@ -296,7 +296,7 @@ does not promise to detect every such page or arbitrary script-based collection.
 
 **“Is your detector AI or machine learning?”**
 
-The current 0.5.0 browser release uses explainable rules. Research ML artifacts
+The current 0.6.0 browser release uses explainable rules. Research ML artifacts
 exist in the repository but remain disabled for browser verdicts until compatible
 training, independent calibration and untouched evaluation support deployment.
 
