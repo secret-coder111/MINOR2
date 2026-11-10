@@ -7,9 +7,38 @@ browser diagnostic in `extension/demo/url-model.js`; compact results live in
 not require large local experiment files. Historical files already tracked in
 Git retain their existing storage configuration, including Git LFS where used.
 
-The extension's current decisions use the corrected local evidence policy. Historical v0.1–v0.6 estimators and reports remain available for research, but their feature semantics, truncated ensembles and evaluation provenance do not qualify them for decisions in the updated extension. No newly achieved real-world accuracy or false-positive rate is claimed.
+## Release and research status
 
-The offline regression suite exercises dataset integrity, 29 named browser/Python features, exact estimator serialization, browser inference and evaluation gates. Its artificial fixtures test the machinery; they are not a phishing detection benchmark.
+PhishGuard **0.6.0** uses the local evidence policy for live page verdicts. The
+URL checker's experimental panel runs the **3 November expanded** character
+TF-IDF and logistic regression model separately. Historical estimator names,
+including `url-multidataset-hard-negatives-v0.6.0`, refer to research artifacts.
+[Packaged diagnostic results](../docs/audit/url-checker-research-2026-11-03-expanded-comparison.json)
+
+The **6 November login-boundary** experiment compared character text transforms,
+regularization and official-login sample weights. Known official-login sites
+were reserved for development and excluded from evaluation. Tuning selected
+the host/path-boundary transform with C=4 and login weight 1. A separate
+calibration set supplied the threshold. These comparisons used the same 22,095
+previously inspected internal URLs after excluding those sites.
+
+| Candidate and threshold | Accuracy | Precision | Recall | F1 | False-positive rate |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| 3 November model, original threshold | 93.12% | 98.24% | 86.79% | 92.16% | 1.36% |
+| 3 November model, recalibrated at the same budget | 92.65% | 98.45% | 85.59% | 91.57% | 1.18% |
+| 6 November login-boundary candidate | 93.29% | 98.42% | 87.01% | 92.36% | 1.22% |
+
+The new candidate's counts were 11,650 true negatives, 144 false positives,
+1,338 false negatives and 8,963 true positives. Its internal-test false-positive
+rate had a 95% Wilson upper bound of 1.44%. The experiment remains offline with
+`browser_inference_supported=false` and `deployment_eligible=false`.
+[6 November comparison](../docs/audit/url-checker-research-2026-11-06-login-boundaries-comparison.json) ·
+[Data audit](reports/url-checker-research-2026-11-06-login-boundaries-data-audit.json)
+
+The offline regression suite checks dataset integrity, the 29 named browser/Python
+features, exact estimator serialization, browser inference and release gates.
+Representative live-extension performance still requires a reviewed, independent
+benchmark.
 
 ## Environment and verification
 
@@ -28,6 +57,7 @@ python -m unittest discover -s ml/tests -v
 - Umbrella popularity imports are sampling seeds with an empty `label` and `label_status=unreviewed_popularity_seed`. Popularity does not establish a safe site/page. Review each intended sample, supply its actual label and set `label_status=reviewed` before capture/training. Existing `umbrella-top-1m` rows also require that explicit review marker; their historical automatically generated legitimate labels are not accepted as ground truth. Other explicitly unreviewed rows are excluded by CSV readers and rejected by snapshot validation.
 - Conflicting labels for the same normalized URL are quarantined permanently within the load, including good/bad/good sequences. DOM snapshots reject conflicts and different captures for one normalized URL for review; identical repeated observations are counted once. Future evaluation also deduplicates identical inputs before sampling/counting, and rejects ambiguous observations. URL paths are never lowercased for deduplication.
 - Grouping uses the pinned complete ICANN and PRIVATE Public Suffix List shared with the browser. Original and redirected final sites form connected groups. Exact duplicate HTML connects groups too. Mixed-label sites can be valid; all their records stay in the same partition. Template/near-duplicate and labeling review are still needed for a real corpus.
+- Optional reviewed `campaign_id` and `template_group` annotations connect related examples across sites. Keep connected records together when splitting. Unannotated campaigns still require review.
 - Preserve actual provenance in `source` and timezone-aware ISO `observed_at`. Renaming a file does not establish an independent source. The shared attribution reader preserves `source_provenance=filename_fallback`, `missing` and unknown classifications through CSV, feed-export and JSONL round trips. A nonempty source column cannot overwrite an existing weaker classification. These samples can be used for exploratory research but cannot pass source/time release checks. Version 3 manifests hash review evidence and document-response identity as well as labels/features, count explicitly identified sources and compare source names without casing/whitespace differences. Old frozen manifests need a new reviewed collection/release; do not rewrite them to qualify. Do not reuse feeds from old training as an untouched future test.
 - Current URL CSVs do not observe DOM. A URL-only model has an explicit 13-feature subset of the stable 29-feature browser contract; absent page data is never supplied as observed harmless DOM zeros.
 
@@ -115,6 +145,10 @@ This executes the actual shipped JavaScript policy offline and evaluates canonic
 Results are explicitly exploratory by default. A source/time-separated claim additionally requires `--frozen-manifest`, `--development-manifest` and `--policy-lock`. The frozen test identity must match, exclude every development URL/site/content/source and have later capture dates. The policy lock JSON contains the actual `policy_sha256`, `extractor_sha256`, `warning_threshold` and timezone-aware `locked_at`; freeze the unseen test before policy selection is locked. Evaluation rejects a threshold different from the locked setting. The CLI writes a receipt and refuses reuse. Preserve collection/selection records: manually writing a lock or changing source names cannot establish that a test was unseen. No accuracy claim follows from the synthetic regression fixtures.
 
 To assess policy release readiness, also include `fpr_budget` (at most `.01`) and the exact `release_requirements()` object in the policy lock before evaluation. Reports without this predeclared contract remain usable for analysis but their release gate fails. The policy evaluator reports the same conservative independent-group metrics and review composition as the model evaluator. Policy scores remain an uncalibrated evidence index, never a phishing probability. Runtime frame aggregation, reputation, interaction timing and warning delivery still require separate browser tests.
+
+For development captures, `--ablations` reports the effect of removing evidence
+families from the JavaScript policy. The evaluator rejects ablations on a
+frozen release holdout. [Policy evaluation code](src/evaluate_policy.py)
 
 ## Export the exact predictor
 
