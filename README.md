@@ -1,143 +1,64 @@
-# PhishGuard 0.5.0
+# PhishGuard 0.6.0
 
-A college research project: a privacy-first Chromium extension that inspects URL,
-DOM and credential-form structure locally and explains possible phishing indicators.
+PhishGuard is a Chromium extension that examines the address, page structure and credential forms of the current tab. It reports the evidence behind each verdict. The repository includes a local demo website, a URL checker and an offline model research pipeline.
 
-Version 0.5.0 adds recognition of explicit email/authenticator verification-code
-prompts, more precise GET credential-exposure evidence, and redesigned popup,
-warning and settings screens. See the [detailed review, changes and remaining
-priorities](docs/audit/improvements-2026-11-02.md). These fixes address controlled
-regressions; they do not establish a real-world accuracy percentage.
+## Run the demo website
 
-The [3 November score/UI repair and model comparison](docs/audit/score-popup-model-2026-11-03.md)
-adds a wider popup and warning, explains HTTP URL-only score contributions, and
-records expanded-data research results with their precision/recall tradeoff.
+Install Node.js 22 or newer, open a terminal in the repository root and run:
 
-**Load the `extension` folder, not the project root.** No server, Python model
-service or build step is needed to run the extension.
+```powershell
+npm.cmd run demo
+```
 
-1. Open `chrome://extensions` in Chrome (`edge://extensions` in Edge).
-2. Enable **Developer mode** and click **Load unpacked**.
-3. Select `C:\Users\wwwvi\Desktop\MINOR2\extension`.
-4. Pin PhishGuard from the toolbar Extensions menu and refresh the website tab.
-5. Disable older PhishGuard copies loaded from other folders.
+On macOS or Linux, use `npm run demo`. Open [the demo home page](http://127.0.0.1:8080/) or [the URL checker](http://127.0.0.1:8080/url-checker.html). Keep the terminal open while you use the site. Press **Ctrl+C** to stop the server.
 
-After source changes, click **Reload** on its extension card and refresh existing
-website tabs. See [loading, demos and troubleshooting](docs/load-extension.md).
+The demo server uses Node's built-in modules. You can start it immediately after downloading the project. If port 8080 is busy, stop the previous demo process and rerun the command.
 
-For a classroom presentation, run `npm.cmd run demo` in this project folder and
-open **http://127.0.0.1:8080/**. The guide includes a normal login, a suspicious
-destination, a combined high-risk example and a reset that demonstrates rescanning.
-See [presentation steps and wording](docs/presentation-demo.md).
-Each comparison now includes an animated, non-submitting credential journey
-and an inspectable real title/form destination. The [professor guide](docs/professor-demonstration.md)
-adds a five-minute script, examiner-controlled changes and independent public-test limits.
-The **Public website comparisons** page includes external links, observed results,
-local comparisons for all three bands, and a progress checklist. Browser/security
-blocklist tests are labelled separately from PhishGuard's structural verdict.
+## Load the extension in Chrome or Edge
 
-The 0.4.0 update adds narrowly scoped lookalike-address protection for same-origin
-HTTPS credential forms, clearer site/frame origins and next steps in the popup,
-and a **Check again** button. A short, visible primary brand heading must match
-the deceptive address and the same sensitive form before this new evidence can
-raise a warning. Internationalized domains, provider buttons, shared hosting and
-ordinary login forms do not activate it alone.
+1. Open `chrome://extensions` in Chrome or `edge://extensions` in Edge.
+2. Turn on **Developer mode** and choose **Load unpacked**.
+3. Select the repository's **`extension/`** folder, which contains `manifest.json`.
+4. Confirm the card displays **PhishGuard 0.6.0**, pin it from the toolbar and refresh the demo tab.
 
-See the [source-based comparison of PhishLang, PhishDetect and commercial tools](docs/audit/competitive-methods-2026-10-27.md)
-and the [implementation and verification report](docs/audit/improvements-2026-10-27.md).
+The installed extension runs locally without a build or Python service. After source changes, click **Reload** on the extension card and refresh any open tabs you want to inspect. Disable older copies loaded from other folders. For a classroom walkthrough, use the ordinary-login, caution, high-risk and dynamic demo pages, and open the extension popup to read the live verdict. [Loading and troubleshooting](docs/load-extension.md) · [Presentation walkthrough](docs/professor-demonstration.md)
 
-## Detection behavior
+## What changed in 0.6.0
 
-The popup and banner share one canonical verdict:
+- The browser toolbar badge shows the state of the current scan, including caution, high risk and incomplete coverage. The popup displays available scan timing measurements.
+- Brand checks can use visible authentication headings and accessible image names associated with the same sensitive form. The detector checks form context and excludes provider buttons and links from this identity signal.
+- GET exposure checks account for whether the submission would include a named sensitive field. For example, a visible password field without a submitted name supplies login context without adding GET exposure evidence.
+- Offline evaluation can group related records by reviewed campaign or template annotations and measure how removing an evidence family affects results on development captures.
 
-- **No strong indicators:** ordinary login fields, CSRF inputs, validation code,
-  incidental brand mentions and normal iframes do not independently warn.
-- **Caution:** review a concern such as an external credential destination,
-  insecure credential transport, or inconsistent brand identity.
-- **High risk:** corroborating identity, destination and transport evidence, or
-  an explicitly enabled reputation service's malicious verdict.
+[Architecture](docs/architecture.md) · [Feature dictionary](docs/feature-dictionary.md) · [Offline ML workflow](ml/README.md)
 
-A score is a risk index, not a probability or guarantee. The default high-risk
-threshold is 65; options can adjust it from 35 to 90. HTTP(S) frames are inspected
-separately, with the most severe verdict used without summing unrelated frame
-scores. SPA navigation and DOM changes trigger rescans; old results are rejected.
+## What each result measures
 
-The 0.3.0 hardening release repairs the [tester audit](docs/audit/tester-audit-2026-10-25.md).
-It recovers missing frames after background-worker restarts, detects CSS-only
-credential reveals, inspects inherited HTTP(S) `about:blank`/`srcdoc` and blob
-documents, and reports incomplete coverage explicitly. Visible-control checks
-exclude collapsed legacy forms. Provider phrases, email recovery prompts and
-individual brand claims have dedicated false-positive regressions. Reviewed
-Google country domains and Indian-bank domain migrations are included as ownership
-data, never as an exemption from other evidence.
+| Where you see it | What it measures |
+| --- | --- |
+| Extension popup, badge and warning | Local evidence from the loaded page and inspected frames. High risk normally requires a credential context, corroborating evidence and the warning threshold, which defaults to 65. An explicitly enabled reputation service can also report a malicious verdict. |
+| URL checker | Address and transport observations from the pasted URL. Pasting a URL runs the check locally without navigating to that address. Choose **Open page for an extension check** to inspect a loaded page separately. |
+| Experimental model panel | The 3 November character TF-IDF and logistic regression diagnostic. Its reused internal test recorded 92.57% accuracy, 98.21% precision, 85.79% recall and 1.40% false-positive rate. |
 
-Inspection starts at document start and analyzes available DOM on initial load,
-before normal credential interaction, after mutations and on relevant rendering
-changes. A visible-page poll checks up to 512 controls every three seconds;
-truncation is disclosed. Arbitrary page scripts can still submit between checks.
-See [repairs, verification and remaining limits](docs/audit/tester-repairs-2026-10-25.md).
+The live extension uses the **0.6.0 evidence policy**. Its risk index expresses the strength of observed evidence. **No strong indicators** describes what was found during inspection. **Incomplete inspection** means some content was unchecked.
 
-## Machine-learning status
+The 6 November login-boundary research candidate recorded **93.29% accuracy, 98.42% precision, 87.01% recall, 92.36% F1 and 1.22% false-positive rate** on a reused internal test with known login development sites excluded. It remains an offline experiment. The packaged checker retains the 3 November diagnostic. Both sets of metrics describe the indicated URL research tests, and representative live-extension accuracy remains unmeasured. [Packaged diagnostic results](docs/audit/url-checker-research-2026-11-03-expanded-comparison.json) · [6 November comparison](docs/audit/url-checker-research-2026-11-06-login-boundaries-comparison.json)
 
-Historical URL tree and character models remain for research. They **do not
-change browser verdicts in this release**: their training/calibration does not
-match the corrected feature semantics or establish independent deployment accuracy.
+## Privacy and inspection coverage
 
-The updated [ML workflow](ml/README.md) supports explicit URL-only/DOM modes,
-connected-domain/content grouping, independent false-positive-budget calibration,
-frozen future-test provenance checks and exact ensemble export. A representative
-unseen login/SSO and phishing corpus is still needed before deploying a learned
-model. Passing regression fixtures is not a real-world accuracy measurement.
+The extension inspects field metadata without reading typed credentials. Optional reputation lookup is off by default. When enabled, it sends the inspected hostname to the configured service. Session tab results omit URL paths and queries. User-reviewed corrections can be exported for research. Predictions use the fixed release policy.
 
-Tree and character model selection now compares recall at the declared tuning
-false-positive budget, rather than choosing only by overall ROC AUC. Independent
-calibration remains separate from fitting and tuning. Any newly trained research
-candidate remains disabled in the extension until the independent release gates pass.
-
-New release gates require predefined recall and false-positive confidence bounds,
-independent site/content groups, preserved source provenance and reviewed benchmark
-composition. DOM captures bind HTTP status to the exact captured browser document.
-`ml/src/review_benchmark.py` reports missing coverage before freezing a benchmark;
-it does not manufacture labels or establish representative accuracy.
+The browser limits inspection of protected pages, opaque frames and closed shadow roots. The extension uses accessible text and DOM structure, so image-only deception without readable metadata and arbitrary script behavior can escape inspection. [Privacy details](docs/privacy-policy.md)
 
 ## Development checks
 
-Use Node.js 22 or newer. The checkout already has installed test dependencies.
+From the repository root:
 
 ```powershell
 npm.cmd ci
 npm.cmd test
-npm.cmd run audit:login
 npm.cmd run test:demo
 npm.cmd run test:browser
-.\.venv\Scripts\python.exe -m unittest discover -s ml/tests -v
 ```
 
-For a fresh setup, install `ml/requirements.txt` inside a Python virtual
-environment. Python and npm are not needed merely to load the extension.
-
-The pinned ICANN + PRIVATE domain list is bundled offline. See
-[third-party notices](THIRD_PARTY_NOTICES.md) and `npm.cmd run vendor:psl`.
-
-## Privacy and practical limits
-
-Typed field values, passwords and cookies are not inspected. Optional reputation
-is disabled by default and sends inspected hostnames only. Session tab results
-omit URL paths/queries and are cleared when tabs close. Optional reputation shares
-in-flight requests and retains bounded, expiring hostname verdicts in session
-storage; disabling it clears those verdicts. Failed lookups are disclosed.
-Corrections retain origins and coarse evidence/coverage context. Options supports
-explicit review/export for independent verification; corrections never automatically
-change predictions. See [privacy details](docs/privacy-policy.md).
-
-Current coverage limits include unknown/compromised brand domains, visual-only
-deception, arbitrary script data flow, closed shadow roots and opaque sandbox/data
-documents. Inherited-origin blank/srcdoc documents are inspected when a trusted
-HTTP(S) origin is available. Internal/protected browser pages may disallow injection.
-
-See [architecture](docs/architecture.md),
-[the original audit](docs/audit/phishguard-audit-2026-10-24.md), and
-[implementation and verification](docs/audit/improvements-2026-10-24.md).
-The [25 October follow-up review](docs/audit/improvements-2026-10-25.md) records
-additional fixes, validation and remaining limitations.
-See also [the second review and public-demo verification](docs/audit/remaining-flaws-2026-10-25.md).
+The browser smoke test needs a supported installed browser. For Python tests, install the dependencies in [`ml/requirements.txt`](ml/requirements.txt) and run `python -m unittest discover -s ml/tests -v`. See the [ML README](ml/README.md) for training inputs, calibration and release evaluation.
